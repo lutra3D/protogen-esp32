@@ -73,7 +73,10 @@ float tiltTolerance = 0.1;
 // NeoPixel
 #define LEDS_PER_DISPLAY 24
 #define DATA_PIN_EARS 32
-int defaultBrightness = 80;
+int earsBrightness = 80;
+int earsColorRed = 255;
+int earsColorGreen = 255;
+int earsColorBlue = 255;
 Adafruit_NeoPixel earLeds(LEDS_PER_DISPLAY, DATA_PIN_EARS, NEO_GRB + NEO_KHZ800);
 
 //--------------------------------//WiFi server setup
@@ -145,6 +148,40 @@ void startWiFiWeb()
                 }
               }
               request->send(400, "text/plain", F("Invalid duty cycle"));
+            });
+
+  server.on("/ears", HTTP_GET, [](AsyncWebServerRequest *request)
+            { 
+              char colorHex[20];
+              request->send(
+                200,
+                 "text/plain", 
+                 "#"+String(earsColorRed,16)+String(earsColorGreen,16)+String(earsColorBlue,16)+" "+String(earsBrightness)); 
+            });
+            
+  server.on("/ears", HTTP_PUT, [](AsyncWebServerRequest *request)
+            { 
+              if(request->hasParam("color", true)) {
+                String color = request->getParam("color", true)->value();
+                int r,g,b =0;
+                int itemsFound = sscanf(color.c_str(), "#%02x%02x%02x", &r, &g, &b);
+                if(itemsFound != 3){
+                  request->send(400, "text/plain", F("Could not set color use #FFFFFF format."));
+                  return;
+                }
+                earsColorRed = r;
+                earsColorGreen = g;
+                earsColorBlue = b;
+              }
+              if(request->hasParam("brightness", true)) {
+                int brightness = request->getParam("brightness", true)->value().toInt();
+                if(brightness >= 256 || brightness < 0) {
+                  request->send(400, "text/plain", F("Could not set brightness use 0-255 value."));
+                  return;
+                }
+                earsBrightness = brightness;
+              }
+              request->send(200, "text/plain", "Color/brightness set."); 
             });
 
   server.on("/gyro", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -402,7 +439,7 @@ void setup()
   if(!earLeds.begin()){
     Serial.println("Starting LED driver failed");
   }
-  earLeds.setBrightness(defaultBrightness);
+  earLeds.setBrightness(earsBrightness);
   
   if (!SPIFFS.begin(true))
   { // use true to format if needed
@@ -431,10 +468,10 @@ void loop()
     gif.playFrame(true, NULL);
     gif.close();
   }
-
+  earLeds.setBrightness(earsBrightness);
   for (int8_t index = 0; index < LEDS_PER_DISPLAY; index++)
   {
-    earLeds.setPixelColor(index, Adafruit_NeoPixel::Color(1,1,1));
+    earLeds.setPixelColor(index, Adafruit_NeoPixel::Color(earsColorRed, earsColorGreen, earsColorBlue));
   }
   earLeds.show(); 
 }
