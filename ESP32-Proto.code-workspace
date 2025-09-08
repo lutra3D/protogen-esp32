@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "D:/Code/ESP32-Proto"
+		},
+		{
+			"name": "ESP32-Proto",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"fstream": "cpp",
+			"list": "cpp",
+			"cmath": "cpp",
+			"new": "cpp"
+		}
+	}
+}
