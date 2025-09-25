@@ -41,7 +41,7 @@ const char *wifiPass = "Test123456!"; // Number of pixels tall of each INDIVIDUA
 AsyncWebServer server(80);
 
 // Fan
-#define fanPWM 33 // PWM pin to control the fan
+#define fanPWM 32 // PWM pin to control the fan
 int fanDutyCycle = 100;
 
 // Emotions
@@ -72,7 +72,7 @@ float tiltTolerance = 0.1;
 
 // NeoPixel
 #define LEDS_PER_DISPLAY 24
-#define DATA_PIN_EARS 32
+#define DATA_PIN_EARS 33
 int earsBrightness = 80;
 int earsColorRed = 255;
 int earsColorGreen = 255;
