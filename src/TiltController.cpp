@@ -12,7 +12,7 @@ bool TiltController::begin() {
   Wire.beginTransmission(0x68);
   if (Wire.endTransmission() == 0) {
     tiltEnabled_ = true;
-    mpu6050_ = std::make_unique<MPU6050>(Wire);
+    mpu6050_.reset(new MPU6050(Wire));
     mpu6050_->begin();
     return true;
   }
