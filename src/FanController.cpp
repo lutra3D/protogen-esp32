@@ -22,3 +22,7 @@ bool FanController::setDutyCycle(int dutyCycle) {
 int FanController::getDutyCycle() const {
   return dutyCycle_;
 }
+
+int FanController::getMaxDutyCycle() const {
+  return (1 << resolution_) - 1;
+}
