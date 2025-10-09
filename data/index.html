@@ -13,6 +13,7 @@
       --accent: #616fff;
       --shadow: rgba(111, 97, 255, 0.3);
     }
+
     body {
       font-family: "Inter", "Segoe UI", system-ui, sans-serif;
       margin: 0;
@@ -23,11 +24,13 @@
       color: #1c2733;
       min-height: 100vh;
     }
+
     .page {
       max-width: 880px;
       margin: 32px auto 48px;
       padding: 0 20px 32px;
     }
+
     h1 {
       margin: 0 0 24px;
       text-align: center;
@@ -35,6 +38,7 @@
       letter-spacing: 0.02em;
       color: #18202a;
     }
+
     section {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -44,6 +48,7 @@
       box-shadow: 0 12px 28px rgba(23, 43, 77, 0.12);
       backdrop-filter: blur(7px);
     }
+
     section h2 {
       margin: 0 0 12px;
       font-size: 1.05rem;
@@ -51,21 +56,25 @@
       letter-spacing: 0.08em;
       color: #4e5d6c;
     }
+
     form {
       display: grid;
       gap: 12px;
     }
+
     label {
       font-weight: 600;
       color: #3b4a5a;
       display: block;
     }
+
     input,
     button {
       font: inherit;
       border-radius: 10px;
       transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
     }
+
     input[type="text"],
     input[type="file"],
     input[type="range"],
@@ -75,25 +84,30 @@
       background: rgba(255, 255, 255, 0.82);
       color: inherit;
     }
+
     input[type="file"] {
       padding: 6px 0;
     }
+
     input:focus {
       outline: none;
       border-color: var(--accent);
       box-shadow: 0 0 0 4px rgba(255, 111, 97, 0.);
     }
+
     input[type="color"] {
       padding: 0;
       width: 68px;
       height: 42px;
       cursor: pointer;
     }
+
     input[type="range"] {
       accent-color: var(--accent);
       width: 220px;
       height: 36px;
     }
+
     button {
       border: none;
       background: linear-gradient(135deg, var(--accent), #a172ff);
@@ -103,14 +117,17 @@
       cursor: pointer;
       box-shadow: 0 10px 20px var(--shadow);
     }
+
     button:hover {
       transform: translateY(-1px);
       box-shadow: 0 12px 24px var(--shadow);
     }
+
     button:active {
       transform: translateY(0);
       box-shadow: 0 6px 14px var(--shadow);
     }
+
     .row {
       display: flex;
       flex-wrap: wrap;
@@ -118,20 +135,25 @@
       align-items: center;
       margin-top: 12px;
     }
+
     .row label {
       margin-top: 0;
       flex: 1 1 140px;
     }
+
     .row input[type="text"],
     .row input[type="range"] {
       flex: 2 1 220px;
     }
+
     .row input[type="color"] {
       flex: 0 0 auto;
     }
+
     .row button {
       flex: 0 0 auto;
     }
+
     .display-row {
       display: flex;
       align-items: center;
@@ -140,13 +162,15 @@
       gap: 10px;
       margin-bottom: 12px;
     }
-    .display-row > .value-display {
+
+    .display-row>.value-display {
       flex: 1 1 auto;
       display: flex;
       align-items: center;
       gap: 6px;
       min-width: 160px;
     }
+
     .icon-button {
       width: 38px;
       height: 38px;
@@ -157,6 +181,7 @@
       font-size: 1.1rem;
       line-height: 1;
     }
+
     .status {
       font-size: 0.9rem;
       margin-top: 10px;
@@ -166,47 +191,60 @@
       border: 1px solid rgba(24, 32, 42, 0.1);
       white-space: pre-wrap;
     }
+
     pre.status {
       font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
     }
+
     .value {
       font-weight: 600;
       color: #1a2530;
     }
+
     @media (max-width: 640px) {
       .page {
         margin: 24px auto 32px;
         padding: 0 14px 28px;
       }
+
       .row {
         flex-direction: column;
         align-items: stretch;
       }
-      .row > * {
+
+      .row>* {
         width: 100%;
       }
+
       input[type="range"] {
         width: 100%;
       }
     }
   </style>
 </head>
+
 <body>
   <main class="page">
-    <h1>ProtoGen Web Control</h1>
+    <h1>Protogen Web Control</h1>
 
     <section>
       <h2>Animation Files</h2>
       <form id="uploadForm">
-        <label>
-          File to upload
-          <input id="fileInput" type="file" accept=".json,.txt,.anim,.dat,.bin,.cfg,.csv,.yml,.yaml,.xml,.c,.h,.cpp,.hpp,.ino" required>
-        </label>
-        <label>
-          Save as (stored in /anims/)
-          <input id="fileName" type="text" placeholder="example.json" required>
-        </label>
-        <button type="submit">Upload</button>
+        <div class="display-row">
+          <label for="fileInput">
+            File:
+          </label>
+          <input id="fileInput" type="file" accept=".gif" required>
+        </div>
+        <div class="display-row">
+          <label for="fileName">
+            Name:
+          </label>
+          <input id="fileName" type="text" placeholder="example.gif" required>
+        </div>
+        <div class="row">
+          <button type="submit">Upload</button>
+        </div>
       </form>
       <div id="uploadStatus" class="status"></div>
 
@@ -222,7 +260,8 @@
       <h2>Emotion</h2>
       <div class="display-row">
         <div class="value-display">Current: <span id="emotionCurrent" class="value">--</span></div>
-        <button id="emotionRefresh" class="icon-button" type="button" aria-label="Refresh emotion" title="Refresh">↻</button>
+        <button id="emotionRefresh" class="icon-button" type="button" aria-label="Refresh emotion"
+          title="Refresh">↻</button>
       </div>
       <div class="row">
         <input id="emotionInput" type="text" placeholder="Enter new emotion">
@@ -234,7 +273,8 @@
     <section>
       <h2>Fan</h2>
       <div class="display-row">
-        <div class="value-display">Duty: <span id="fanDuty" class="value">--</span> | Percent: <span id="fanPercent" class="value">--</span>%</div>
+        <div class="value-display">Duty: <span id="fanDuty" class="value">--</span> | Percent: <span id="fanPercent"
+            class="value">--</span>%</div>
         <button id="fanRefresh" class="icon-button" type="button" aria-label="Refresh fan" title="Refresh">↻</button>
       </div>
       <div class="row">
@@ -249,7 +289,8 @@
     <section>
       <h2>Ears</h2>
       <div class="display-row">
-        <div class="value-display">Color: <span id="earColorText" class="value">--</span> | Brightness: <span id="earBrightnessText" class="value">--</span></div>
+        <div class="value-display">Color: <span id="earColorText" class="value">--</span> | Brightness: <span
+            id="earBrightnessText" class="value">--</span></div>
         <button id="earRefresh" class="icon-button" type="button" aria-label="Refresh ears" title="Refresh">↻</button>
       </div>
       <div class="row">
@@ -267,7 +308,8 @@
       <h2>Heap Status</h2>
       <div class="display-row">
         <div class="value-display">Value: <span id="heapValue" class="value">--</span></div>
-        <button id="heapRefresh" class="icon-button" type="button" aria-label="Refresh heap status" title="Refresh">↻</button>
+        <button id="heapRefresh" class="icon-button" type="button" aria-label="Refresh heap status"
+          title="Refresh">↻</button>
       </div>
       <div id="heapStatus" class="status"></div>
     </section>
@@ -276,11 +318,12 @@
       <h2>Gyroscope</h2>
       <div class="display-row">
         <div class="value-display">Value: <span id="gyroValue" class="value">--</span></div>
-        <button id="gyroRefresh" class="icon-button" type="button" aria-label="Refresh gyroscope" title="Refresh">↻</button>
+        <button id="gyroRefresh" class="icon-button" type="button" aria-label="Refresh gyroscope"
+          title="Refresh">↻</button>
       </div>
       <div id="gyroStatus" class="status"></div>
     </section>
-
+    <p>Lutra 3D, 2025</p>
   </main>
 
   <script>
@@ -507,4 +550,5 @@
     })();
   </script>
 </body>
+
 </html>
