@@ -10,7 +10,8 @@
       --bg: #f4f6fb;
       --panel: rgba(255, 255, 255, 0.94);
       --border: rgba(28, 39, 51, 0.16);
-      --accent: #ff6f61;
+      --accent: #616fff;
+      --shadow: rgba(111, 97, 255, 0.3);
     }
     body {
       font-family: "Inter", "Segoe UI", system-ui, sans-serif;
@@ -80,7 +81,7 @@
     input:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 4px rgba(255, 111, 97, 0.28);
+      box-shadow: 0 0 0 4px rgba(255, 111, 97, 0.);
     }
     input[type="color"] {
       padding: 0;
@@ -95,20 +96,20 @@
     }
     button {
       border: none;
-      background: linear-gradient(135deg, var(--accent), #ffa172);
+      background: linear-gradient(135deg, var(--accent), #a172ff);
       color: #fff;
       font-weight: 600;
       padding: 10px 18px;
       cursor: pointer;
-      box-shadow: 0 10px 20px rgba(255, 111, 97, 0.3);
+      box-shadow: 0 10px 20px var(--shadow);
     }
     button:hover {
       transform: translateY(-1px);
-      box-shadow: 0 12px 24px rgba(255, 111, 97, 0.34);
+      box-shadow: 0 12px 24px var(--shadow);
     }
     button:active {
       transform: translateY(0);
-      box-shadow: 0 6px 14px rgba(255, 111, 97, 0.3);
+      box-shadow: 0 6px 14px var(--shadow);
     }
     .row {
       display: flex;
@@ -233,14 +234,16 @@
 
     <section>
       <h2>Heap Status</h2>
+      <div>Value: <span id="heapValue" class="value">--</span></div>
       <button id="heapRefresh" type="button">Refresh</button>
-      <div id="heapValue" class="status">--</div>
+      <div id="heapStatus" class="status"></div>
     </section>
 
     <section>
       <h2>Gyroscope</h2>
+      <div>Value: <span id="gyroValue" class="value">--</span></div>
       <button id="gyroRefresh" type="button">Refresh</button>
-      <pre id="gyroValue" class="status">--</pre>
+      <div id="gyroStatus" class="status"></div>
     </section>
 
   </main>
@@ -271,7 +274,9 @@
       var earBrightnessValue = $("earBrightnessValue");
       var earStatus = $("earStatus");
       var heapValue = $("heapValue");
+      var heapStatus = $("heapStatus");
       var gyroValue = $("gyroValue");
+      var gyroStatus = $("gyroStatus");
 
       fileInput.addEventListener("change", function () {
         if (fileInput.files.length && !fileNameInput.value) {
@@ -396,16 +401,20 @@
       function refreshHeap() {
         fetchText("/heap").then(function (text) {
           setText(heapValue, text);
+          setText(heapStatus, "");
         }).catch(function (error) {
-          setText(heapValue, "Error: " + error.message);
+          setText(heapValue, "--");
+          setText(heapStatus, "Error: " + error.message);
         });
       }
 
       function refreshGyro() {
         fetchText("/gyro").then(function (text) {
           setText(gyroValue, text);
+          setText(gyroStatus, "");
         }).catch(function (error) {
-          setText(gyroValue, "Error: " + error.message);
+          setText(gyroValue, "--");
+          setText(gyroStatus, "Error: " + error.message);
         });
       }
 
