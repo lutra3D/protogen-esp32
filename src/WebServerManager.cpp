@@ -23,7 +23,9 @@ void WebServerManager::loop() {
 }
 
 void WebServerManager::registerRoutes() {
-  server_.on("/savefile", HTTP_POST, [this](AsyncWebServerRequest *request) {
+  server_.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+
+  server_.on("/file", HTTP_POST, [this](AsyncWebServerRequest *request) {
     if (request->hasParam("file", true) && request->hasParam("content", true)) {
       String path = "/anims/" + request->getParam("file", true)->value();
       File file = SPIFFS.open(path, "w");
@@ -50,6 +52,10 @@ void WebServerManager::registerRoutes() {
     } else {
       request->send(400, "text/plain", F("Parameter 'file' not present!"));
     }
+  });
+
+  server_.on("/files", HTTP_GET, [this](AsyncWebServerRequest *request) {
+    request->send(200, "text/plain", F("[]"));
   });
 
   server_.on("/emotion", HTTP_GET, [this](AsyncWebServerRequest *request) {

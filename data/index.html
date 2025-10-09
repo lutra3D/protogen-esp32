@@ -467,7 +467,7 @@
         }
         file.text().then(function (content) {
           var body = new URLSearchParams({ file: name, content: content });
-          return fetchText("/savefile", {
+          return fetchText("/file", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: body
