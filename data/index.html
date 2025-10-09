@@ -132,6 +132,31 @@
     .row button {
       flex: 0 0 auto;
     }
+    .display-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .display-row > .value-display {
+      flex: 1 1 auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 160px;
+    }
+    .icon-button {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
     .status {
       font-size: 0.9rem;
       margin-top: 10px;
@@ -195,10 +220,12 @@
 
     <section>
       <h2>Emotion</h2>
-      <div>Current: <span id="emotionCurrent" class="value">--</span></div>
+      <div class="display-row">
+        <div class="value-display">Current: <span id="emotionCurrent" class="value">--</span></div>
+        <button id="emotionRefresh" class="icon-button" type="button" aria-label="Refresh emotion" title="Refresh">↻</button>
+      </div>
       <div class="row">
         <input id="emotionInput" type="text" placeholder="Enter new emotion">
-        <button id="emotionRefresh" type="button">Refresh</button>
         <button id="emotionUpdate" type="button">Update</button>
       </div>
       <div id="emotionStatus" class="status"></div>
@@ -206,12 +233,14 @@
 
     <section>
       <h2>Fan</h2>
-      <div>Duty: <span id="fanDuty" class="value">--</span> | Percent: <span id="fanPercent" class="value">--</span>%</div>
+      <div class="display-row">
+        <div class="value-display">Duty: <span id="fanDuty" class="value">--</span> | Percent: <span id="fanPercent" class="value">--</span>%</div>
+        <button id="fanRefresh" class="icon-button" type="button" aria-label="Refresh fan" title="Refresh">↻</button>
+      </div>
       <div class="row">
         <label for="fanSlider">Speed (%)</label>
         <input id="fanSlider" type="range" min="0" max="100" value="0">
         <span id="fanSliderValue" class="value">0%</span>
-        <button id="fanRefresh" type="button">Refresh</button>
         <button id="fanApply" type="button">Apply</button>
       </div>
       <div id="fanStatus" class="status"></div>
@@ -219,14 +248,16 @@
 
     <section>
       <h2>Ears</h2>
-      <div>Color: <span id="earColorText" class="value">--</span> | Brightness: <span id="earBrightnessText" class="value">--</span></div>
+      <div class="display-row">
+        <div class="value-display">Color: <span id="earColorText" class="value">--</span> | Brightness: <span id="earBrightnessText" class="value">--</span></div>
+        <button id="earRefresh" class="icon-button" type="button" aria-label="Refresh ears" title="Refresh">↻</button>
+      </div>
       <div class="row">
         <label for="earColor">Color</label>
         <input id="earColor" type="color" value="#ffffff">
         <label for="earBrightness">Brightness</label>
         <input id="earBrightness" type="range" min="0" max="255" value="128">
         <span id="earBrightnessValue" class="value">128</span>
-        <button id="earRefresh" type="button">Refresh</button>
         <button id="earApply" type="button">Apply</button>
       </div>
       <div id="earStatus" class="status"></div>
@@ -234,15 +265,19 @@
 
     <section>
       <h2>Heap Status</h2>
-      <div>Value: <span id="heapValue" class="value">--</span></div>
-      <button id="heapRefresh" type="button">Refresh</button>
+      <div class="display-row">
+        <div class="value-display">Value: <span id="heapValue" class="value">--</span></div>
+        <button id="heapRefresh" class="icon-button" type="button" aria-label="Refresh heap status" title="Refresh">↻</button>
+      </div>
       <div id="heapStatus" class="status"></div>
     </section>
 
     <section>
       <h2>Gyroscope</h2>
-      <div>Value: <span id="gyroValue" class="value">--</span></div>
-      <button id="gyroRefresh" type="button">Refresh</button>
+      <div class="display-row">
+        <div class="value-display">Value: <span id="gyroValue" class="value">--</span></div>
+        <button id="gyroRefresh" class="icon-button" type="button" aria-label="Refresh gyroscope" title="Refresh">↻</button>
+      </div>
       <div id="gyroStatus" class="status"></div>
     </section>
 
