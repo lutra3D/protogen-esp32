@@ -182,6 +182,47 @@
       line-height: 1;
     }
 
+    .file-list {
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 6px 14px rgba(23, 43, 77, 0.1);
+      gap: 12px;
+    }
+
+    .file-item.empty {
+      justify-content: center;
+      color: #5a6a7b;
+      font-style: italic;
+    }
+
+    .file-name {
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .delete-button {
+      background: rgba(238, 64, 64, 0.12);
+      color: #d14949;
+      box-shadow: none;
+      border: 1px solid rgba(209, 73, 73, 0.2);
+    }
+
+    .delete-button:hover {
+      background: rgba(238, 64, 64, 0.18);
+      box-shadow: none;
+    }
+
     .status {
       font-size: 0.9rem;
       margin-top: 10px;
@@ -242,18 +283,13 @@
           </label>
           <input id="fileName" type="text" placeholder="example.gif" required>
         </div>
-        <div class="row">
-          <button type="submit">Upload</button>
-        </div>
+      <div class="row">
+        <button type="submit">Upload</button>
+      </div>
       </form>
       <div id="uploadStatus" class="status"></div>
-
-      <div class="row">
-        <label for="deleteName">Delete /anims/ file:</label>
-        <input id="deleteName" type="text" placeholder="example.json">
-        <button id="deleteButton" type="button">Delete</button>
-      </div>
-      <div id="deleteStatus" class="status"></div>
+      <div id="filesStatus" class="status"></div>
+      <div id="fileList" class="file-list" aria-live="polite"></div>
     </section>
 
     <section>
@@ -335,8 +371,8 @@
       var fileInput = $("fileInput");
       var fileNameInput = $("fileName");
       var uploadStatus = $("uploadStatus");
-      var deleteInput = $("deleteName");
-      var deleteStatus = $("deleteStatus");
+      var fileList = $("fileList");
+      var filesStatus = $("filesStatus");
       var emotionCurrent = $("emotionCurrent");
       var emotionInput = $("emotionInput");
       var emotionStatus = $("emotionStatus");
@@ -375,6 +411,20 @@
           return response.text().then(function (text) {
             if (!response.ok) { throw new Error(text || response.statusText); }
             return text;
+          });
+        });
+      }
+
+      function fetchJson(url, options) {
+        return fetch(url, options).then(function (response) {
+          return response.text().then(function (text) {
+            if (!response.ok) { throw new Error(text || response.statusText); }
+            if (!text) { return []; }
+            try {
+              return JSON.parse(text);
+            } catch (error) {
+              throw new Error("Invalid JSON response");
+            }
           });
         });
       }
@@ -517,20 +567,75 @@
           });
         }).then(function (text) {
           setText(uploadStatus, text);
+          refreshFiles();
         }).catch(function (error) {
           setText(uploadStatus, "Error: " + error.message);
         });
       });
 
-      $("deleteButton").addEventListener("click", function () {
-        var name = deleteInput.value.trim();
-        if (!name) {
-          setText(deleteStatus, "Enter a file name.");
+      function renderFileList(files) {
+        fileList.innerHTML = "";
+        if (!files.length) {
+          var empty = document.createElement("div");
+          empty.className = "file-item empty";
+          empty.textContent = "No animation files uploaded.";
+          fileList.appendChild(empty);
           return;
         }
+
+        var fragment = document.createDocumentFragment();
+        files.forEach(function (name) {
+          var item = document.createElement("div");
+          item.className = "file-item";
+
+          var label = document.createElement("span");
+          label.className = "file-name";
+          label.textContent = name;
+
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "icon-button delete-button";
+          button.setAttribute("data-file-delete", name);
+          button.setAttribute("aria-label", "Delete " + name);
+          button.title = "Delete";
+          button.textContent = "🗑";
+
+          item.appendChild(label);
+          item.appendChild(button);
+          fragment.appendChild(item);
+        });
+
+        fileList.appendChild(fragment);
+      }
+
+      function refreshFiles() {
+        fetchJson("/files").then(function (files) {
+          renderFileList(Array.isArray(files) ? files : []);
+          setText(filesStatus, "");
+        }).catch(function (error) {
+          renderFileList([]);
+          setText(filesStatus, "Error: " + error.message);
+        });
+      }
+
+      function deleteFile(name) {
         fetchText("/file?file=" + encodeURIComponent(name), { method: "DELETE" })
-          .then(function (text) { setText(deleteStatus, text); })
-          .catch(function (error) { setText(deleteStatus, "Error: " + error.message); });
+          .then(function (text) {
+            setText(filesStatus, text);
+            refreshFiles();
+          })
+          .catch(function (error) {
+            setText(filesStatus, "Error: " + error.message);
+          });
+      }
+
+      fileList.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-file-delete]");
+        if (!button) { return; }
+        var name = button.getAttribute("data-file-delete") || "";
+        if (name) {
+          deleteFile(name);
+        }
       });
 
       $("emotionRefresh").addEventListener("click", refreshEmotion);
@@ -542,6 +647,7 @@
       $("heapRefresh").addEventListener("click", refreshHeap);
       $("gyroRefresh").addEventListener("click", refreshGyro);
 
+      refreshFiles();
       refreshEmotion();
       refreshFan();
       refreshEars();
