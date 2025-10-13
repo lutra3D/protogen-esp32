@@ -88,9 +88,7 @@ void WebServerManager::registerRoutes() {
     }
     dir.close();
 
-    size_t jsonCapacity = JSON_ARRAY_SIZE(fileNames.size());
-
-    JsonDocument doc(jsonCapacity);
+    JsonDocument doc;
     JsonArray array = doc.to<JsonArray>();
     for (const String &fileName : fileNames) {
       array.add(fileName);
