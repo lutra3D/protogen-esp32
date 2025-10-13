@@ -1,5 +1,8 @@
 #include "WebServerManager.hpp"
 
+#include <vector>
+#include <ArduinoJson.h>
+
 WebServerManager::WebServerManager(EmotionState &emotionState, FanController &fanController,
                                    EarController &earController, TiltController &tiltController)
     : server_(80),
@@ -55,7 +58,45 @@ void WebServerManager::registerRoutes() {
   });
 
   server_.on("/files", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    request->send(200, "text/plain", F("[]"));
+    File dir = SPIFFS.open("/anims");
+    if (!dir || !dir.isDirectory()) {
+      if (dir) {
+        dir.close();
+      }
+      request->send(500, "application/json", F("[]"));
+      return;
+    }
+
+    std::vector<String> fileNames;
+    fileNames.reserve(8);
+
+    File file = dir.openNextFile();
+    while (file) {
+      if (!file.isDirectory()) {
+        String name = file.name();
+        int slashIndex = name.lastIndexOf('/');
+        if (slashIndex >= 0) {
+          name = name.substring(slashIndex + 1);
+        }
+
+        if (name.endsWith(".gif")) {
+          fileNames.emplace_back(std::move(name));
+        }
+      }
+      file.close();
+      file = dir.openNextFile();
+    }
+    dir.close();
+
+    JsonDocument doc;
+    JsonArray array = doc.to<JsonArray>();
+    for (const String &fileName : fileNames) {
+      array.add(fileName);
+    }
+
+    String json;
+    serializeJson(array, json);
+    request->send(200, "application/json", json);
   });
 
   server_.on("/emotion", HTTP_GET, [this](AsyncWebServerRequest *request) {
