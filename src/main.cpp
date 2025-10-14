@@ -4,6 +4,7 @@
 #include "EarController.hpp"
 #include "EmotionState.hpp"
 #include "FanController.hpp"
+#include "StatusDisplay.hpp"
 #include "TiltController.hpp"
 #include "WebServerManager.hpp"
 
@@ -26,12 +27,17 @@ constexpr uint8_t FAN_PWM_RESOLUTION = 8;
 constexpr uint16_t LEDS_PER_DISPLAY = 24;
 constexpr uint8_t DATA_PIN_EARS = 33;
 
+// Status display configuration
+constexpr int8_t DISPLAY_RESET_PIN = -1;
+constexpr uint8_t DISPLAY_I2C_ADDRESS = 0x3C;
+
 EmotionState emotionState;
 FanController fanController(FAN_PWM_PIN, FAN_PWM_CHANNEL, FAN_PWM_FREQUENCY, FAN_PWM_RESOLUTION);
 EarController earController(LEDS_PER_DISPLAY, DATA_PIN_EARS);
 TiltController tiltController(emotionState);
 AnimationManager animationManager(PANEL_RES_X, PANEL_RES_Y, PANEL_CHAIN);
 WebServerManager webServerManager(emotionState, fanController, earController, tiltController);
+StatusDisplay statusDisplay(emotionState, fanController, earController, DISPLAY_RESET_PIN, DISPLAY_I2C_ADDRESS);
 
 void setup() {
   Serial.begin(115200);
@@ -50,6 +56,10 @@ void setup() {
     Serial.println(F("Starting LED driver failed"));
   }
 
+  if (!statusDisplay.begin()) {
+    Serial.println(F("Starting status display failed"));
+  }
+
   webServerManager.begin(WIFI_NAME, WIFI_PASS);
 
   Serial.println(F("Init done"));
@@ -60,4 +70,5 @@ void loop() {
   tiltController.update();
   animationManager.playEmotion(emotionState.getCurrentEmotion());
   earController.update();
+  statusDisplay.update();
 }
