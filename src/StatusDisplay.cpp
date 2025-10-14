@@ -54,10 +54,7 @@ StatusDisplay::StatusDisplay(EmotionState &emotionState,
 bool StatusDisplay::begin() {
   Wire.begin();
 
-  if (!display_.begin(SH1106_SWITCHCAPVCC, i2cAddress_)) {
-    Serial.println(F("Failed to initialize SH1106 display"));
-    return false;
-  }
+  display_.begin(SH1106_SWITCHCAPVCC, i2cAddress_);
 
   display_.clearDisplay();
   display_.display();
