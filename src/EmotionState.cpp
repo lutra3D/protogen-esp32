@@ -1,10 +1,10 @@
 #include "EmotionState.hpp"
 
 EmotionState::EmotionState()
-    : currentEmotion_("/neutral.gif"),
-      previousEmotion_("/neutral.gif"),
-      tiltUpEmotion_("/happy.gif"),
-      tiltSideEmotion_("/confused.gif") {}
+    : currentEmotion_("/anims/neutral.gif"),
+      previousEmotion_("/anims/neutral.gif"),
+      tiltUpEmotion_("/anims/happy.gif"),
+      tiltSideEmotion_("/anims/confused.gif") {}
 
 const String &EmotionState::getCurrentEmotion() const {
   return currentEmotion_;
