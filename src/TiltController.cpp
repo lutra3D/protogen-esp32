@@ -1,7 +1,9 @@
 #include "TiltController.hpp"
 
-TiltController::TiltController(EmotionState &emotionState)
-    : emotionState_(emotionState),
+TiltController::TiltController(EmotionState &emotionState, uint8_t sdaPin, uint8_t sclPin)
+    : sdaPin_(sdaPin),
+      sclPin_(sclPin),
+      emotionState_(emotionState),
       tiltEnabled_(true),
       lastUpdateMillis_(0),
       tiltChangeMillis_(0),

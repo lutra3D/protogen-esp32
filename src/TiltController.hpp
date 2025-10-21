@@ -11,7 +11,7 @@
 
 class TiltController {
 public:
-  explicit TiltController(EmotionState &emotionState);
+  explicit TiltController(EmotionState &emotionState, uint8_t sdaPin, uint8_t sclPin);
 
   bool begin();
   void update();
@@ -23,6 +23,8 @@ private:
   void handleTiltChange(const String &targetEmotion);
 
   EmotionState &emotionState_;
+  uint8_t sdaPin_;
+  uint8_t sclPin_;
   std::unique_ptr<MPU6050> mpu6050_;
   bool tiltEnabled_;
   unsigned long lastUpdateMillis_;
