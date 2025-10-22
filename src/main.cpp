@@ -3,14 +3,12 @@
 #include <Arduino.h>
 
 #include "AnimationManager.hpp"
+#include "DisplayManager.hpp"
 #include "EarController.hpp"
 #include "EmotionState.hpp"
 #include "FanController.hpp"
 #include "TiltController.hpp"
 #include "WebServerManager.hpp"
-
-#include <Adafruit_GFX.h>
-#include <Adafruit_SH1106.h>
 
 // Display configuration
 constexpr int PANEL_RES_X = 64;
@@ -31,10 +29,8 @@ constexpr uint8_t FAN_PWM_RESOLUTION = 8;
 constexpr uint16_t LEDS_PER_DISPLAY = 32;
 constexpr uint8_t DATA_PIN_EARS = 33;
 
-#define PIN_SDA 21
-#define PIN_SCL 2
-
-Adafruit_SH1106 display(PIN_SDA, PIN_SCL);
+constexpr uint8_t PIN_SDA = 21;
+constexpr uint8_t PIN_SCL = 2;
 
 EmotionState emotionState;
 FanController fanController(FAN_PWM_PIN, FAN_PWM_CHANNEL, FAN_PWM_FREQUENCY, FAN_PWM_RESOLUTION);
@@ -42,11 +38,12 @@ EarController earController(LEDS_PER_DISPLAY, DATA_PIN_EARS);
 TiltController tiltController(emotionState, PIN_SDA, PIN_SCL);
 AnimationManager animationManager(PANEL_RES_X, PANEL_RES_Y, PANEL_CHAIN);
 WebServerManager webServerManager(emotionState, fanController, earController, tiltController);
+DisplayManager displayManager(PIN_SDA, PIN_SCL, emotionState, fanController, earController);
 
 void setup() {
   Serial.begin(115200);
 
-  //tiltController.begin();
+  // tiltController.begin();
 
   if (!animationManager.begin()) {
     while (true) {
@@ -62,30 +59,18 @@ void setup() {
 
   webServerManager.begin(WIFI_NAME, WIFI_PASS);
 
-  display.begin(SH1106_EXTERNALVCC, 0x3C);
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.setRotation(2);
-  display.println("Hello, world! How long of a thing I can write here? Let's try!");
-  display.display();
-  Serial.printf("Done!");
+  if (!displayManager.begin()) {
+    Serial.println(F("Failed to start SH1106 display"));
+  }
 
   Serial.println(F("Init done"));
 }
 
 void loop() {
   webServerManager.loop();
-  //tiltController.update();
+  // tiltController.update();
   animationManager.playEmotion(emotionState.getCurrentEmotion());
   earController.update();
-
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.println("Hello, world! How long of a thing I can write here? Let's try!");
-  display.display();
+  displayManager.update();
 }
 #endif
