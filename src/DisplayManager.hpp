@@ -14,7 +14,7 @@ public:
   DisplayManager(uint8_t sdaPin, uint8_t sclPin, EmotionState &emotionState,
                  FanController &fanController, EarController &earController);
 
-  bool begin();
+  void begin();
   void update();
 
 private:

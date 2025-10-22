@@ -26,9 +26,9 @@ DisplayManager::DisplayManager(uint8_t sdaPin, uint8_t sclPin,
       emotionState_(emotionState),
       fanController_(fanController),
       earController_(earController),
-      display_(-1) {}
+      display_() {}
 
-bool DisplayManager::begin() {
+void DisplayManager::begin() {
   Wire.begin(sdaPin_, sclPin_);
   display_.begin(SH1106_EXTERNALVCC, kDisplayAddress);
 
@@ -37,7 +37,6 @@ bool DisplayManager::begin() {
   display_.setTextColor(WHITE);
   display_.setRotation(kRotation);
   display_.display();
-  return true;
 }
 
 void DisplayManager::update() {

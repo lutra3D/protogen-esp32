@@ -59,9 +59,7 @@ void setup() {
 
   webServerManager.begin(WIFI_NAME, WIFI_PASS);
 
-  if (!displayManager.begin()) {
-    Serial.println(F("Failed to start SH1106 display"));
-  }
+  displayManager.begin();
 
   Serial.println(F("Init done"));
 }
