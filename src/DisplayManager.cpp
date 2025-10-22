@@ -1,6 +1,7 @@
 #include "DisplayManager.hpp"
 
 #include <WiFi.h>
+#include <Wire.h>
 
 namespace {
 constexpr uint8_t kDisplayAddress = 0x3C;
@@ -25,12 +26,11 @@ DisplayManager::DisplayManager(uint8_t sdaPin, uint8_t sclPin,
       emotionState_(emotionState),
       fanController_(fanController),
       earController_(earController),
-      display_(sdaPin, sclPin) {}
+      display_(-1) {}
 
 bool DisplayManager::begin() {
-  if (!display_.begin(SH1106_EXTERNALVCC, kDisplayAddress)) {
-    return false;
-  }
+  Wire.begin(sdaPin_, sclPin_);
+  display_.begin(SH1106_EXTERNALVCC, kDisplayAddress);
 
   display_.clearDisplay();
   display_.setTextSize(1);
