@@ -10,14 +10,14 @@ TiltController::TiltController(EmotionState &emotionState, uint8_t sdaPin, uint8
       wasTilt_(false) {}
 
 bool TiltController::begin() {
-  Wire.begin(SDA, SCL, 400000);
-  Wire.beginTransmission(0x68);
-  if (Wire.endTransmission() == 0) {
-    tiltEnabled_ = true;
-    mpu6050_.reset(new MPU6050(Wire));
-    mpu6050_->begin();
-    return true;
-  }
+  // Wire.begin(SDA, SCL, 400000);
+  // Wire.beginTransmission(0x68);
+  // if (Wire.endTransmission() == 0) {
+  //   tiltEnabled_ = true;
+  //   mpu6050_.reset(new MPU6050(Wire));
+  //   mpu6050_->begin();
+  //   return true;
+  // }
   tiltEnabled_ = false;
   Serial.println(F("MPU6050 not found. Tilt disabled"));
   return false;

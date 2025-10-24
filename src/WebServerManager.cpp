@@ -132,7 +132,7 @@ void WebServerManager::registerRoutes() {
   });
 
   server_.on("/ears", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    request->send(200, "text/plain", earController_.getColorHexString());
+    request->send(200, "text/plain", earController_.getColorHexString()+ F(" ") + earController_.getBrightness());
   });
 
   server_.on("/ears", HTTP_PUT, [this](AsyncWebServerRequest *request) {

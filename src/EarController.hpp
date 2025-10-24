@@ -18,6 +18,7 @@ public:
   uint8_t getBlue() const;
 
   String getColorHexString() const;
+  float getBrightnessPercent() const;
 
   void update();
 

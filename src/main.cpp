@@ -43,7 +43,7 @@ DisplayManager displayManager(PIN_SDA, PIN_SCL, emotionState, fanController, ear
 void setup() {
   Serial.begin(115200);
 
-  // tiltController.begin();
+  tiltController.begin();
 
   if (!animationManager.begin()) {
     while (true) {
@@ -66,7 +66,7 @@ void setup() {
 
 void loop() {
   webServerManager.loop();
-  // tiltController.update();
+  tiltController.update();
   animationManager.playEmotion(emotionState.getCurrentEmotion());
   earController.update();
   displayManager.update();

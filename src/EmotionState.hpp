@@ -9,6 +9,7 @@ public:
 
   const String &getCurrentEmotion() const;
   const String &getPreviousEmotion() const;
+  const String getDisplayEmotion() const;
 
   void setCurrentEmotion(const String &emotionName);
 
