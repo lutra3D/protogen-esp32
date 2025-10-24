@@ -552,21 +552,26 @@
           setText(uploadStatus, "Please choose a file.");
           return;
         }
+
         var file = fileInput.files[0];
         var name = fileNameInput.value.trim() || file.name;
         if (!name) {
           setText(uploadStatus, "File name is required.");
           return;
         }
-        file.text().then(function (content) {
-          var body = new URLSearchParams({ file: name, content: content });
-          return fetchText("/file", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: body
-          });
+
+        var formData = new FormData();
+        formData.append("name", name);
+        formData.append("file", file, name);
+
+        setText(uploadStatus, "Uploading...");
+
+        fetchText("/file", {
+          method: "POST",
+          body: formData
         }).then(function (text) {
           setText(uploadStatus, text);
+          uploadForm.reset();
           refreshFiles();
         }).catch(function (error) {
           setText(uploadStatus, "Error: " + error.message);
