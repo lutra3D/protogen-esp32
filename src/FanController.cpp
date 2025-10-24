@@ -1,7 +1,12 @@
 #include "FanController.hpp"
 
-FanController::FanController(uint8_t pwmPin, uint8_t channel, uint32_t frequency, uint8_t resolution)
-    : pwmPin_(pwmPin), channel_(channel), frequency_(frequency), resolution_(resolution), dutyCycle_(100) {}
+FanController::FanController(uint8_t pwmPin, uint8_t channel, uint32_t frequency,
+                             uint8_t resolution)
+    : pwmPin_(pwmPin),
+      channel_(channel),
+      frequency_(frequency),
+      resolution_(resolution),
+      dutyCycle_(100) {}
 
 void FanController::begin() {
   pinMode(pwmPin_, OUTPUT);
@@ -19,6 +24,12 @@ bool FanController::setDutyCycle(int dutyCycle) {
   return true;
 }
 
-int FanController::getDutyCycle() const {
-  return dutyCycle_;
+int FanController::getDutyCycle() const { return dutyCycle_; }
+
+float FanController::getDutyCyclePercent() const {
+  const int maxValue = (1 << resolution_) - 1;
+  if (maxValue <= 0) {
+    return 0.0f;
+  }
+  return (static_cast<float>(dutyCycle_) / static_cast<float>(maxValue)) * 100.0f;
 }

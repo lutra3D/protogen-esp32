@@ -10,6 +10,7 @@ public:
   void begin();
   bool setDutyCycle(int dutyCycle);
   int getDutyCycle() const;
+  float getDutyCyclePercent() const;
 
 private:
   uint8_t pwmPin_;

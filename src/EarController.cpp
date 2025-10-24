@@ -45,9 +45,11 @@ String EarController::getColorHexString() const {
   result += String(red_, 16);
   result += String(green_, 16);
   result += String(blue_, 16);
-  result += " ";
-  result += String(brightness_);
   return result;
+}
+
+float EarController::getBrightnessPercent() const{
+  return (static_cast<float>(getBrightness()) / 255.0f) * 100.0f;
 }
 
 void EarController::update() {

@@ -10,7 +10,7 @@ TiltController::TiltController(EmotionState &emotionState, uint8_t sdaPin, uint8
       wasTilt_(false) {}
 
 bool TiltController::begin() {
-  Wire.begin(SDA, SCL, 400000);
+  Wire.begin(sdaPin_, sclPin_);
   Wire.beginTransmission(0x68);
   if (Wire.endTransmission() == 0) {
     tiltEnabled_ = true;
