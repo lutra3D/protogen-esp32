@@ -10,6 +10,9 @@ struct UploadContext {
   bool error = false;
 };
 
+uint8_t uploadHandledTag;
+void *const kUploadHandled = &uploadHandledTag;
+
 String sanitizeFileName(String name) {
   name.trim();
 
@@ -70,25 +73,14 @@ void WebServerManager::registerRoutes() {
   server_.on(
       "/file", HTTP_POST,
       [](AsyncWebServerRequest *request) {
-        auto *context = static_cast<UploadContext *>(request->_tempObject);
-        if (!context) {
-          request->send(400, "text/plain", F("No file uploaded."));
+        if (request->_tempObject == kUploadHandled) {
+          request->_tempObject = nullptr;
           return;
         }
 
-        if (context->error) {
-          request->send(500, "text/plain", F("Failed to save file."));
-        } else {
-          request->send(200, "text/plain", F("File was saved."));
+        if (request->contentLength() == 0) {
+          request->send(400, "text/plain", F("No file uploaded."));
         }
-
-        if (request->_tempFile) {
-          request->_tempFile.close();
-          request->_tempFile = File();
-        }
-
-        delete context;
-        request->_tempObject = nullptr;
       },
       [this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data,
              size_t len, bool final) {
@@ -239,6 +231,7 @@ void WebServerManager::handleFileUpload(AsyncWebServerRequest *request, const St
 
     if (request->_tempFile) {
       request->_tempFile.close();
+      request->_tempFile = File();
     }
 
     SPIFFS.remove(context->tempPath);
@@ -267,20 +260,28 @@ void WebServerManager::handleFileUpload(AsyncWebServerRequest *request, const St
   if (final) {
     if (request->_tempFile) {
       request->_tempFile.close();
+      request->_tempFile = File();
     }
 
     if (context->error) {
       SPIFFS.remove(context->tempPath);
-      return;
+    } else {
+      SPIFFS.remove(context->finalPath);
+      if (!SPIFFS.rename(context->tempPath, context->finalPath)) {
+        context->error = true;
+        SPIFFS.remove(context->tempPath);
+        Serial.println(F("[E] Failed to finalize uploaded file."));
+      } else {
+        Serial.println(F("[I] File uploaded!"));
+      }
     }
 
-    SPIFFS.remove(context->finalPath);
-    if (!SPIFFS.rename(context->tempPath, context->finalPath)) {
-      context->error = true;
-      SPIFFS.remove(context->tempPath);
-      Serial.println(F("[E] Failed to finalize uploaded file."));
-    } else {
-      Serial.println(F("[I] File uploaded!"));
-    }
+    int status = context->error ? 500 : 200;
+    const __FlashStringHelper *message =
+        context->error ? F("Failed to save file.") : F("File was saved.");
+    request->send(status, "text/plain", message);
+
+    delete context;
+    request->_tempObject = kUploadHandled;
   }
 }
