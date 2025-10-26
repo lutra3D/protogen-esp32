@@ -14,7 +14,8 @@ public:
 
   bool begin();
   void playEmotion(const String &emotionPath);
-  void listSPIFFS();
+  std::vector<AnimationInfo> AnimationManager::getEmotions();
+  void printEmotions();
 
 private:
   static AnimationManager *instance_;
@@ -48,6 +49,11 @@ private:
   uint16_t colorCyan_;
   uint16_t colorMagenta_;
   uint16_t colorBlack_;
+};
+
+struct AnimationInfo {
+    String name; 
+    String path;
 };
 
 #endif // ANIMATION_MANAGER_HPP

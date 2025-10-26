@@ -3,13 +3,19 @@
 #include <vector>
 #include <ArduinoJson.h>
 
-WebServerManager::WebServerManager(EmotionState &emotionState, FanController &fanController,
-                                   EarController &earController, TiltController &tiltController)
+WebServerManager::WebServerManager(
+  EmotionState &emotionState, 
+  FanController &fanController,
+  EarController &earController, 
+  TiltController &tiltController,
+  AnimationManager &animationManager
+)
     : server_(80),
       emotionState_(emotionState),
       fanController_(fanController),
       earController_(earController),
-      tiltController_(tiltController) {}
+      tiltController_(tiltController),
+      animationManager_(animationManager) {}
 
 void WebServerManager::begin(const char *ssid, const char *password) {
   WiFi.softAP(ssid, password);
@@ -58,40 +64,12 @@ void WebServerManager::registerRoutes() {
   });
 
   server_.on("/files", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    File dir = SPIFFS.open("/anims");
-    if (!dir || !dir.isDirectory()) {
-      if (dir) {
-        dir.close();
-      }
-      request->send(500, "application/json", F("[]"));
-      return;
-    }
-
-    std::vector<String> fileNames;
-    fileNames.reserve(8);
-
-    File file = dir.openNextFile();
-    while (file) {
-      if (!file.isDirectory()) {
-        String name = file.name();
-        int slashIndex = name.lastIndexOf('/');
-        if (slashIndex >= 0) {
-          name = name.substring(slashIndex + 1);
-        }
-
-        if (name.endsWith(".gif")) {
-          fileNames.emplace_back(std::move(name));
-        }
-      }
-      file.close();
-      file = dir.openNextFile();
-    }
-    dir.close();
+    auto emotions = animationManager_.getEmotions();
 
     JsonDocument doc;
     JsonArray array = doc.to<JsonArray>();
-    for (const String &fileName : fileNames) {
-      array.add(fileName);
+    for (const auto emotion : emotions) {
+      array.add(emotion.path);
     }
 
     String json;
