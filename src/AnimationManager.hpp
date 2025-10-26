@@ -7,6 +7,13 @@
 
 #include <Arduino.h>
 
+#include "float_helper.hpp"
+
+struct AnimationInfo {
+    String name; 
+    String path;
+};
+
 class AnimationManager {
 public:
   AnimationManager(int panelResX, int panelResY, int panelChainLength);
@@ -14,7 +21,7 @@ public:
 
   bool begin();
   void playEmotion(const String &emotionPath);
-  std::vector<AnimationInfo> AnimationManager::getEmotions();
+  std::vector<AnimationInfo> getEmotions();
   void printEmotions();
 
 private:
@@ -49,11 +56,6 @@ private:
   uint16_t colorCyan_;
   uint16_t colorMagenta_;
   uint16_t colorBlack_;
-};
-
-struct AnimationInfo {
-    String name; 
-    String path;
 };
 
 #endif // ANIMATION_MANAGER_HPP

@@ -79,31 +79,28 @@ std::vector<AnimationInfo> AnimationManager::getEmotions()
 {
   std::vector<AnimationInfo> animations;
 
-  File root = SPIFFS.open("/");
-  if (!root || !root.isDirectory())
+  File animationsDir = SPIFFS.open("/anims");
+  if (!animationsDir || !animationsDir.isDirectory())
   {
-    Serial.println(F("Failed to open SPIFFS root or not a directory"));
-    return animations; // empty list
+    Serial.println(F("[E] Failed to open animation directory"));
+    return animations;
   }
 
-  File file = root.openNextFile();
+  File file = animationsDir.openNextFile();
   while (file)
   {
     AnimationInfo info;
-    info.path = file.name();
+    info.path = file.path();
+    info.name = FileHelper::GetNameOnly(info.path);
 
-    // Extract filename (strip path)
-    String fullPath = file.name();
-    int lastSlash = fullPath.lastIndexOf('/');
-    info.name = (lastSlash >= 0) ? fullPath.substring(lastSlash + 1) : fullPath;
-
-    if (!info.name.endsWith(".gif"))
+    if (info.path.endsWith(".gif"))
     {
       animations.push_back(std::move(info));
     }
-    file = root.openNextFile();
+    file.close();
+    file = animationsDir.openNextFile();
   }
-
+  animationsDir.close();
   return animations;
 }
 
