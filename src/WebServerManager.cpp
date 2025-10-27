@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <ArduinoJson.h>
+#include <FS.h>
 
 WebServerManager::WebServerManager(
   EmotionState &emotionState, 
@@ -34,24 +35,33 @@ void WebServerManager::loop() {
 void WebServerManager::registerRoutes() {
   server_.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
 
-  server_.on("/file", HTTP_POST, [this](AsyncWebServerRequest *request) {
-    if (request->hasParam("file", true) && request->hasParam("content", true)) {
-      String path = "/anims/" + request->getParam("file", true)->value();
-      File file = SPIFFS.open(path, "w");
-      if (!file) {
-        Serial.println(F("[E] There was an error opening the file for saving an animation!"));
-        file.close();
-        request->send(400, "text/plain", F("Error opening file for writing!"));
-      } else {
-        Serial.println(F("[I] File saved!"));
-        file.print(request->getParam("content", true)->value());
-        file.close();
-        request->send(200, "text/plain", F("File was saved."));
-      }
-    } else {
-      request->send(400, "text/plain", F("No valid parameters detected!"));
-    }
-  });
+  server_.on(
+      "/file", HTTP_POST,
+      [](AsyncWebServerRequest *request) {
+        auto *context = static_cast<UploadContext *>(request->_tempObject);
+        if (context == nullptr) {
+          request->send(400, "text/plain", F("No file uploaded."));
+          return;
+        }
+
+        String message = context->message;
+        if (!message.length()) {
+          message = F("File was saved.");
+        }
+
+        if (context->error) {
+          request->send(400, "text/plain", message);
+        } else {
+          request->send(200, "text/plain", message);
+        }
+
+        delete context;
+        request->_tempObject = nullptr;
+      },
+      [this](AsyncWebServerRequest *request, String filename, size_t index,
+             uint8_t *data, size_t len, bool final) {
+        handleFileUpload(request, filename, index, data, len, final);
+      });
 
   server_.on("/file", HTTP_DELETE, [this](AsyncWebServerRequest *request) {
     if (request->hasParam("file")) {
@@ -146,4 +156,105 @@ void WebServerManager::registerRoutes() {
   server_.onNotFound([](AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
   });
+}
+
+void WebServerManager::handleFileUpload(AsyncWebServerRequest *request,
+                                        String filename, size_t index,
+                                        uint8_t *data, size_t len,
+                                        bool final) {
+  auto *context = static_cast<UploadContext *>(request->_tempObject);
+
+  if (index == 0) {
+    if (context != nullptr) {
+      delete context;
+      context = nullptr;
+    }
+
+    context = new UploadContext();
+    request->_tempObject = context;
+
+    filename.trim();
+    if (filename.isEmpty()) {
+      context->error = true;
+      context->message = F("File name is required.");
+      return;
+    }
+
+    for (size_t i = 0; i < filename.length(); ++i) {
+      char c = filename.charAt(i);
+      if (c == '/' || c == '\\') {
+        filename.setCharAt(i, '_');
+      }
+    }
+
+    context->targetPath = "/anims/" + filename;
+    context->tempPath = context->targetPath + F(".tmp");
+
+    if (SPIFFS.exists(context->tempPath)) {
+      SPIFFS.remove(context->tempPath);
+    }
+
+    request->_tempFile = SPIFFS.open(context->tempPath, FILE_WRITE);
+    if (!request->_tempFile) {
+      context->error = true;
+      context->message = F("Error opening temporary file for writing!");
+      return;
+    }
+  }
+
+  if (context == nullptr) {
+    return;
+  }
+
+  if (context->error) {
+    if (final && request->_tempFile) {
+      request->_tempFile.close();
+      request->_tempFile = File();
+    }
+    return;
+  }
+
+  if (len > 0 && request->_tempFile) {
+    size_t written = request->_tempFile.write(data, len);
+    if (written != len && !context->error) {
+      context->error = true;
+      context->message = F("Failed to write uploaded data.");
+      request->_tempFile.close();
+      request->_tempFile = File();
+      if (SPIFFS.exists(context->tempPath)) {
+        SPIFFS.remove(context->tempPath);
+      }
+    }
+  }
+
+  if (!final) {
+    return;
+  }
+
+  if (request->_tempFile) {
+    request->_tempFile.close();
+    request->_tempFile = File();
+  }
+
+  if (context->error) {
+    if (SPIFFS.exists(context->tempPath)) {
+      SPIFFS.remove(context->tempPath);
+    }
+    return;
+  }
+
+  if (SPIFFS.exists(context->targetPath)) {
+    SPIFFS.remove(context->targetPath);
+  }
+
+  if (!SPIFFS.rename(context->tempPath, context->targetPath)) {
+    context->error = true;
+    context->message = F("Failed to save file.");
+    if (SPIFFS.exists(context->tempPath)) {
+      SPIFFS.remove(context->tempPath);
+    }
+    return;
+  }
+
+  context->message = F("File was saved.");
 }

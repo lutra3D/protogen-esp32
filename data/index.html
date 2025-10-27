@@ -558,13 +558,13 @@
           setText(uploadStatus, "File name is required.");
           return;
         }
-        file.text().then(function (content) {
-          var body = new URLSearchParams({ file: name, content: content });
-          return fetchText("/file", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: body
-          });
+        setText(uploadStatus, "Uploading...");
+
+        var formData = new FormData();
+        formData.append("file", file, name);
+        fetchText("/file", {
+          method: "POST",
+          body: formData
         }).then(function (text) {
           setText(uploadStatus, text);
           refreshFiles();
