@@ -15,21 +15,26 @@ AnimationManager::AnimationManager(int panelResX, int panelResY, int panelChainL
       colorYellow_(0),
       colorCyan_(0),
       colorMagenta_(0),
-      colorBlack_(0) {
+      colorBlack_(0)
+{
   instance_ = this;
 }
 
-AnimationManager::~AnimationManager() {
-  if (display_ != nullptr) {
+AnimationManager::~AnimationManager()
+{
+  if (display_ != nullptr)
+  {
     delete display_;
     display_ = nullptr;
   }
-  if (instance_ == this) {
+  if (instance_ == this)
+  {
     instance_ = nullptr;
   }
 }
 
-bool AnimationManager::begin() {
+bool AnimationManager::begin()
+{
   HUB75_I2S_CFG mxconfig(panelResX_, panelResY_, panelChainLength_);
   mxconfig.gpio.e = 18;
   mxconfig.clkphase = false;
@@ -44,73 +49,101 @@ bool AnimationManager::begin() {
   display_->setTextColor(colorBlue_);
   display_->println("Startup...");
 
-  if (!SPIFFS.begin(true)) {
+  if (!SPIFFS.begin(true))
+  {
     Serial.println(F("SPIFFS mount failed!"));
     return false;
   }
 
   gif_.begin(LITTLE_ENDIAN_PIXELS);
 
-  listSPIFFS();
+  printEmotions();
   return true;
 }
 
-void AnimationManager::playEmotion(const String &emotionPath) {
-  if (!display_) {
+void AnimationManager::playEmotion(const String &emotionPath)
+{
+  if (!display_)
+  {
     return;
   }
 
-  if (gif_.open(emotionPath.c_str(), fileOpenWrapper, fileCloseWrapper, fileReadWrapper, fileSeekWrapper, GIFDrawWrapper)) {
+  if (gif_.open(emotionPath.c_str(), fileOpenWrapper, fileCloseWrapper, fileReadWrapper, fileSeekWrapper, GIFDrawWrapper))
+  {
     gif_.playFrame(true, nullptr);
     gif_.close();
   }
 }
 
-void AnimationManager::listSPIFFS() {
-  Serial.println(F("SPIFFS contents:"));
-  File root = SPIFFS.open("/");
-  if (!root) {
-    Serial.println(F("Failed to open root directory"));
-    return;
-  }
-  if (!root.isDirectory()) {
-    Serial.println(F("Root is not a directory"));
-    return;
+std::vector<AnimationInfo> AnimationManager::getEmotions()
+{
+  std::vector<AnimationInfo> animations;
+
+  File animationsDir = SPIFFS.open("/anims");
+  if (!animationsDir || !animationsDir.isDirectory())
+  {
+    Serial.println(F("[E] Failed to open animation directory"));
+    return animations;
   }
 
-  File file = root.openNextFile();
-  while (file) {
-    Serial.printf("  %s  (%d bytes)\n", file.name(), file.size());
-    file = root.openNextFile();
+  File file = animationsDir.openNextFile();
+  while (file)
+  {
+    AnimationInfo info;
+    info.path = file.path();
+    info.name = FileHelper::GetNameOnly(info.path);
+
+    if (info.path.endsWith(".gif"))
+    {
+      animations.push_back(std::move(info));
+    }
+    file.close();
+    file = animationsDir.openNextFile();
   }
-  Serial.println(F("---- End of SPIFFS listing ----"));
+  animationsDir.close();
+  return animations;
 }
 
-void AnimationManager::GIFDrawWrapper(GIFDRAW *pDraw) {
-  if (instance_) {
+void AnimationManager::printEmotions() {
+    auto animations = getEmotions();
+    for (const auto &anim : animations) {
+        Serial.printf("Animation: %s, Path: %s\n", anim.name.c_str(), anim.path.c_str());
+    }
+}
+
+void AnimationManager::GIFDrawWrapper(GIFDRAW *pDraw)
+{
+  if (instance_)
+  {
     instance_->GIFDraw(pDraw);
   }
 }
 
-void *AnimationManager::fileOpenWrapper(const char *filename, int32_t *pFileSize) {
+void *AnimationManager::fileOpenWrapper(const char *filename, int32_t *pFileSize)
+{
   return instance_ ? instance_->fileOpen(filename, pFileSize) : nullptr;
 }
 
-void AnimationManager::fileCloseWrapper(void *pHandle) {
-  if (instance_) {
+void AnimationManager::fileCloseWrapper(void *pHandle)
+{
+  if (instance_)
+  {
     instance_->fileClose(pHandle);
   }
 }
 
-int32_t AnimationManager::fileReadWrapper(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen) {
+int32_t AnimationManager::fileReadWrapper(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
+{
   return instance_ ? instance_->fileRead(pHandle, pBuf, iLen) : 0;
 }
 
-int32_t AnimationManager::fileSeekWrapper(GIFFILE *pHandle, int32_t iPosition) {
+int32_t AnimationManager::fileSeekWrapper(GIFFILE *pHandle, int32_t iPosition)
+{
   return instance_ ? instance_->fileSeek(pHandle, iPosition) : -1;
 }
 
-void AnimationManager::GIFDraw(GIFDRAW *pDraw) {
+void AnimationManager::GIFDraw(GIFDRAW *pDraw)
+{
   uint8_t *s;
   uint16_t *d, *usPalette, usTemp[320];
   int x, y;
@@ -119,64 +152,85 @@ void AnimationManager::GIFDraw(GIFDRAW *pDraw) {
   y = pDraw->iY + pDraw->y;
 
   s = pDraw->pPixels;
-  if (pDraw->ucDisposalMethod == 2) {
-    for (x = 0; x < pDraw->iWidth; x++) {
-      if (s[x] == pDraw->ucTransparent) {
+  if (pDraw->ucDisposalMethod == 2)
+  {
+    for (x = 0; x < pDraw->iWidth; x++)
+    {
+      if (s[x] == pDraw->ucTransparent)
+      {
         s[x] = pDraw->ucBackground;
       }
     }
     pDraw->ucHasTransparency = 0;
   }
 
-  if (pDraw->ucHasTransparency) {
+  if (pDraw->ucHasTransparency)
+  {
     uint8_t *pEnd, c, ucTransparent = pDraw->ucTransparent;
     int iCount = 0;
     pEnd = s + pDraw->iWidth;
     x = 0;
-    while (x < pDraw->iWidth) {
+    while (x < pDraw->iWidth)
+    {
       c = ucTransparent - 1;
       d = usTemp;
-      while (c != ucTransparent && s < pEnd) {
+      while (c != ucTransparent && s < pEnd)
+      {
         c = *s++;
-        if (c == ucTransparent) {
+        if (c == ucTransparent)
+        {
           s--;
-        } else {
+        }
+        else
+        {
           *d++ = usPalette[c];
           iCount++;
         }
       }
-      if (iCount) {
-        for (int xOffset = 0; xOffset < iCount; xOffset++) {
+      if (iCount)
+      {
+        for (int xOffset = 0; xOffset < iCount; xOffset++)
+        {
           display_->drawPixel(x + xOffset + pDraw->iX, y, usTemp[xOffset]);
         }
         x += iCount;
         iCount = 0;
       }
       c = ucTransparent;
-      while (c == ucTransparent && s < pEnd) {
+      while (c == ucTransparent && s < pEnd)
+      {
         c = *s++;
-        if (c == ucTransparent) {
+        if (c == ucTransparent)
+        {
           iCount++;
-        } else {
+        }
+        else
+        {
           s--;
         }
       }
-      if (iCount) {
+      if (iCount)
+      {
         x += iCount;
         iCount = 0;
       }
     }
-  } else {
+  }
+  else
+  {
     s = pDraw->pPixels;
-    for (x = 0; x < pDraw->iWidth; x++) {
+    for (x = 0; x < pDraw->iWidth; x++)
+    {
       display_->drawPixel(x + pDraw->iX, y, usPalette[*s++]);
     }
   }
 }
 
-void *AnimationManager::fileOpen(const char *filename, int32_t *pFileSize) {
+void *AnimationManager::fileOpen(const char *filename, int32_t *pFileSize)
+{
   gifFile_ = SPIFFS.open(filename, FILE_READ);
-  if (!gifFile_) {
+  if (!gifFile_)
+  {
     Serial.printf("Failed to open GIF file from SPIFFS: %s\n", filename);
     *pFileSize = 0;
     return nullptr;
@@ -185,37 +239,46 @@ void *AnimationManager::fileOpen(const char *filename, int32_t *pFileSize) {
   return &gifFile_;
 }
 
-void AnimationManager::fileClose(void *pHandle) {
+void AnimationManager::fileClose(void *pHandle)
+{
   (void)pHandle;
-  if (gifFile_) {
+  if (gifFile_)
+  {
     gifFile_.close();
   }
 }
 
-int32_t AnimationManager::fileRead(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen) {
+int32_t AnimationManager::fileRead(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
+{
   (void)pHandle;
-  if (!gifFile_) {
+  if (!gifFile_)
+  {
     return 0;
   }
   return gifFile_.read(pBuf, static_cast<size_t>(iLen));
 }
 
-int32_t AnimationManager::fileSeek(GIFFILE *pHandle, int32_t iPosition) {
+int32_t AnimationManager::fileSeek(GIFFILE *pHandle, int32_t iPosition)
+{
   (void)pHandle;
-  if (!gifFile_) {
+  if (!gifFile_)
+  {
     return -1;
   }
-  if (iPosition < 0) {
+  if (iPosition < 0)
+  {
     iPosition = 0;
   }
-  if (iPosition > static_cast<int32_t>(gifFile_.size())) {
+  if (iPosition > static_cast<int32_t>(gifFile_.size()))
+  {
     iPosition = gifFile_.size();
   }
   gifFile_.seek(iPosition, SeekSet);
   return iPosition;
 }
 
-void AnimationManager::initializeColors() {
+void AnimationManager::initializeColors()
+{
   colorRed_ = display_->color565(255, 0, 0);
   colorGreen_ = display_->color565(0, 255, 0);
   colorBlue_ = display_->color565(0, 0, 255);

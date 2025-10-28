@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+#include "float_helper.hpp"
+
 class EmotionState {
 public:
   EmotionState();

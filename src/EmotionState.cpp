@@ -8,14 +8,7 @@ EmotionState::EmotionState()
 
 const String EmotionState::getDisplayEmotion() const
 {
-  size_t lastSlash = currentEmotion_.lastIndexOf("/");
-  String filename = (lastSlash == std::string::npos) ? currentEmotion_ : currentEmotion_.substring(lastSlash + 1);
-  size_t lastDot = filename.lastIndexOf(".");
-
-  if (lastDot == std::string::npos){
-    return filename;
-  }
-  return filename.substring(0, lastDot);
+  return FileHelper::GetNameOnly(currentEmotion_);
 }
 
 const String &EmotionState::getCurrentEmotion() const

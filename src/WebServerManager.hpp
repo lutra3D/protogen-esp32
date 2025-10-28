@@ -12,11 +12,13 @@
 #include "EmotionState.hpp"
 #include "FanController.hpp"
 #include "TiltController.hpp"
+#include "AnimationManager.hpp"
 
 class WebServerManager {
 public:
   WebServerManager(EmotionState &emotionState, FanController &fanController,
-                   EarController &earController, TiltController &tiltController);
+                   EarController &earController, TiltController &tiltController,
+                   AnimationManager &animationManager);
 
   void begin(const char *ssid, const char *password);
   void loop();
@@ -31,6 +33,7 @@ private:
   FanController &fanController_;
   EarController &earController_;
   TiltController &tiltController_;
+  AnimationManager &animationManager_;
 };
 
 #endif // WEB_SERVER_MANAGER_HPP

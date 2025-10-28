@@ -9,6 +9,7 @@
 #include "FanController.hpp"
 #include "TiltController.hpp"
 #include "WebServerManager.hpp"
+#include "BLEController.hpp"
 
 // Display configuration
 constexpr int PANEL_RES_X = 64;
@@ -37,8 +38,9 @@ FanController fanController(FAN_PWM_PIN, FAN_PWM_CHANNEL, FAN_PWM_FREQUENCY, FAN
 EarController earController(LEDS_PER_DISPLAY, DATA_PIN_EARS);
 TiltController tiltController(emotionState, PIN_SDA, PIN_SCL);
 AnimationManager animationManager(PANEL_RES_X, PANEL_RES_Y, PANEL_CHAIN);
-WebServerManager webServerManager(emotionState, fanController, earController, tiltController);
+WebServerManager webServerManager(emotionState, fanController, earController, tiltController, animationManager);
 DisplayManager displayManager(PIN_SDA, PIN_SCL, emotionState, fanController, earController);
+BLEController bleController(animationManager, emotionState); 
 
 void setup() {
   Serial.begin(115200);
@@ -54,14 +56,18 @@ void setup() {
   fanController.begin();
 
   if (!earController.begin()) {
-    Serial.println(F("Starting LED driver failed"));
+    Serial.println(F("[E] Starting LED driver failed"));
   }
 
   webServerManager.begin(WIFI_NAME, WIFI_PASS);
 
   displayManager.begin();
 
-  Serial.println(F("Init done"));
+  if(!bleController.begin()) {
+      Serial.println(F("[E] An Error has occurred while starting BLE!"));
+    }
+
+  Serial.println(F("[I] Init done"));
 }
 
 void loop() {
