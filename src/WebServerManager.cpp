@@ -65,13 +65,26 @@ void WebServerManager::registerRoutes() {
       });
 
   server_.on("/file", HTTP_DELETE, [this](AsyncWebServerRequest *request) {
-    if (request->hasParam("file")) {
-      String path = "/anims/" + request->getParam("file")->value();
-      SPIFFS.remove(path);
-      request->send(200, "text/plain", F("File was deleted."));
-    } else {
+    if (!request->hasParam("file")) {
       request->send(400, "text/plain", F("Parameter 'file' not present!"));
+      return;
     }
+
+    auto filePath = request->getParam("file")->value();
+    Serial.println("[I] Deleting " + String(filePath));
+
+    if(!SPIFFS.exists(filePath)){
+      request->send(400, "text/plain", F("File does not exist!"));
+      return;
+    }
+
+    if(!filePath.startsWith("/anims/")){
+      request->send(400, "text/plain", F("Cannot delete the file, file is not an animation!"));
+      return;
+    }
+
+    SPIFFS.remove(filePath);
+    request->send(200, "text/plain", F("File was deleted."));
   });
 
   server_.on("/files", HTTP_GET, [this](AsyncWebServerRequest *request) {
