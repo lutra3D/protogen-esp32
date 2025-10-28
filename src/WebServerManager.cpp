@@ -73,20 +73,23 @@ void WebServerManager::loop() {
 void WebServerManager::registerRoutes() {
   server_.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
 
-  server_.on(
-      "/file", HTTP_POST,
-      [](AsyncWebServerRequest *request) {
-        if (request->_tempObject == kUploadHandled) {
-          request->_tempObject = nullptr;
-          return;
-        }
+  server_.on("/file", HTTP_POST, [](AsyncWebServerRequest *request) {
+    if (request->_tempObject == kUploadHandled) {
+      request->_tempObject = nullptr;
+      return;
+    }
 
-        request->send(400, "text/plain", F("No file uploaded."));
-      },
-      [this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data,
-             size_t len, bool final) {
-        handleFileUpload(request, filename, index, data, len, final);
-      });
+    request->send(400, "text/plain", F("No file uploaded."));
+  });
+
+  server_.onFileUpload([this](AsyncWebServerRequest *request, const String &filename,
+                              size_t index, uint8_t *data, size_t len, bool final) {
+    if (!request || request->url() != F("/file")) {
+      return;
+    }
+
+    handleFileUpload(request, filename, index, data, len, final);
+  });
 
   server_.on("/file", HTTP_DELETE, [this](AsyncWebServerRequest *request) {
     if (request->hasParam("file")) {
