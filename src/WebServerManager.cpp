@@ -49,7 +49,8 @@ String sanitizeFileName(String name) {
 } // namespace
 
 WebServerManager::WebServerManager(EmotionState &emotionState, FanController &fanController,
-                                   EarController &earController, TiltController &tiltController)
+                                   EarController &earController, TiltController &tiltController,
+                                   AnimationManager &animationManager)
     : server_(80),
       emotionState_(emotionState),
       fanController_(fanController),
