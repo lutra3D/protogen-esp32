@@ -8,6 +8,9 @@ struct UploadContext {
   String tempPath;
   String finalPath;
   bool error = false;
+  int status = 200;
+  String message;
+  size_t received = 0;
 };
 
 uint8_t uploadHandledTag;
@@ -75,11 +78,6 @@ void WebServerManager::registerRoutes() {
       [](AsyncWebServerRequest *request) {
         if (request->_tempObject == kUploadHandled) {
           request->_tempObject = nullptr;
-          return;
-        }
-
-        if (request->contentLength() == 0) {
-          request->send(400, "text/plain", F("No file uploaded."));
         }
       },
       [this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data,
@@ -226,6 +224,10 @@ void WebServerManager::handleFileUpload(AsyncWebServerRequest *request, const St
       request->_tempObject = context;
     }
 
+    context->error = false;
+    context->status = 200;
+    context->message = F("File was saved.");
+    context->received = 0;
     context->finalPath = "/anims/" + sanitized;
     context->tempPath = context->finalPath + F(".tmp");
 
@@ -239,6 +241,8 @@ void WebServerManager::handleFileUpload(AsyncWebServerRequest *request, const St
     request->_tempFile = SPIFFS.open(context->tempPath, FILE_WRITE);
     if (!request->_tempFile) {
       context->error = true;
+      context->status = 500;
+      context->message = F("Failed to open temporary file.");
       Serial.println(F("[E] Failed to open temporary file for upload."));
       return;
     }
@@ -253,8 +257,17 @@ void WebServerManager::handleFileUpload(AsyncWebServerRequest *request, const St
     size_t written = request->_tempFile.write(data, len);
     if (written != len) {
       context->error = true;
+      context->status = 500;
+      context->message = F("Failed to write uploaded data.");
       Serial.println(F("[E] Failed to write uploaded data."));
     }
+    context->received += written;
+  }
+
+  if (final && context->received == 0 && !context->error) {
+    context->error = true;
+    context->status = 400;
+    context->message = F("No file data received.");
   }
 
   if (final) {
@@ -269,6 +282,8 @@ void WebServerManager::handleFileUpload(AsyncWebServerRequest *request, const St
       SPIFFS.remove(context->finalPath);
       if (!SPIFFS.rename(context->tempPath, context->finalPath)) {
         context->error = true;
+        context->status = 500;
+        context->message = F("Failed to finalize uploaded file.");
         SPIFFS.remove(context->tempPath);
         Serial.println(F("[E] Failed to finalize uploaded file."));
       } else {
@@ -276,9 +291,11 @@ void WebServerManager::handleFileUpload(AsyncWebServerRequest *request, const St
       }
     }
 
-    int status = context->error ? 500 : 200;
-    const __FlashStringHelper *message =
-        context->error ? F("Failed to save file.") : F("File was saved.");
+    int status = context->error ? context->status : 200;
+    String message =
+        context->error ? (context->message.length() ? context->message
+                                                    : String(F("Failed to save file.")))
+                        : context->message;
     request->send(status, "text/plain", message);
 
     delete context;
