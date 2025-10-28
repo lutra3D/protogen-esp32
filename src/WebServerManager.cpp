@@ -60,6 +60,7 @@ void WebServerManager::registerRoutes() {
       },
       [this](AsyncWebServerRequest *request, String filename, size_t index,
              uint8_t *data, size_t len, bool final) {
+            Serial.println(F("[I] File upload callback called"));
         handleFileUpload(request, filename, index, data, len, final);
       });
 
