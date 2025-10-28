@@ -3,6 +3,51 @@
 #include <vector>
 #include <ArduinoJson.h>
 
+namespace {
+struct UploadContext {
+  String tempPath;
+  String finalPath;
+  bool error = false;
+  int status = 200;
+  String message;
+  size_t received = 0;
+};
+
+uint8_t uploadHandledTag;
+void *const kUploadHandled = &uploadHandledTag;
+
+String sanitizeFileName(String name) {
+  name.trim();
+
+  String sanitized;
+  sanitized.reserve(name.length());
+  for (size_t i = 0; i < name.length(); ++i) {
+    char c = name.charAt(i);
+    bool allowed = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                   (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.';
+    if (allowed) {
+      sanitized += c;
+    }
+  }
+
+  if (sanitized.length() == 0) {
+    sanitized = F("animation");
+  }
+
+  String lower = sanitized;
+  lower.toLowerCase();
+  if (!lower.endsWith(F(".gif"))) {
+    sanitized += F(".gif");
+  }
+
+  if (sanitized.length() > 0 && sanitized.charAt(0) == '.') {
+    sanitized = String(F("animation")) + sanitized;
+  }
+
+  return sanitized;
+}
+} // namespace
+
 WebServerManager::WebServerManager(EmotionState &emotionState, FanController &fanController,
                                    EarController &earController, TiltController &tiltController)
     : server_(80),
@@ -28,24 +73,20 @@ void WebServerManager::loop() {
 void WebServerManager::registerRoutes() {
   server_.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
 
-  server_.on("/file", HTTP_POST, [this](AsyncWebServerRequest *request) {
-    if (request->hasParam("file", true) && request->hasParam("content", true)) {
-      String path = "/anims/" + request->getParam("file", true)->value();
-      File file = SPIFFS.open(path, "w");
-      if (!file) {
-        Serial.println(F("[E] There was an error opening the file for saving an animation!"));
-        file.close();
-        request->send(400, "text/plain", F("Error opening file for writing!"));
-      } else {
-        Serial.println(F("[I] File saved!"));
-        file.print(request->getParam("content", true)->value());
-        file.close();
-        request->send(200, "text/plain", F("File was saved."));
-      }
-    } else {
-      request->send(400, "text/plain", F("No valid parameters detected!"));
-    }
-  });
+  server_.on(
+      "/file", HTTP_POST,
+      [](AsyncWebServerRequest *request) {
+        if (request->_tempObject == kUploadHandled) {
+          request->_tempObject = nullptr;
+          return;
+        }
+
+        request->send(400, "text/plain", F("No file uploaded."));
+      },
+      [this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data,
+             size_t len, bool final) {
+        handleFileUpload(request, filename, index, data, len, final);
+      });
 
   server_.on("/file", HTTP_DELETE, [this](AsyncWebServerRequest *request) {
     if (request->hasParam("file")) {
@@ -88,7 +129,7 @@ void WebServerManager::registerRoutes() {
     }
     dir.close();
 
-    JsonDocument doc;
+    DynamicJsonDocument doc(256);
     JsonArray array = doc.to<JsonArray>();
     for (const String &fileName : fileNames) {
       array.add(fileName);
@@ -168,4 +209,107 @@ void WebServerManager::registerRoutes() {
   server_.onNotFound([](AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");
   });
+}
+
+void WebServerManager::handleFileUpload(AsyncWebServerRequest *request, const String &filename,
+                                        size_t index, uint8_t *data, size_t len, bool final) {
+  if (request->_tempObject == kUploadHandled) {
+    return;
+  }
+
+  if (!filename.length()) {
+    return;
+  }
+
+  auto *context = static_cast<UploadContext *>(request->_tempObject);
+
+  if (index == 0) {
+    String desiredName = filename;
+    if (request->hasParam("name", true)) {
+      desiredName = request->getParam("name", true)->value();
+    }
+
+    String sanitized = sanitizeFileName(desiredName);
+    if (!context) {
+      context = new UploadContext();
+      request->_tempObject = context;
+    }
+
+    context->error = false;
+    context->status = 200;
+    context->message = F("File was saved.");
+    context->received = 0;
+    context->finalPath = "/anims/" + sanitized;
+    context->tempPath = context->finalPath + F(".tmp");
+
+    if (request->_tempFile) {
+      request->_tempFile.close();
+      request->_tempFile = File();
+    }
+
+    SPIFFS.remove(context->tempPath);
+
+    request->_tempFile = SPIFFS.open(context->tempPath, FILE_WRITE);
+    if (!request->_tempFile) {
+      context->error = true;
+      context->status = 500;
+      context->message = F("Failed to open temporary file.");
+      Serial.println(F("[E] Failed to open temporary file for upload."));
+      return;
+    }
+  }
+
+  if (!context) {
+    Serial.println(F("[E] Upload context missing."));
+    return;
+  }
+
+  if (len && request->_tempFile && !context->error) {
+    size_t written = request->_tempFile.write(data, len);
+    if (written != len) {
+      context->error = true;
+      context->status = 500;
+      context->message = F("Failed to write uploaded data.");
+      Serial.println(F("[E] Failed to write uploaded data."));
+    }
+    context->received += written;
+  }
+
+  if (final && context->received == 0 && !context->error) {
+    context->error = true;
+    context->status = 400;
+    context->message = F("No file data received.");
+  }
+
+  if (final) {
+    if (request->_tempFile) {
+      request->_tempFile.close();
+      request->_tempFile = File();
+    }
+
+    if (context->error) {
+      SPIFFS.remove(context->tempPath);
+    } else {
+      SPIFFS.remove(context->finalPath);
+      if (!SPIFFS.rename(context->tempPath, context->finalPath)) {
+        context->error = true;
+        context->status = 500;
+        context->message = F("Failed to finalize uploaded file.");
+        SPIFFS.remove(context->tempPath);
+        Serial.println(F("[E] Failed to finalize uploaded file."));
+      } else {
+        Serial.println(F("[I] File uploaded!"));
+      }
+    }
+
+    int status = context->error ? context->status : 200;
+    String message =
+        context->error ? (context->message.length() ? context->message
+                                                    : String(F("Failed to save file.")))
+                        : context->message;
+    request->send(status, "text/plain", message);
+
+    delete context;
+    request->_tempObject = kUploadHandled;
+  }
 }
