@@ -53,7 +53,7 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
     if (characteristicValue.toInt() > 0 && characteristicValue.toInt() <= emotionCount)
     { // legacy remote reasons
         auto newEmotion = emotions[characteristicValue.toInt() - 1];
-        emotionState_.setCurrentEmotion(newEmotion.name);
+        emotionState_.setCurrentEmotion(newEmotion.path);
         return;
     }
     
@@ -62,9 +62,9 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
         auto emotion = emotions[i];
         if (characteristicValue == emotion.name)
         {
-            emotionState_.setCurrentEmotion(emotion.name);
+            emotionState_.setCurrentEmotion(emotion.path);
         }
-    } 
+    }
 }
 
 class ServerCallbacks : public NimBLEServerCallbacks
