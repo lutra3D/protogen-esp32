@@ -154,6 +154,36 @@
       flex: 0 0 auto;
     }
 
+    .emotion-buttons {
+      gap: 10px;
+      justify-content: flex-start;
+    }
+
+    .emotion-buttons button {
+      flex: 0 0 auto;
+      background: rgba(97, 111, 255, 0.12);
+      color: #3b4a5a;
+      box-shadow: none;
+      border: 1px solid rgba(97, 111, 255, 0.25);
+      padding: 8px 14px;
+    }
+
+    .emotion-buttons button:hover {
+      background: rgba(97, 111, 255, 0.2);
+    }
+
+    .emotion-buttons button.is-active {
+      background: linear-gradient(135deg, var(--accent), #a172ff);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 6px 16px var(--shadow);
+    }
+
+    .emotion-empty {
+      color: #5a6a7b;
+      font-style: italic;
+    }
+
     .display-row {
       display: flex;
       align-items: center;
@@ -299,10 +329,7 @@
         <button id="emotionRefresh" class="icon-button" type="button" aria-label="Refresh emotion"
           title="Refresh">↻</button>
       </div>
-      <div class="row">
-        <input id="emotionInput" type="text" placeholder="Enter new emotion">
-        <button id="emotionUpdate" type="button">Update</button>
-      </div>
+      <div id="emotionButtons" class="row emotion-buttons" aria-live="polite"></div>
       <div id="emotionStatus" class="status"></div>
     </section>
 
@@ -374,8 +401,9 @@
       var fileList = $("fileList");
       var filesStatus = $("filesStatus");
       var emotionCurrent = $("emotionCurrent");
-      var emotionInput = $("emotionInput");
       var emotionStatus = $("emotionStatus");
+      var emotionButtons = $("emotionButtons");
+      var currentEmotionName = "";
       var fanDuty = $("fanDuty");
       var fanPercent = $("fanPercent");
       var fanSlider = $("fanSlider");
@@ -429,31 +457,65 @@
         });
       }
 
-      function refreshEmotion() {
-        fetchText("/emotion").then(function (text) {
-          setText(emotionCurrent, text || "(empty)");
-          setText(emotionStatus, "");
-        }).catch(function (error) {
-          setText(emotionStatus, "Error: " + error.message);
+      function highlightEmotion(name) {
+        var active = (name || "").trim();
+        var buttons = emotionButtons.querySelectorAll("[data-emotion]");
+        buttons.forEach(function (button) {
+          var matches = button.getAttribute("data-emotion") === active;
+          button.classList.toggle("is-active", matches);
+          button.setAttribute("aria-pressed", matches ? "true" : "false");
         });
       }
 
-      function updateEmotion() {
-        var value = emotionInput.value.trim();
-        if (!value) {
-          setText(emotionStatus, "Please enter a value.");
+      function refreshEmotion(options) {
+        var preserveStatus = options && options.preserveStatus;
+        return fetchText("/emotion").then(function (text) {
+          var value = (text || "").trim();
+          currentEmotionName = value;
+          setText(emotionCurrent, value || "(empty)");
+          highlightEmotion(currentEmotionName);
+          if (!preserveStatus) {
+            setText(emotionStatus, "");
+          }
+          return value;
+        }).catch(function (error) {
+          if (!preserveStatus) {
+            setText(emotionStatus, "Error: " + error.message);
+          }
+          return null;
+        });
+      }
+
+      function renderEmotionButtons(files) {
+        emotionButtons.innerHTML = "";
+        var list = Array.isArray(files) ? files : [];
+        if (!list.length) {
+          var empty = document.createElement("div");
+          empty.className = "emotion-empty";
+          empty.textContent = "No emotions available.";
+          emotionButtons.appendChild(empty);
           return;
         }
-        var body = new URLSearchParams({ name: value });
-        fetchText("/emotion", {
+
+        var fragment = document.createDocumentFragment();
+        list.forEach(function (name) {
+          var button = document.createElement("button");
+          button.type = "button";
+          button.textContent = name;
+          button.setAttribute("data-emotion", name);
+          button.setAttribute("aria-pressed", "false");
+          fragment.appendChild(button);
+        });
+        emotionButtons.appendChild(fragment);
+        highlightEmotion(currentEmotionName);
+      }
+
+      function setEmotion(name) {
+        var body = new URLSearchParams({ name: name });
+        return fetchText("/emotion", {
           method: "PUT",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: body
-        }).then(function (text) {
-          setText(emotionStatus, text);
-          refreshEmotion();
-        }).catch(function (error) {
-          setText(emotionStatus, "Error: " + error.message);
         });
       }
 
@@ -610,11 +672,17 @@
 
       function refreshFiles() {
         fetchJson("/files").then(function (files) {
-          renderFileList(Array.isArray(files) ? files : []);
+          var list = Array.isArray(files) ? files : [];
+          renderFileList(list);
+          renderEmotionButtons(list);
           setText(filesStatus, "");
         }).catch(function (error) {
           renderFileList([]);
+          renderEmotionButtons([]);
           setText(filesStatus, "Error: " + error.message);
+          if (!emotionStatus.textContent) {
+            setText(emotionStatus, "Error loading emotions: " + error.message);
+          }
         });
       }
 
@@ -638,8 +706,26 @@
         }
       });
 
-      $("emotionRefresh").addEventListener("click", refreshEmotion);
-      $("emotionUpdate").addEventListener("click", updateEmotion);
+      $("emotionRefresh").addEventListener("click", function () {
+        refreshEmotion();
+        refreshFiles();
+      });
+
+      emotionButtons.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-emotion]");
+        if (!button) { return; }
+        var name = button.getAttribute("data-emotion") || "";
+        if (!name) { return; }
+        setText(emotionStatus, "Updating emotion...");
+        setEmotion(name).then(function (text) {
+          currentEmotionName = name;
+          setText(emotionCurrent, name);
+          highlightEmotion(currentEmotionName);
+          setText(emotionStatus, text);
+        }).catch(function (error) {
+          setText(emotionStatus, "Error: " + error.message);
+        });
+      });
       $("fanRefresh").addEventListener("click", refreshFan);
       $("fanApply").addEventListener("click", applyFan);
       $("earRefresh").addEventListener("click", refreshEars);
