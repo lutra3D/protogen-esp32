@@ -299,6 +299,17 @@
     <h1>Protogen Web Control</h1>
 
     <section>
+      <h2>Emotion</h2>
+      <div class="display-row">
+        <div class="value-display">Current: <span id="emotionCurrent" class="value">--</span></div>
+        <button id="emotionRefresh" class="icon-button" type="button" aria-label="Refresh emotion"
+          title="Refresh">↻</button>
+      </div>
+      <div id="emotionButtons" class="row emotion-buttons" aria-live="polite"></div>
+      <div id="emotionStatus" class="status"></div>
+    </section>
+
+    <section>
       <h2>Animation Files</h2>
       <form id="uploadForm">
         <div class="display-row">
@@ -313,24 +324,13 @@
           </label>
           <input id="fileName" type="text" placeholder="example.gif" required>
         </div>
-      <div class="row">
-        <button type="submit">Upload</button>
-      </div>
+        <div class="row">
+          <button type="submit">Upload</button>
+        </div>
       </form>
       <div id="uploadStatus" class="status"></div>
       <div id="filesStatus" class="status"></div>
       <div id="fileList" class="file-list" aria-live="polite"></div>
-    </section>
-
-    <section>
-      <h2>Emotion</h2>
-      <div class="display-row">
-        <div class="value-display">Current: <span id="emotionCurrent" class="value">--</span></div>
-        <button id="emotionRefresh" class="icon-button" type="button" aria-label="Refresh emotion"
-          title="Refresh">↻</button>
-      </div>
-      <div id="emotionButtons" class="row emotion-buttons" aria-live="polite"></div>
-      <div id="emotionStatus" class="status"></div>
     </section>
 
     <section>
