@@ -93,7 +93,10 @@ void WebServerManager::registerRoutes() {
     JsonDocument doc;
     JsonArray array = doc.to<JsonArray>();
     for (const auto emotion : emotions) {
-      array.add(emotion.path);
+      JsonDocument emotionInfo;
+      emotionInfo["name"] = emotion.name;
+      emotionInfo["path"] = emotion.path;
+      array.add(emotionInfo);
     }
 
     String json;

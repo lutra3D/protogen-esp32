@@ -53,6 +53,7 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
     if (characteristicValue.toInt() > 0 && characteristicValue.toInt() <= emotionCount)
     { // legacy remote reasons
         auto newEmotion = emotions[characteristicValue.toInt() - 1];
+        Serial.println("[I] Setting emotion" + newEmotion.path);
         emotionState_.setCurrentEmotion(newEmotion.path);
         return;
     }
@@ -62,6 +63,7 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
         auto emotion = emotions[i];
         if (characteristicValue == emotion.name)
         {
+            Serial.println("[I] Setting emotion" + emotion.path);
             emotionState_.setCurrentEmotion(emotion.path);
         }
     }

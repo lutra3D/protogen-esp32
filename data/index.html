@@ -498,11 +498,11 @@
         }
 
         var fragment = document.createDocumentFragment();
-        list.forEach(function (name) {
+        list.forEach(function (emotion) {
           var button = document.createElement("button");
           button.type = "button";
-          button.textContent = name;
-          button.setAttribute("data-emotion", name);
+          button.textContent = emotion.name;
+          button.setAttribute("data-emotion", emotion.path);
           button.setAttribute("aria-pressed", "false");
           fragment.appendChild(button);
         });
@@ -516,6 +516,11 @@
           method: "PUT",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: body
+        }).then(function (text) {
+          setText(emotionStatus, text);
+          refreshEmotion();
+        }).catch(function (error) {
+          setText(emotionStatus, "Error: " + error.message);
         });
       }
 
@@ -646,19 +651,19 @@
         }
 
         var fragment = document.createDocumentFragment();
-        files.forEach(function (name) {
+        files.forEach(function (emotion) {
           var item = document.createElement("div");
           item.className = "file-item";
 
           var label = document.createElement("span");
           label.className = "file-name";
-          label.textContent = name;
+          label.textContent = emotion.path;
 
           var button = document.createElement("button");
           button.type = "button";
           button.className = "icon-button delete-button";
-          button.setAttribute("data-file-delete", name);
-          button.setAttribute("aria-label", "Delete " + name);
+          button.setAttribute("data-file-delete", emotion.path);
+          button.setAttribute("aria-label", "Delete " + emotion.path);
           button.title = "Delete";
           button.textContent = "🗑";
 
