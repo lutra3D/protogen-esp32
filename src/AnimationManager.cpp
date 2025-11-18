@@ -68,11 +68,24 @@ void AnimationManager::playEmotion(const String &emotionPath)
     return;
   }
 
-  if (gif_.open(emotionPath.c_str(), fileOpenWrapper, fileCloseWrapper, fileReadWrapper, fileSeekWrapper, GIFDrawWrapper))
+  if (!SPIFFS.exists(emotionPath))
   {
-    gif_.playFrame(true, nullptr);
-    gif_.close();
+    Serial.printf("[E] Emotion file missing: %s\n", emotionPath.c_str());
+    return;
   }
+
+  if (!gif_.open(emotionPath.c_str(), fileOpenWrapper, fileCloseWrapper, fileReadWrapper, fileSeekWrapper, GIFDrawWrapper))
+  {
+    Serial.printf("[E] Failed to open GIF: %s\n", emotionPath.c_str());
+    return;
+  }
+
+  while (gif_.playFrame(true, nullptr))
+  {
+    delay(0); // Allow background tasks while frames are rendered
+  }
+
+  gif_.close();
 }
 
 std::vector<AnimationInfo> AnimationManager::getEmotions()
