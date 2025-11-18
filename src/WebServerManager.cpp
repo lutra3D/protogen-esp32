@@ -137,28 +137,51 @@ void WebServerManager::registerRoutes() {
   });
 
   server_.on("/ears", HTTP_GET, [this](AsyncWebServerRequest *request) {
-    request->send(200, "text/plain", earController_.getColorHexString()+ F(" ") + earController_.getBrightness());
+    JsonDocument doc;
+    JsonObject obj = doc.to<JsonObject>();
+    earController_.getEar().serialize(obj);
+
+    String json;
+    serializeJson(doc, json);
+    request->send(200, "application/json", json);
   });
 
   server_.on("/ears", HTTP_PUT, [this](AsyncWebServerRequest *request) {
+    bool updated = false;
+
+    Ear &ear = earController_.getEar();
+
     if (request->hasParam("color", true)) {
       String color = request->getParam("color", true)->value();
-      int r = 0, g = 0, b = 0;
-      int itemsFound = sscanf(color.c_str(), "#%02x%02x%02x", &r, &g, &b);
-      if (itemsFound != 3) {
+      if (!ear.setColorFromHex(color)) {
         request->send(400, "text/plain", F("Could not set color use #FFFFFF format."));
         return;
       }
-      earController_.setColor(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b));
+      updated = true;
     }
-    if (request->hasParam("brightness", true)) {
+
+    if (request->hasParam("brightnessPercent", true)) {
+      const float percent = request->getParam("brightnessPercent", true)->value().toFloat();
+      if (!ear.setBrightnessPercentChecked(percent)) {
+        request->send(400, "text/plain", F("Could not set brightness use 0-100 percent."));
+        return;
+      }
+      updated = true;
+    } else if (request->hasParam("brightness", true)) {
       int brightness = request->getParam("brightness", true)->value().toInt();
       if (brightness >= 256 || brightness < 0) {
         request->send(400, "text/plain", F("Could not set brightness use 0-255 value."));
         return;
       }
-      earController_.setBrightness(static_cast<uint8_t>(brightness));
+      ear.setBrightness(static_cast<uint8_t>(brightness));
+      updated = true;
     }
+
+    if (!updated) {
+      request->send(400, "text/plain", F("No valid parameters detected!"));
+      return;
+    }
+
     request->send(200, "text/plain", F("Color/brightness set."));
   });
 

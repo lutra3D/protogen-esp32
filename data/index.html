@@ -299,6 +299,17 @@
     <h1>Protogen Web Control</h1>
 
     <section>
+      <h2>Emotion</h2>
+      <div class="display-row">
+        <div class="value-display">Current: <span id="emotionCurrent" class="value">--</span></div>
+        <button id="emotionRefresh" class="icon-button" type="button" aria-label="Refresh emotion"
+          title="Refresh">↻</button>
+      </div>
+      <div id="emotionButtons" class="row emotion-buttons" aria-live="polite"></div>
+      <div id="emotionStatus" class="status"></div>
+    </section>
+
+    <section>
       <h2>Animation Files</h2>
       <form id="uploadForm">
         <div class="display-row">
@@ -313,24 +324,13 @@
           </label>
           <input id="fileName" type="text" placeholder="example.gif" required>
         </div>
-      <div class="row">
-        <button type="submit">Upload</button>
-      </div>
+        <div class="row">
+          <button type="submit">Upload</button>
+        </div>
       </form>
       <div id="uploadStatus" class="status"></div>
       <div id="filesStatus" class="status"></div>
       <div id="fileList" class="file-list" aria-live="polite"></div>
-    </section>
-
-    <section>
-      <h2>Emotion</h2>
-      <div class="display-row">
-        <div class="value-display">Current: <span id="emotionCurrent" class="value">--</span></div>
-        <button id="emotionRefresh" class="icon-button" type="button" aria-label="Refresh emotion"
-          title="Refresh">↻</button>
-      </div>
-      <div id="emotionButtons" class="row emotion-buttons" aria-live="polite"></div>
-      <div id="emotionStatus" class="status"></div>
     </section>
 
     <section>
@@ -353,15 +353,15 @@
       <h2>Ears</h2>
       <div class="display-row">
         <div class="value-display">Color: <span id="earColorText" class="value">--</span> | Brightness: <span
-            id="earBrightnessText" class="value">--</span></div>
+            id="earBrightnessText" class="value">--%</span></div>
         <button id="earRefresh" class="icon-button" type="button" aria-label="Refresh ears" title="Refresh">↻</button>
       </div>
       <div class="row">
         <label for="earColor">Color</label>
         <input id="earColor" type="color" value="#ffffff">
         <label for="earBrightness">Brightness</label>
-        <input id="earBrightness" type="range" min="0" max="255" value="128">
-        <span id="earBrightnessValue" class="value">128</span>
+        <input id="earBrightness" type="range" min="0" max="100" value="50">
+        <span id="earBrightnessValue" class="value">50%</span>
         <button id="earApply" type="button">Apply</button>
       </div>
       <div id="earStatus" class="status"></div>
@@ -431,7 +431,7 @@
       });
 
       earBrightness.addEventListener("input", function () {
-        setText(earBrightnessValue, earBrightness.value);
+        setText(earBrightnessValue, earBrightness.value + "%");
       });
 
       function fetchText(url, options) {
@@ -557,18 +557,22 @@
       }
 
       function refreshEars() {
-        fetchText("/ears").then(function (response) {
-          var parts = response.trim().split(/\s+/);
-          var color = (parts[0] || "#ffffff").toLowerCase();
-          var brightness = parseInt(parts[1] || "0", 10);
+        fetchJson("/ears").then(function (data) {
+          var payload = (data && typeof data === "object" && !Array.isArray(data)) ? data : {};
+          var color = typeof payload.color === "string" ? payload.color.toLowerCase() : "#ffffff";
+          var brightnessPercent = Number(payload.brightnessPercent);
           setText(earColorText, color);
-          setText(earBrightnessText, isFinite(brightness) ? brightness : "--");
           if (/^#[0-9a-f]{6}$/i.test(color)) {
             earColor.value = color;
           }
-          if (isFinite(brightness)) {
-            earBrightness.value = brightness;
-            setText(earBrightnessValue, brightness);
+          if (isFinite(brightnessPercent)) {
+            var rounded = Math.round(brightnessPercent);
+            setText(earBrightnessText, rounded + "%");
+            earBrightness.value = rounded;
+            setText(earBrightnessValue, rounded + "%");
+          } else {
+            setText(earBrightnessText, "--%");
+            setText(earBrightnessValue, "--%");
           }
           setText(earStatus, "");
         }).catch(function (error) {
@@ -579,7 +583,7 @@
       function applyEars() {
         var body = new URLSearchParams({
           color: earColor.value,
-          brightness: earBrightness.value
+          brightnessPercent: earBrightness.value
         });
         fetchText("/ears", {
           method: "PUT",
