@@ -60,15 +60,11 @@ public:
   uint8_t getBrightness() const;
 
   void setColor(uint8_t red, uint8_t green, uint8_t blue);
-  uint8_t getRed() const;
-  uint8_t getGreen() const;
-  uint8_t getBlue() const;
 
   String getColorHexString() const;
   float getBrightnessPercent() const;
 
   Ear &getEar();
-  const Ear &getEar() const;
 
   void update();
 

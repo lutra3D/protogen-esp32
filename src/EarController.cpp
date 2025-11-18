@@ -148,18 +148,6 @@ void EarController::setColor(uint8_t red, uint8_t green, uint8_t blue) {
   ear_.setColor(red, green, blue);
 }
 
-uint8_t EarController::getRed() const {
-  return ear_.getColor().red;
-}
-
-uint8_t EarController::getGreen() const {
-  return ear_.getColor().green;
-}
-
-uint8_t EarController::getBlue() const {
-  return ear_.getColor().blue;
-}
-
 String EarController::getColorHexString() const {
   return ear_.getColorHexString();
 }
@@ -169,10 +157,6 @@ float EarController::getBrightnessPercent() const {
 }
 
 Ear &EarController::getEar() {
-  return ear_;
-}
-
-const Ear &EarController::getEar() const {
   return ear_;
 }
 
