@@ -31,7 +31,7 @@ constexpr uint16_t LEDS_PER_DISPLAY = 32;
 constexpr uint8_t DATA_PIN_EARS = 33;
 
 constexpr uint8_t PIN_SDA = 21;
-constexpr uint8_t PIN_SCL = 2;
+constexpr uint8_t PIN_SCL = 22;
 
 EmotionState emotionState;
 FanController fanController(FAN_PWM_PIN, FAN_PWM_CHANNEL, FAN_PWM_FREQUENCY, FAN_PWM_RESOLUTION);

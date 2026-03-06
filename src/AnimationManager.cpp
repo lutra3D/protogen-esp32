@@ -79,8 +79,11 @@ void AnimationManager::playEmotion(const String &emotionPath)
     }
   }
 
-  if (!gif_.playFrame(true, nullptr))
+  int result = gif_.playFrame(true, nullptr);
+
+  if (result < 0)
   {
+    Serial.printf("[E] GIF play error: %i\n", gif_.getLastError());
     if (!restartEmotion())
     {
       closeEmotion();
@@ -121,11 +124,13 @@ std::vector<AnimationInfo> AnimationManager::getEmotions()
   return animations;
 }
 
-void AnimationManager::printEmotions() {
-    auto animations = getEmotions();
-    for (const auto &anim : animations) {
-        Serial.printf("Animation: %s, Path: %s\n", anim.name.c_str(), anim.path.c_str());
-    }
+void AnimationManager::printEmotions()
+{
+  auto animations = getEmotions();
+  for (const auto &anim : animations)
+  {
+    Serial.printf("Animation: %s, Path: %s\n", anim.name.c_str(), anim.path.c_str());
+  }
 }
 
 void AnimationManager::GIFDrawWrapper(GIFDRAW *pDraw)
@@ -253,6 +258,7 @@ void *AnimationManager::fileOpen(const char *filename, int32_t *pFileSize)
     return nullptr;
   }
   *pFileSize = gifFile_.size();
+  Serial.printf("[I] Opened file: %s %d B\n", filename, gifFile_.size());
   return &gifFile_;
 }
 
@@ -267,31 +273,64 @@ void AnimationManager::fileClose(void *pHandle)
 
 int32_t AnimationManager::fileRead(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
 {
-  (void)pHandle;
-  if (!gifFile_)
+  if (!pHandle || !pHandle->fHandle)
   {
     return 0;
   }
-  return gifFile_.read(pBuf, static_cast<size_t>(iLen));
+
+  File *file = static_cast<File *>(pHandle->fHandle);
+  if (!(*file))
+  {
+    return 0;
+  }
+
+  int32_t bytesToRead = iLen;
+  const int32_t remaining = pHandle->iSize - pHandle->iPos;
+  if (remaining < bytesToRead)
+  {
+    bytesToRead = remaining;
+  }
+
+  if (bytesToRead <= 0)
+  {
+    return 0;
+  }
+
+  const int32_t bytesRead = file->read(pBuf, static_cast<size_t>(bytesToRead));
+  pHandle->iPos = static_cast<int32_t>(file->position());
+  return bytesRead;
 }
 
 int32_t AnimationManager::fileSeek(GIFFILE *pHandle, int32_t iPosition)
 {
-  (void)pHandle;
-  if (!gifFile_)
+  if (!pHandle || !pHandle->fHandle)
   {
     return -1;
   }
+
+  File *file = static_cast<File *>(pHandle->fHandle);
+  if (!(*file))
+  {
+    return -1;
+  }
+
   if (iPosition < 0)
   {
     iPosition = 0;
   }
-  if (iPosition > static_cast<int32_t>(gifFile_.size()))
+
+  if (iPosition > pHandle->iSize)
   {
-    iPosition = gifFile_.size();
+    iPosition = pHandle->iSize;
   }
-  gifFile_.seek(iPosition, SeekSet);
-  return iPosition;
+
+  if (!file->seek(iPosition, SeekSet))
+  {
+    return -1;
+  }
+
+  pHandle->iPos = static_cast<int32_t>(file->position());
+  return pHandle->iPos;
 }
 
 bool AnimationManager::openEmotion(const String &emotionPath, bool logTransition)
