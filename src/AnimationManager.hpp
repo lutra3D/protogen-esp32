@@ -38,6 +38,9 @@ private:
   void fileClose(void *pHandle);
   int32_t fileRead(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen);
   int32_t fileSeek(GIFFILE *pHandle, int32_t iPosition);
+  bool openEmotion(const String &emotionPath, bool logTransition = true);
+  void closeEmotion();
+  bool restartEmotion();
   void initializeColors();
 
   int panelResX_;
@@ -47,6 +50,8 @@ private:
   MatrixPanel_I2S_DMA *display_;
   AnimatedGIF gif_;
   File gifFile_;
+  String activeEmotionPath_;
+  bool isEmotionPlaying_;
 
   uint16_t colorRed_;
   uint16_t colorGreen_;

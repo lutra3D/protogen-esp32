@@ -8,6 +8,8 @@ AnimationManager::AnimationManager(int panelResX, int panelResY, int panelChainL
       panelChainLength_(panelChainLength),
       display_(nullptr),
       gifFile_(),
+      activeEmotionPath_(),
+      isEmotionPlaying_(false),
       colorRed_(0),
       colorGreen_(0),
       colorBlue_(0),
@@ -22,6 +24,7 @@ AnimationManager::AnimationManager(int panelResX, int panelResY, int panelChainL
 
 AnimationManager::~AnimationManager()
 {
+  closeEmotion();
   if (display_ != nullptr)
   {
     delete display_;
@@ -68,10 +71,27 @@ void AnimationManager::playEmotion(const String &emotionPath)
     return;
   }
 
-  if (gif_.open(emotionPath.c_str(), fileOpenWrapper, fileCloseWrapper, fileReadWrapper, fileSeekWrapper, GIFDrawWrapper))
+  if (!isEmotionPlaying_ || emotionPath != activeEmotionPath_)
   {
+    if (!openEmotion(emotionPath))
+    {
+      return;
+    }
+  }
+
+  int result = gif_.playFrame(true, nullptr);
+
+  if (result < 0)
+  {
+    Serial.printf("[E] GIF play error: %i\n", gif_.getLastError());
+    if (!restartEmotion())
+    {
+      closeEmotion();
+      Serial.printf("[E] Failed to continue GIF %s\n", emotionPath.c_str());
+      return;
+    }
+
     gif_.playFrame(true, nullptr);
-    gif_.close();
   }
 }
 
@@ -104,11 +124,13 @@ std::vector<AnimationInfo> AnimationManager::getEmotions()
   return animations;
 }
 
-void AnimationManager::printEmotions() {
-    auto animations = getEmotions();
-    for (const auto &anim : animations) {
-        Serial.printf("Animation: %s, Path: %s\n", anim.name.c_str(), anim.path.c_str());
-    }
+void AnimationManager::printEmotions()
+{
+  auto animations = getEmotions();
+  for (const auto &anim : animations)
+  {
+    Serial.printf("Animation: %s, Path: %s\n", anim.name.c_str(), anim.path.c_str());
+  }
 }
 
 void AnimationManager::GIFDrawWrapper(GIFDRAW *pDraw)
@@ -236,6 +258,7 @@ void *AnimationManager::fileOpen(const char *filename, int32_t *pFileSize)
     return nullptr;
   }
   *pFileSize = gifFile_.size();
+  Serial.printf("[I] Opened file: %s %d B\n", filename, gifFile_.size());
   return &gifFile_;
 }
 
@@ -250,31 +273,117 @@ void AnimationManager::fileClose(void *pHandle)
 
 int32_t AnimationManager::fileRead(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
 {
-  (void)pHandle;
-  if (!gifFile_)
+  if (!pHandle || !pHandle->fHandle)
   {
     return 0;
   }
-  return gifFile_.read(pBuf, static_cast<size_t>(iLen));
+
+  File *file = static_cast<File *>(pHandle->fHandle);
+  if (!(*file))
+  {
+    return 0;
+  }
+
+  int32_t bytesToRead = iLen;
+  const int32_t remaining = pHandle->iSize - pHandle->iPos;
+  if (remaining < bytesToRead)
+  {
+    bytesToRead = remaining;
+  }
+
+  if (bytesToRead <= 0)
+  {
+    return 0;
+  }
+
+  const int32_t bytesRead = file->read(pBuf, static_cast<size_t>(bytesToRead));
+  pHandle->iPos = static_cast<int32_t>(file->position());
+  return bytesRead;
 }
 
 int32_t AnimationManager::fileSeek(GIFFILE *pHandle, int32_t iPosition)
 {
-  (void)pHandle;
-  if (!gifFile_)
+  if (!pHandle || !pHandle->fHandle)
   {
     return -1;
   }
+
+  File *file = static_cast<File *>(pHandle->fHandle);
+  if (!(*file))
+  {
+    return -1;
+  }
+
   if (iPosition < 0)
   {
     iPosition = 0;
   }
-  if (iPosition > static_cast<int32_t>(gifFile_.size()))
+
+  if (iPosition > pHandle->iSize)
   {
-    iPosition = gifFile_.size();
+    iPosition = pHandle->iSize;
   }
-  gifFile_.seek(iPosition, SeekSet);
-  return iPosition;
+
+  if (!file->seek(iPosition, SeekSet))
+  {
+    return -1;
+  }
+
+  pHandle->iPos = static_cast<int32_t>(file->position());
+  return pHandle->iPos;
+}
+
+bool AnimationManager::openEmotion(const String &emotionPath, bool logTransition)
+{
+  if (emotionPath.isEmpty())
+  {
+    Serial.println(F("[E] Emotion path is empty"));
+    closeEmotion();
+    return false;
+  }
+
+  closeEmotion();
+
+  if (!gif_.open(emotionPath.c_str(), fileOpenWrapper, fileCloseWrapper, fileReadWrapper, fileSeekWrapper, GIFDrawWrapper))
+  {
+    Serial.printf("[E] Failed to open GIF %s\n", emotionPath.c_str());
+    return false;
+  }
+
+  activeEmotionPath_ = emotionPath;
+  isEmotionPlaying_ = true;
+  if (logTransition)
+  {
+    Serial.printf("[I] Playing GIF %s\n", emotionPath.c_str());
+  }
+  return true;
+}
+
+void AnimationManager::closeEmotion()
+{
+  if (isEmotionPlaying_)
+  {
+    gif_.close();
+  }
+
+  if (gifFile_)
+  {
+    gifFile_.close();
+  }
+
+  isEmotionPlaying_ = false;
+  activeEmotionPath_ = "";
+}
+
+bool AnimationManager::restartEmotion()
+{
+  if (activeEmotionPath_.isEmpty())
+  {
+    return false;
+  }
+  const String path = activeEmotionPath_;
+  closeEmotion();
+  return openEmotion(path, false);
 }
 
 void AnimationManager::initializeColors()
