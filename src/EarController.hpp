@@ -17,6 +17,19 @@ public:
     bool setFromHex(const String &hex);
   };
 
+  struct Gradient {
+    Color from;
+    Color to;
+    float directionX = 1.0f;
+    float directionY = 0.0f;
+    float midpoint = 0.5f;
+  };
+
+  enum class ColorMode {
+    Solid,
+    Gradient,
+  };
+
   class Brightness {
   public:
     explicit Brightness(uint8_t value = 80);
@@ -37,6 +50,15 @@ public:
   const Color &getColor() const;
   String getColorHexString() const;
 
+  bool setGradientFromHex(const String &fromHex, const String &toHex,
+                          float directionX, float directionY,
+                          float midpoint);
+  void setGradient(const Gradient &gradient);
+  const Gradient &getGradient() const;
+
+  void setColorMode(ColorMode mode);
+  ColorMode getColorMode() const;
+
   void setBrightness(uint8_t brightness);
   void setBrightnessPercent(float percent);
   bool setBrightnessPercentChecked(float percent);
@@ -47,6 +69,8 @@ public:
 
 private:
   Color color_;
+  Gradient gradient_;
+  ColorMode colorMode_;
   Brightness brightness_;
 };
 

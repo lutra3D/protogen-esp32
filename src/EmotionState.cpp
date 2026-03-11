@@ -1,13 +1,37 @@
 #include "EmotionState.hpp"
 
+namespace {
+EmotionState::EarColor MakeSolidEarColor(const String &hex)
+{
+  EmotionState::EarColor earColor;
+  earColor.type = EmotionState::EarColor::Type::Solid;
+  earColor.solidColor = hex;
+  return earColor;
+}
+} // namespace
+
 EmotionState::EmotionState()
     : currentEmotion_("/anims/neutral.gif"),
       previousEmotion_("/anims/neutral.gif"),
       tiltUpEmotion_("/anims/happy.gif"),
-      tiltSideEmotion_("/anims/confused.gif") {}
+      tiltSideEmotion_("/anims/confused.gif")
+{
+  seedEmotionDefinitions({
+      {"neutral", "/anims/neutral.gif", MakeSolidEarColor("#ffffff")},
+      {"happy", "/anims/happy.gif", MakeSolidEarColor("#fff36b")},
+      {"sad", "/anims/sad.gif", MakeSolidEarColor("#6bb4ff")},
+      {"evil", "/anims/evil.gif", MakeSolidEarColor("#ff6767")},
+      {"blush", "/anims/blush.gif", MakeSolidEarColor("#ff99b8")},
+  });
+}
 
 const String EmotionState::getDisplayEmotion() const
 {
+  const EmotionDefinition *emotion = getCurrentEmotionDefinition();
+  if (emotion != nullptr && emotion->name.length())
+  {
+    return emotion->name;
+  }
   return FileHelper::GetNameOnly(currentEmotion_);
 }
 
@@ -24,6 +48,21 @@ const String &EmotionState::getPreviousEmotion() const
 void EmotionState::setCurrentEmotion(const String &emotionName)
 {
   previousEmotion_ = currentEmotion_;
+
+  const EmotionDefinition *byName = getEmotionDefinitionByName(emotionName);
+  if (byName != nullptr)
+  {
+    currentEmotion_ = byName->path;
+    return;
+  }
+
+  const EmotionDefinition *byPath = getEmotionDefinitionByPath(emotionName);
+  if (byPath != nullptr)
+  {
+    currentEmotion_ = byPath->path;
+    return;
+  }
+
   currentEmotion_ = emotionName;
 }
 
@@ -45,4 +84,114 @@ void EmotionState::setTiltUpEmotion(const String &emotionName)
 void EmotionState::setTiltSideEmotion(const String &emotionName)
 {
   tiltSideEmotion_ = emotionName;
+}
+
+const std::vector<EmotionState::EmotionDefinition> &EmotionState::getEmotionDefinitions() const
+{
+  return emotionDefinitions_;
+}
+
+const EmotionState::EmotionDefinition *EmotionState::getEmotionDefinitionByName(const String &name) const
+{
+  const int index = findEmotionIndexByName(name);
+  if (index < 0)
+  {
+    return nullptr;
+  }
+  return &emotionDefinitions_[static_cast<size_t>(index)];
+}
+
+const EmotionState::EmotionDefinition *EmotionState::getEmotionDefinitionByPath(const String &path) const
+{
+  const int index = findEmotionIndexByPath(path);
+  if (index < 0)
+  {
+    return nullptr;
+  }
+  return &emotionDefinitions_[static_cast<size_t>(index)];
+}
+
+const EmotionState::EmotionDefinition *EmotionState::getCurrentEmotionDefinition() const
+{
+  return getEmotionDefinitionByPath(currentEmotion_);
+}
+
+bool EmotionState::upsertEmotionDefinition(const EmotionDefinition &emotion, bool overwriteExisting)
+{
+  const int nameIndex = findEmotionIndexByName(emotion.name);
+  if (nameIndex >= 0)
+  {
+    if (!overwriteExisting)
+    {
+      return false;
+    }
+    emotionDefinitions_[static_cast<size_t>(nameIndex)] = emotion;
+    return true;
+  }
+
+  const int pathIndex = findEmotionIndexByPath(emotion.path);
+  if (pathIndex >= 0)
+  {
+    if (!overwriteExisting)
+    {
+      return false;
+    }
+    emotionDefinitions_[static_cast<size_t>(pathIndex)] = emotion;
+    return true;
+  }
+
+  emotionDefinitions_.push_back(emotion);
+  return true;
+}
+
+bool EmotionState::removeEmotionDefinitionByName(const String &name)
+{
+  const int index = findEmotionIndexByName(name);
+  if (index < 0)
+  {
+    return false;
+  }
+
+  const String removedPath = emotionDefinitions_[static_cast<size_t>(index)].path;
+  emotionDefinitions_.erase(emotionDefinitions_.begin() + index);
+
+  if (currentEmotion_ == removedPath)
+  {
+    currentEmotion_ = previousEmotion_;
+  }
+
+  return true;
+}
+
+void EmotionState::seedEmotionDefinitions(const std::vector<EmotionDefinition> &emotions)
+{
+  emotionDefinitions_.clear();
+  for (const auto &emotion : emotions)
+  {
+    emotionDefinitions_.push_back(emotion);
+  }
+}
+
+int EmotionState::findEmotionIndexByName(const String &name) const
+{
+  for (size_t index = 0; index < emotionDefinitions_.size(); ++index)
+  {
+    if (emotionDefinitions_[index].name == name)
+    {
+      return static_cast<int>(index);
+    }
+  }
+  return -1;
+}
+
+int EmotionState::findEmotionIndexByPath(const String &path) const
+{
+  for (size_t index = 0; index < emotionDefinitions_.size(); ++index)
+  {
+    if (emotionDefinitions_[index].path == path)
+    {
+      return static_cast<int>(index);
+    }
+  }
+  return -1;
 }
