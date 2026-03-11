@@ -377,15 +377,6 @@
       <div id="heapStatus" class="status"></div>
     </section>
 
-    <section>
-      <h2>Gyroscope</h2>
-      <div class="display-row">
-        <div class="value-display">Value: <span id="gyroValue" class="value">--</span></div>
-        <button id="gyroRefresh" class="icon-button" type="button" aria-label="Refresh gyroscope"
-          title="Refresh">↻</button>
-      </div>
-      <div id="gyroStatus" class="status"></div>
-    </section>
     <p>Lutra 3D, 2025</p>
   </main>
 
@@ -417,8 +408,6 @@
       var earStatus = $("earStatus");
       var heapValue = $("heapValue");
       var heapStatus = $("heapStatus");
-      var gyroValue = $("gyroValue");
-      var gyroStatus = $("gyroStatus");
 
       fileInput.addEventListener("change", function () {
         if (fileInput.files.length && !fileNameInput.value) {
@@ -740,14 +729,12 @@
       $("earRefresh").addEventListener("click", refreshEars);
       $("earApply").addEventListener("click", applyEars);
       $("heapRefresh").addEventListener("click", refreshHeap);
-      $("gyroRefresh").addEventListener("click", refreshGyro);
 
       refreshFiles();
       refreshEmotion();
       refreshFan();
       refreshEars();
       refreshHeap();
-      refreshGyro();
     })();
   </script>
 </body>
