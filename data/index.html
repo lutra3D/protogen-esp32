@@ -403,7 +403,7 @@
       var emotionCurrent = $("emotionCurrent");
       var emotionStatus = $("emotionStatus");
       var emotionButtons = $("emotionButtons");
-      var currentEmotionName = "";
+      var currentEmotionPath = "";
       var fanDuty = $("fanDuty");
       var fanPercent = $("fanPercent");
       var fanSlider = $("fanSlider");
@@ -469,15 +469,17 @@
 
       function refreshEmotion(options) {
         var preserveStatus = options && options.preserveStatus;
-        return fetchText("/emotion").then(function (text) {
-          var value = (text || "").trim();
-          currentEmotionName = value;
-          setText(emotionCurrent, value || "(empty)");
-          highlightEmotion(currentEmotionName);
+        return fetchJson("/emotion").then(function (data) {
+          var payload = (data && typeof data === "object") ? data : {};
+          var name = (payload.name || "").trim();
+          var path = (payload.path || "").trim();
+          currentEmotionPath = path;
+          setText(emotionCurrent, name || path || "(empty)");
+          highlightEmotion(currentEmotionPath);
           if (!preserveStatus) {
             setText(emotionStatus, "");
           }
-          return value;
+          return payload;
         }).catch(function (error) {
           if (!preserveStatus) {
             setText(emotionStatus, "Error: " + error.message);
@@ -507,7 +509,7 @@
           fragment.appendChild(button);
         });
         emotionButtons.appendChild(fragment);
-        highlightEmotion(currentEmotionName);
+        highlightEmotion(currentEmotionPath);
       }
 
       function setEmotion(name) {
@@ -727,9 +729,9 @@
         if (!name) { return; }
         setText(emotionStatus, "Updating emotion...");
         setEmotion(name).then(function (text) {
-          currentEmotionName = name;
+          currentEmotionPath = name;
           setText(emotionCurrent, name);
-          highlightEmotion(currentEmotionName);
+          highlightEmotion(currentEmotionPath);
           setText(emotionStatus, text);
         }).catch(function (error) {
           setText(emotionStatus, "Error: " + error.message);
