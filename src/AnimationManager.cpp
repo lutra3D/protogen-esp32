@@ -95,9 +95,9 @@ void AnimationManager::playEmotion(const String &emotionPath)
   }
 }
 
-std::vector<AnimationInfo> AnimationManager::getEmotions()
+std::vector<AnimationFile> AnimationManager::getEmotions()
 {
-  std::vector<AnimationInfo> animations;
+  std::vector<AnimationFile> animations;
 
   File animationsDir = SPIFFS.open("/anims");
   if (!animationsDir || !animationsDir.isDirectory())
@@ -109,7 +109,7 @@ std::vector<AnimationInfo> AnimationManager::getEmotions()
   File file = animationsDir.openNextFile();
   while (file)
   {
-    AnimationInfo info;
+    AnimationFile info;
     info.path = file.path();
     info.name = FileHelper::GetNameOnly(info.path);
 

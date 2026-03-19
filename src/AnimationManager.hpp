@@ -8,11 +8,7 @@
 #include <Arduino.h>
 
 #include "float_helper.hpp"
-
-struct AnimationInfo {
-    String name; 
-    String path;
-};
+#include "Model/AnimationFile.hpp"
 
 class AnimationManager {
 public:
@@ -21,7 +17,7 @@ public:
 
   bool begin();
   void playEmotion(const String &emotionPath);
-  std::vector<AnimationInfo> getEmotions();
+  std::vector<AnimationFile> getEmotions();
   void printEmotions();
 
 private:

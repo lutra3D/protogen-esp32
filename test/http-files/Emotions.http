@@ -1,0 +1,25 @@
+### Get All Emotions
+
+GET http://192.168.4.1/emotions
+
+### Get current emotion
+
+GET http://192.168.4.1/emotion
+
+### Update existing emotion
+
+PUT http://192.168.4.1/emotion
+Content-Type: application/json
+
+{
+    "date": "2023-05-10",
+    "temperatureC": 30,
+    "summary": "Warm"
+}
+
+### Change current emotion
+
+PUT http://192.168.4.1/emotion
+Content-Type: application/x-www-form-urlencoded
+
+name=Blush
