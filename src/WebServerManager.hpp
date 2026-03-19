@@ -3,16 +3,25 @@
 
 #include <ESPAsyncWebServer.h>
 #include <ElegantOTA.h>
-#include <SPIFFS.h>
 #include <WiFi.h>
 
 #include <Arduino.h>
 
+#include "AnimationManager.hpp"
 #include "EarController.hpp"
 #include "EmotionState.hpp"
 #include "FanController.hpp"
 #include "TiltController.hpp"
-#include "AnimationManager.hpp"
+#include "WebEndpoints/Devices/EarsEndpoint.hpp"
+#include "WebEndpoints/Devices/FanEndpoint.hpp"
+#include "WebEndpoints/Emotions/EmotionEndpoint.hpp"
+#include "WebEndpoints/Emotions/EmotionsEndpoint.hpp"
+#include "WebEndpoints/Files/FileEndpoint.hpp"
+#include "WebEndpoints/Files/FilesEndpoint.hpp"
+#include "WebEndpoints/System/GyroEndpoint.hpp"
+#include "WebEndpoints/System/HeapEndpoint.hpp"
+#include "WebEndpoints/System/NotFoundEndpoint.hpp"
+#include "WebEndpoints/System/StaticContentEndpoint.hpp"
 
 class WebServerManager {
 public:
@@ -26,23 +35,17 @@ public:
 private:
   void registerRoutes();
 
-  struct UploadContext {
-    String targetPath;
-    String tempPath;
-    bool error = false;
-    String message;
-  };
-
-  void handleFileUpload(AsyncWebServerRequest *request, String filename,
-                        size_t index, uint8_t *data, size_t len,
-                        bool final);
-
   AsyncWebServer server_;
-  EmotionState &emotionState_;
-  FanController &fanController_;
-  EarController &earController_;
-  TiltController &tiltController_;
-  AnimationManager &animationManager_;
+  StaticContentEndpoint staticContentEndpoint_;
+  FileEndpoint fileEndpoint_;
+  FilesEndpoint filesEndpoint_;
+  EmotionsEndpoint emotionsEndpoint_;
+  EmotionEndpoint emotionEndpoint_;
+  HeapEndpoint heapEndpoint_;
+  FanEndpoint fanEndpoint_;
+  EarsEndpoint earsEndpoint_;
+  GyroEndpoint gyroEndpoint_;
+  NotFoundEndpoint notFoundEndpoint_;
 };
 
 #endif // WEB_SERVER_MANAGER_HPP
