@@ -1,15 +1,5 @@
 #include "EmotionState.hpp"
 
-namespace {
-EmotionState::EarColor MakeSolidEarColor(const String &hex)
-{
-  EmotionState::EarColor earColor;
-  earColor.type = EmotionState::EarColor::Type::Solid;
-  earColor.solidColor = hex;
-  return earColor;
-}
-} // namespace
-
 EmotionState::EmotionState()
     : currentEmotion_("/anims/neutral.gif"),
       previousEmotion_("/anims/neutral.gif"),
@@ -17,11 +7,11 @@ EmotionState::EmotionState()
       tiltSideEmotion_("/anims/confused.gif")
 {
   seedEmotionDefinitions({
-      {"neutral", "/anims/neutral.gif", MakeSolidEarColor("#ffffff")},
-      {"happy", "/anims/happy.gif", MakeSolidEarColor("#fff36b")},
-      {"sad", "/anims/sad.gif", MakeSolidEarColor("#6bb4ff")},
-      {"evil", "/anims/evil.gif", MakeSolidEarColor("#ff6767")},
-      {"blush", "/anims/blush.gif", MakeSolidEarColor("#ff99b8")},
+      EmotionDefinition("Neutral", "/anims/neutral.gif", Color(255, 255, 255), Gradient(), ColorMode::Solid),
+      EmotionDefinition("Happy", "/anims/happy.gif", Color(255, 255, 0), Gradient(), ColorMode::Solid),
+      EmotionDefinition("Confused", "/anims/confused.gif", Color(255, 0, 255), Gradient(), ColorMode::Solid),
+      EmotionDefinition("Sad", "/anims/sad.gif", Color(0, 0, 255), Gradient(), ColorMode::Solid),
+      EmotionDefinition("Angry", "/anims/angry.gif", Color(255, 0, 0), Gradient(), ColorMode::Solid)
   });
 }
 
@@ -86,12 +76,12 @@ void EmotionState::setTiltSideEmotion(const String &emotionName)
   tiltSideEmotion_ = emotionName;
 }
 
-const std::vector<EmotionState::EmotionDefinition> &EmotionState::getEmotionDefinitions() const
+const std::vector<EmotionDefinition> &EmotionState::getEmotionDefinitions() const
 {
   return emotionDefinitions_;
 }
 
-const EmotionState::EmotionDefinition *EmotionState::getEmotionDefinitionByName(const String &name) const
+const EmotionDefinition *EmotionState::getEmotionDefinitionByName(const String &name) const
 {
   const int index = findEmotionIndexByName(name);
   if (index < 0)
@@ -101,7 +91,7 @@ const EmotionState::EmotionDefinition *EmotionState::getEmotionDefinitionByName(
   return &emotionDefinitions_[static_cast<size_t>(index)];
 }
 
-const EmotionState::EmotionDefinition *EmotionState::getEmotionDefinitionByPath(const String &path) const
+const EmotionDefinition *EmotionState::getEmotionDefinitionByPath(const String &path) const
 {
   const int index = findEmotionIndexByPath(path);
   if (index < 0)
@@ -111,7 +101,7 @@ const EmotionState::EmotionDefinition *EmotionState::getEmotionDefinitionByPath(
   return &emotionDefinitions_[static_cast<size_t>(index)];
 }
 
-const EmotionState::EmotionDefinition *EmotionState::getCurrentEmotionDefinition() const
+const EmotionDefinition *EmotionState::getCurrentEmotionDefinition() const
 {
   return getEmotionDefinitionByPath(currentEmotion_);
 }

@@ -6,34 +6,10 @@
 #include <vector>
 
 #include "float_helper.hpp"
+#include "Model/EmotionDefinition.hpp"
 
 class EmotionState {
 public:
-  struct EarGradient {
-    String fromColor = "#ffffff";
-    String toColor = "#ffffff";
-    float directionX = 1.0f;
-    float directionY = 0.0f;
-    float midpoint = 0.5f;
-  };
-
-  struct EarColor {
-    enum class Type {
-      Solid,
-      Gradient,
-    };
-
-    Type type = Type::Solid;
-    String solidColor = "#ffffff";
-    EarGradient gradient;
-  };
-
-  struct EmotionDefinition {
-    String name;
-    String path;
-    EarColor earColor;
-  };
-
   EmotionState();
 
   const String &getCurrentEmotion() const;

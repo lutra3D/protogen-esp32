@@ -4,143 +4,45 @@
 #include <FS.h>
 #include <vector>
 
-namespace {
-bool parseEmotionDefinitionJson(const String &jsonPayload,
-                                EmotionState::EmotionDefinition &emotion,
-                                String &error)
+namespace
 {
-  JsonDocument doc;
-  DeserializationError parseError = deserializeJson(doc, jsonPayload);
-  if (parseError)
+  bool parseEmotionDefinitionJson(const String &jsonPayload, EmotionDefinition &emotion, String &error)
   {
-    error = "Invalid JSON payload.";
-    return false;
-  }
-
-  JsonVariant root = doc.as<JsonVariant>();
-  if (!root.is<JsonObject>())
-  {
-    error = "Payload must be an object.";
-    return false;
-  }
-
-  emotion.name = root["name"] | "";
-  emotion.path = root["path"] | "";
-  if (emotion.name.isEmpty() || emotion.path.isEmpty())
-  {
-    error = "Emotion requires non-empty 'name' and 'path'.";
-    return false;
-  }
-
-  JsonVariant earColorJson = root["earColor"];
-  if (earColorJson.isNull() || !earColorJson.is<JsonObject>())
-  {
-    error = "Emotion requires 'earColor' object.";
-    return false;
-  }
-
-  const String type = earColorJson["type"] | "";
-  if (type == "solid")
-  {
-    const String color = earColorJson["color"] | "";
-    emotion.earColor.type = EmotionState::EarColor::Type::Solid;
-    emotion.earColor.solidColor = color;
-    if (color.length() != 7 || color.charAt(0) != '#')
+    JsonDocument doc;
+    DeserializationError parseError = deserializeJson(doc, jsonPayload);
+    if (parseError)
     {
-      error = "Solid earColor.color must be in #RRGGBB format.";
-      return false;
-    }
-  }
-  else if (type == "gradient")
-  {
-    JsonVariant gradientJson = earColorJson["gradient"];
-    if (gradientJson.isNull() || !gradientJson.is<JsonObject>())
-    {
-      error = "Gradient earColor requires gradient object.";
+      error = "Invalid JSON payload.";
       return false;
     }
 
-    const String from = gradientJson["from"] | "";
-    const String to = gradientJson["to"] | "";
-    if (from.length() != 7 || to.length() != 7 || from.charAt(0) != '#' || to.charAt(0) != '#')
+    JsonVariant root = doc.as<JsonVariant>();
+    if (!root.is<JsonObject>())
     {
-      error = "Gradient colors must be in #RRGGBB format.";
+      error = "Payload must be an object.";
       return false;
     }
 
-    emotion.earColor.type = EmotionState::EarColor::Type::Gradient;
-    emotion.earColor.gradient.fromColor = from;
-    emotion.earColor.gradient.toColor = to;
-    emotion.earColor.gradient.directionX = gradientJson["directionX"] | 1.0f;
-    emotion.earColor.gradient.directionY = gradientJson["directionY"] | 0.0f;
-    emotion.earColor.gradient.midpoint = gradientJson["midpoint"] | 0.5f;
-    if (emotion.earColor.gradient.midpoint < 0.0f || emotion.earColor.gradient.midpoint > 1.0f)
+    return emotion.deserialize(root.as<JsonObject>(), error);
+  }
+
+  void applyEmotionEarColor(EarController &earController, const EmotionDefinition *emotion)
+  {
+    if (emotion == nullptr)
     {
-      error = "Gradient midpoint must be within [0,1].";
-      return false;
+      return;
+    }
+
+    Ear &ear = earController.getEar();
+    if (emotion->earColorMode == ColorMode::Gradient)
+    {
+      ear.setGradient(emotion->earGradient);
+    }
+    else
+    {
+      ear.setColor(emotion->earColor);
     }
   }
-  else
-  {
-    error = "earColor.type must be either 'solid' or 'gradient'.";
-    return false;
-  }
-
-  return true;
-}
-
-void serializeEmotionDefinition(JsonArray array, const EmotionState::EmotionDefinition &emotion)
-{
-  JsonObject emotionObject = array.add<JsonObject>();
-  emotionObject["name"] = emotion.name;
-  emotionObject["path"] = emotion.path;
-
-  JsonObject earColor = emotionObject["earColor"].to<JsonObject>();
-  if (emotion.earColor.type == EmotionState::EarColor::Type::Gradient)
-  {
-    earColor["type"] = "gradient";
-    JsonObject gradient = earColor["gradient"].to<JsonObject>();
-    gradient["from"] = emotion.earColor.gradient.fromColor;
-    gradient["to"] = emotion.earColor.gradient.toColor;
-    gradient["directionX"] = emotion.earColor.gradient.directionX;
-    gradient["directionY"] = emotion.earColor.gradient.directionY;
-    gradient["midpoint"] = emotion.earColor.gradient.midpoint;
-  }
-  else
-  {
-    earColor["type"] = "solid";
-    earColor["color"] = emotion.earColor.solidColor;
-  }
-}
-
-void applyEmotionEarColor(EarController &earController,
-                          const EmotionState::EmotionDefinition *emotion)
-{
-  if (emotion == nullptr)
-  {
-    return;
-  }
-
-  Ear &ear = earController.getEar();
-  if (emotion->earColor.type == EmotionState::EarColor::Type::Gradient)
-  {
-    if (!ear.setGradientFromHex(
-            emotion->earColor.gradient.fromColor,
-            emotion->earColor.gradient.toColor,
-            emotion->earColor.gradient.directionX,
-            emotion->earColor.gradient.directionY,
-            emotion->earColor.gradient.midpoint))
-    {
-      Serial.println(F("[E] Could not apply gradient ear color from emotion."));
-    }
-    return;
-  }
-
-  if (!ear.setColorFromHex(emotion->earColor.solidColor))
-  {
-    Serial.println(F("[E] Could not apply solid ear color from emotion."));
-  }
-}
 } // namespace
 
 WebServerManager::WebServerManager(
@@ -237,15 +139,19 @@ void WebServerManager::registerRoutes()
 
   server_.on("/files", HTTP_GET, [this](AsyncWebServerRequest *request)
              {
+              auto emotionFiles = animationManager_.getEmotions();
+
     JsonDocument doc;
     JsonArray array = doc.to<JsonArray>();
-    const auto &emotions = emotionState_.getEmotionDefinitions();
-    for (const auto &emotion : emotions) {
-      serializeEmotionDefinition(array, emotion);
-    }
 
+    for (const auto &file : emotionFiles) {
+      JsonObject fileObject = array.add<JsonObject>();
+      file.serialize(fileObject);
+    }
+    
     String json;
-    serializeJson(array, json);
+    serializeJson(doc, json);
+
     request->send(200, "application/json", json); });
 
   server_.on("/emotions", HTTP_GET, [this](AsyncWebServerRequest *request)
@@ -253,7 +159,8 @@ void WebServerManager::registerRoutes()
     JsonDocument doc;
     JsonArray array = doc.to<JsonArray>();
     for (const auto &emotion : emotionState_.getEmotionDefinitions()) {
-      serializeEmotionDefinition(array, emotion);
+      JsonObject emotionObject = array.add<JsonObject>();
+      emotion.serialize(emotionObject);
     }
 
     String json;
@@ -265,26 +172,7 @@ void WebServerManager::registerRoutes()
     JsonDocument doc;
     JsonObject object = doc.to<JsonObject>();
     const auto *emotion = emotionState_.getCurrentEmotionDefinition();
-
-    object["path"] = emotionState_.getCurrentEmotion();
-    if (emotion != nullptr) {
-      object["name"] = emotion->name;
-      JsonObject earColor = object["earColor"].to<JsonObject>();
-      if (emotion->earColor.type == EmotionState::EarColor::Type::Gradient) {
-        earColor["type"] = "gradient";
-        JsonObject gradient = earColor["gradient"].to<JsonObject>();
-        gradient["from"] = emotion->earColor.gradient.fromColor;
-        gradient["to"] = emotion->earColor.gradient.toColor;
-        gradient["directionX"] = emotion->earColor.gradient.directionX;
-        gradient["directionY"] = emotion->earColor.gradient.directionY;
-        gradient["midpoint"] = emotion->earColor.gradient.midpoint;
-      } else {
-        earColor["type"] = "solid";
-        earColor["color"] = emotion->earColor.solidColor;
-      }
-    } else {
-      object["name"] = emotionState_.getDisplayEmotion();
-    }
+    emotion->serialize(object);
 
     String json;
     serializeJson(doc, json);
@@ -297,13 +185,14 @@ void WebServerManager::registerRoutes()
       return;
     }
 
-    EmotionState::EmotionDefinition emotion;
+    EmotionDefinition emotion;
+
     String error;
     if (!parseEmotionDefinitionJson(request->getParam("plain", true)->value(), emotion, error)) {
       request->send(400, "text/plain", error);
       return;
     }
-
+    
     if (!emotionState_.upsertEmotionDefinition(emotion, false)) {
       request->send(409, "text/plain", F("Emotion already exists."));
       return;
@@ -325,7 +214,7 @@ void WebServerManager::registerRoutes()
       return;
     }
 
-    EmotionState::EmotionDefinition emotion;
+    EmotionDefinition emotion;
     String error;
     if (!parseEmotionDefinitionJson(request->getParam("plain", true)->value(), emotion, error)) {
       request->send(400, "text/plain", error);
@@ -407,10 +296,11 @@ void WebServerManager::registerRoutes()
 
     if (request->hasParam("brightnessPercent", true)) {
       const float percent = request->getParam("brightnessPercent", true)->value().toFloat();
-      if (!ear.setBrightnessPercentChecked(percent)) {
-        request->send(400, "text/plain", F("Could not set brightness use 0-100 percent."));
-        return;
+      if (percent >= 100 || percent < 0) {
+         request->send(400, "text/plain", F("Could not set brightness use 0-100 percent."));
+         return;
       }
+      ear.setBrightnessPercent(percent);
       updated = true;
     } else if (request->hasParam("brightness", true)) {
       int brightness = request->getParam("brightness", true)->value().toInt();
