@@ -1,0 +1,7 @@
+@baseUrl = http://192.168.4.1
+
+### Read the current free heap
+GET {{baseUrl}}/heap
+
+### Read the current gyro/tilt status
+GET {{baseUrl}}/gyro

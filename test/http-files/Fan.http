@@ -1,0 +1,10 @@
+@baseUrl = http://192.168.4.1
+
+### Read the current fan duty cycle
+GET {{baseUrl}}/fan
+
+### Set the fan duty cycle to 50%
+PUT {{baseUrl}}/fan
+Content-Type: application/x-www-form-urlencoded
+
+duty=50
