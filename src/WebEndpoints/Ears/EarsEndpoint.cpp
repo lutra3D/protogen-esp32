@@ -1,4 +1,4 @@
-#include "WebEndpoints/Devices/EarsEndpoint.hpp"
+#include "WebEndpoints/Ears/EarsEndpoint.hpp"
 
 #include <ArduinoJson.h>
 

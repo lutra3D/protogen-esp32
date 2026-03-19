@@ -1,4 +1,4 @@
-#include "WebEndpoints/Devices/FanEndpoint.hpp"
+#include "WebEndpoints/Fan/FanEndpoint.hpp"
 
 FanEndpoint::FanEndpoint(FanController &fanController)
     : fanController_(fanController)

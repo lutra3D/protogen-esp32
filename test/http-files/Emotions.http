@@ -46,7 +46,7 @@ Content-Type: application/json
 PUT {{baseUrl}}/emotion
 Content-Type: application/x-www-form-urlencoded
 
-name=REST Test
+name=Blush
 
 ### Delete an emotion definition by name
 DELETE {{baseUrl}}/emotion?name=REST%20Test
