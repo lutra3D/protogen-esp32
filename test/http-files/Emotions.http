@@ -1,25 +1,52 @@
-### Get All Emotions
+@baseUrl = http://192.168.4.1
 
-GET http://192.168.4.1/emotions
+### List all configured emotions
+GET {{baseUrl}}/emotions
 
-### Get current emotion
+### Get the currently active emotion
+GET {{baseUrl}}/emotion
 
-GET http://192.168.4.1/emotion
-
-### Update existing emotion
-
-PUT http://192.168.4.1/emotion
+### Create a new emotion definition
+POST {{baseUrl}}/emotion
 Content-Type: application/json
 
 {
-    "date": "2023-05-10",
-    "temperatureC": 30,
-    "summary": "Warm"
+  "name": "REST Test",
+  "path": "/anims/rest-test-upload.txt",
+  "earColorMode": "gradient",
+  "earColor": "#44AAFF",
+  "gradient": {
+    "from": "#44AAFF",
+    "to": "#FF66CC",
+    "directionX": 1.0,
+    "directionY": 0.0,
+    "midpoint": 0.5
+  }
 }
 
-### Change current emotion
+### Update an existing emotion definition
+PUT {{baseUrl}}/emotion
+Content-Type: application/json
 
-PUT http://192.168.4.1/emotion
+{
+  "name": "REST Test",
+  "path": "/anims/rest-test-upload.txt",
+  "earColorMode": "solid",
+  "earColor": "#00FF88",
+  "gradient": {
+    "from": "#00FF88",
+    "to": "#0044FF",
+    "directionX": 0.0,
+    "directionY": 1.0,
+    "midpoint": 0.35
+  }
+}
+
+### Change the current emotion by name
+PUT {{baseUrl}}/emotion
 Content-Type: application/x-www-form-urlencoded
 
-name=Blush
+name=REST Test
+
+### Delete an emotion definition by name
+DELETE {{baseUrl}}/emotion?name=REST%20Test

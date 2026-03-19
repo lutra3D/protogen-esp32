@@ -1,3 +1,19 @@
-### Get all files
+@baseUrl = http://192.168.4.1
 
-GET http://192.168.4.1/files
+### List uploaded animation files
+GET {{baseUrl}}/files
+
+### Upload a test animation file
+# @name uploadTestAnimation
+POST {{baseUrl}}/file
+Content-Type: multipart/form-data; boundary=ProtogenBoundary
+
+--ProtogenBoundary
+Content-Disposition: form-data; name="file"; filename="rest-test-upload.txt"
+Content-Type: text/plain
+
+This is a test upload created from test/http-files/Files.http.
+--ProtogenBoundary--
+
+### Delete the uploaded test animation file
+DELETE {{baseUrl}}/file?file=/anims/rest-test-upload.txt

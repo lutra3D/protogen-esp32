@@ -1,0 +1,16 @@
+@baseUrl = http://192.168.4.1
+
+### Read the current ear LED state
+GET {{baseUrl}}/ears
+
+### Set ear color and brightness percentage
+PUT {{baseUrl}}/ears
+Content-Type: application/x-www-form-urlencoded
+
+color=%23FF8800&brightnessPercent=35
+
+### Set ear brightness using the raw 0-255 scale
+PUT {{baseUrl}}/ears
+Content-Type: application/x-www-form-urlencoded
+
+brightness=96
