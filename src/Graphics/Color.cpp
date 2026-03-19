@@ -1,5 +1,7 @@
 #include "Color.hpp"
 
+Color::Color() : red(0), green(0), blue(0) {}
+
 Color::Color(uint8_t r, uint8_t g, uint8_t b)
 {
     red = r;

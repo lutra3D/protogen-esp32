@@ -9,7 +9,8 @@ struct Color {
     uint8_t getGreen() const;
     uint8_t getBlue() const;
 
-    explicit Color(uint8_t r, uint8_t g, uint8_t b);
+    explicit Color();
+    Color(uint8_t r, uint8_t g, uint8_t b);
     void set(uint8_t r, uint8_t g, uint8_t b);
     String toHexString() const;
     bool setFromHex(const String &hex);
