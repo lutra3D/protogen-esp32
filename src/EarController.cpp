@@ -25,9 +25,14 @@ uint8_t EarController::getBrightness() const {
   return ear_.getBrightness();
 }
 
-void EarController::setColor(uint8_t red, uint8_t green, uint8_t blue) {
-  ear_.setColor(red, green, blue);
+void EarController::setColor(Color color) {
+  ear_.setColor(color);
 }
+
+void EarController::setGradient(Gradient gradient) {
+  ear_.setGradient(gradient);
+}
+
 
 String EarController::getColorHexString() const {
   return ear_.getColorHexString();

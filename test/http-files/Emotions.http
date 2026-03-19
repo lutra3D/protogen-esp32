@@ -22,4 +22,4 @@ Content-Type: application/json
 PUT http://192.168.4.1/emotion
 Content-Type: application/x-www-form-urlencoded
 
-name=Sad
+name=Neutral

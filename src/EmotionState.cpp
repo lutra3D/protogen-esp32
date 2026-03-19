@@ -7,11 +7,12 @@ EmotionState::EmotionState()
       tiltSideEmotion_("/anims/confused.gif")
 {
   seedEmotionDefinitions({
-      EmotionDefinition("Neutral", "/anims/neutral.gif", Color(255, 255, 255), Gradient(), ColorMode::Solid),
+      EmotionDefinition("Blush", "/anims/blush.gif", Color(255, 192, 203), Gradient(), ColorMode::Gradient),
+      EmotionDefinition("Cute", "/anims/cute.gif", Color(255, 192, 203), Gradient(), ColorMode::Solid),
+      EmotionDefinition("Evil", "/anims/evil.gif", Color(0, 0, 0), Gradient(), ColorMode::Solid),
       EmotionDefinition("Happy", "/anims/happy.gif", Color(255, 255, 0), Gradient(), ColorMode::Solid),
-      EmotionDefinition("Confused", "/anims/confused.gif", Color(255, 0, 255), Gradient(), ColorMode::Solid),
+      EmotionDefinition("Neutral", "/anims/neutral.gif", Color(255, 255, 255), Gradient(), ColorMode::Solid),
       EmotionDefinition("Sad", "/anims/sad.gif", Color(0, 0, 255), Gradient(), ColorMode::Solid),
-      EmotionDefinition("Angry", "/anims/angry.gif", Color(255, 0, 0), Gradient(), ColorMode::Solid)
   });
 }
 

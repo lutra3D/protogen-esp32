@@ -16,7 +16,8 @@ public:
   void setBrightnessPercent(float percent);
   uint8_t getBrightness() const;
 
-  void setColor(uint8_t red, uint8_t green, uint8_t blue);
+  void setColor(Color color);
+  void setGradient(Gradient gradient);
 
   String getColorHexString() const;
   float getBrightnessPercent() const;

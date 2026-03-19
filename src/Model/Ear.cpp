@@ -10,7 +10,7 @@ void Ear::setColor(uint8_t red, uint8_t green, uint8_t blue) {
 void Ear::setColor(const Color &color)
 {
   color_ = color;
-  colorMode_ = ColorMode::Gradient;
+  colorMode_ = ColorMode::Solid;
 }
 
 bool Ear::setColorFromHex(const String &hex) {

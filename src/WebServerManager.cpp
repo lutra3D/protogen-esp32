@@ -36,10 +36,12 @@ namespace
     Ear &ear = earController.getEar();
     if (emotion->earColorMode == ColorMode::Gradient)
     {
+      Serial.println("[D] Setting ear gradient");
       ear.setGradient(emotion->earGradient);
     }
     else
     {
+      Serial.println("[D] Setting ear color");
       ear.setColor(emotion->earColor);
     }
   }
@@ -204,6 +206,7 @@ void WebServerManager::registerRoutes()
              {
     if (request->hasParam("name", true)) {
       emotionState_.setCurrentEmotion(request->getParam("name", true)->value());
+
       applyEmotionEarColor(earController_, emotionState_.getCurrentEmotionDefinition());
       request->send(200, "text/plain", F("Emotion changed."));
       return;
