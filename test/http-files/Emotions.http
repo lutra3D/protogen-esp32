@@ -43,10 +43,10 @@ Content-Type: application/json
 }
 
 ### Change the current emotion by name
-PUT {{baseUrl}}/emotion
+PUT {{baseUrl}}/emotion/current
 Content-Type: application/x-www-form-urlencoded
 
-name=REST Test
+name=Evil
 
 ### Delete an emotion definition by name
 DELETE {{baseUrl}}/emotion?name=REST%20Test

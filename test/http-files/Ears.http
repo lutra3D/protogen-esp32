@@ -13,4 +13,4 @@ color=%23FF8800&brightnessPercent=35
 PUT {{baseUrl}}/ears
 Content-Type: application/x-www-form-urlencoded
 
-brightness=96
+brightness=15
