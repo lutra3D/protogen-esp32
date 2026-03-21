@@ -22,8 +22,8 @@
 #include "WebEndpoints/System/HeapEndpoint.hpp"
 #include "WebEndpoints/System/NotFoundEndpoint.hpp"
 #include "WebEndpoints/System/StaticContentEndpoint.hpp"
-
-class WebServerManager {
+class WebServerManager
+{
 public:
   WebServerManager(EmotionState &emotionState, FanController &fanController,
                    EarController &earController, TiltController &tiltController,

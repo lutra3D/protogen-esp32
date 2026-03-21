@@ -3,29 +3,26 @@
 
 #include <ESPAsyncWebServer.h>
 
+#include "Web/JsonEndpoint.hpp"
 #include "EarController.hpp"
 #include "EmotionState.hpp"
 
-class EmotionEndpoint {
+class EmotionEndpoint : public JsonEndpoint
+{
 public:
   EmotionEndpoint(EmotionState &emotionState, EarController &earController);
 
   void registerEndpoint(AsyncWebServer &server);
 
 private:
-  bool parseEmotionDefinitionJson(const String &jsonPayload,
-                                  EmotionDefinition &emotion,
-                                  String &error) const;
+  bool parseEmotionDefinitionJson(const String &jsonPayload,  EmotionDefinition &emotion, String &error) const;
   void applyEmotionEarColor(const EmotionDefinition *emotion);
-  bool hasEmotionUpdatePayload(AsyncWebServerRequest *request) const;
   void handleGet(AsyncWebServerRequest *request);
-  void handlePost(AsyncWebServerRequest *request);
-  void handlePut(AsyncWebServerRequest *request);
+  Response handlePost(AsyncWebServerRequest *request, JsonDocument &doc);
+  Response handlePut(AsyncWebServerRequest *request, JsonDocument &doc);
   void handleDelete(AsyncWebServerRequest *request);
   void handleSetCurrentEmotion(AsyncWebServerRequest *request);
-  void handleUpdateEmotionDefinition(AsyncWebServerRequest *request);
-  void sendEmotionJson(AsyncWebServerRequest *request,
-                       const EmotionDefinition &emotion) const;
+  void sendEmotionJson(AsyncWebServerRequest *request, const EmotionDefinition &emotion) const;
 
   EmotionState &emotionState_;
   EarController &earController_;
