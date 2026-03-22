@@ -11,10 +11,11 @@ struct RasterPoint
 class CircleDisplay
 {
 public:
+    CircleDisplay(int ledsPerCircle, float radius);
     RasterPoint getRasterPoint(int index, int length) const;
 private:
-    static constexpr int kLedsPerCircle = 16;
-    static constexpr float kCircleSpacing = 4.0f;
+    const int ledsPerCircle;
+    const float radius;
 
     RasterPoint getLocalCirclePoint(int ledIndex) const;
 };

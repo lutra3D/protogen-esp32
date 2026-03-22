@@ -41,9 +41,9 @@ bool Gradient::setFromHex(
   {
     return false;
   }
-  directionX = directionX;
-  directionY = directionY;
-  midpoint = clampUnit(midpoint);
+  this->directionX = directionX;
+  this->directionY = directionY;
+  this->midpoint = clampUnit(midpoint);
 
   return true;
 }
@@ -68,6 +68,9 @@ Color Gradient::rasterize(int index, int length, CircleDisplay display) const
     normalizedDirectionX /= directionLength;
     normalizedDirectionY /= directionLength;
   }
+
+  Serial.println("dir: "+String(directionX)+","+String(directionY));
+  Serial.println("ndir: "+String(normalizedDirectionX)+","+String(normalizedDirectionY));
 
   const RasterPoint currentPoint = display.getRasterPoint(index, length);
 
@@ -123,7 +126,7 @@ Color Gradient::rasterize(int index, int length, CircleDisplay display) const
   const uint8_t green = interpolateComponent(from.getGreen(), to.getGreen(), blend);
   const uint8_t blue = interpolateComponent(from.getBlue(), to.getBlue(), blend);
 
-  Serial.print("Rasterizing LED "+String(red)+","+String(green)+","+String(blue)+" at position "+String(position)+" with blend "+String(blend)+"\n");
+  //Serial.print("Rasterizing LED "+String(red)+","+String(green)+","+String(blue)+" at position "+String(position)+" with blend "+String(blend)+", nx="+String(normalizedDirectionX)+", ny="+String(normalizedDirectionY)+"\n");
 
   Color color(red, green, blue);
   return color;
@@ -156,6 +159,8 @@ bool Gradient::deserialize(const JsonObject &obj, String &error)
   float directionX = obj["directionX"].is<float>() ? obj["directionX"].as<float>() : 1.0f;
   float directionY = obj["directionY"].is<float>() ? obj["directionY"].as<float>() : 0.0f;
   float midpoint = obj["midpoint"].is<float>() ? obj["midpoint"].as<float>() : 0.5f;
+
+  Serial.println("j: " + String(obj["directionX"].as<float>()) + "," + String(obj["directionY"].as<float>()) + "," + String(obj["midpoint"].as<float>()));
 
   if (!setFromHex(fromHex, toHex, directionX, directionY, midpoint))
   {

@@ -6,7 +6,7 @@ EarController::EarController(uint16_t ledCount, uint8_t dataPin)
     : ledCount_(ledCount),
       earLeds_(ledCount, dataPin, NEO_GRB + NEO_KHZ800),
       ear_(),
-      display_()
+      display_(ledCount, 61.0f)
       { }
 
 bool EarController::begin() {

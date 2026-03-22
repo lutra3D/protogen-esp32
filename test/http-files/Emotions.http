@@ -34,11 +34,11 @@ Content-Type: application/json
   "earColorMode": "gradient",
   "earColor": "#00FF88",
   "gradient": {
-    "from": "#00FF88",
+    "from": "#0000FF",
     "to": "#FFFF00",
     "directionX": 0.0,
     "directionY": 1.0,
-    "midpoint": 0.55
+    "midpoint":0.3
   }
 }
 
