@@ -29,11 +29,9 @@ String Ear::getColorHexString() const {
   return color_.toHexString();
 }
 
-bool Ear::setGradientFromHex(const String &fromHex, const String &toHex,
-                          float directionX, float directionY,
-                          float midpoint)
+bool Ear::setGradientFromHex(const String &fromHex, const String &toHex, float angle, float midpoint)
 {
-    if (!gradient_.setFromHex(fromHex, toHex, directionX, directionY, midpoint)) {
+    if (!gradient_.setFromHex(fromHex, toHex, angle, midpoint)) {
         return false;
     }
     colorMode_ = ColorMode::Solid;

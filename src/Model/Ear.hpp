@@ -16,10 +16,7 @@ public:
   bool setColorFromHex(const String &hex);
   const Color &getColor() const;
   String getColorHexString() const;
-
-  bool setGradientFromHex(const String &fromHex, const String &toHex,
-                          float directionX, float directionY,
-                          float midpoint);
+  bool setGradientFromHex(const String &fromHex, const String &toHex, float angle, float midpoint);
   void setGradient(const Gradient &gradient);
   const Gradient &getGradient() const;
 

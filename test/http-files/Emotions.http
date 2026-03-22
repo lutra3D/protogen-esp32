@@ -18,8 +18,7 @@ Content-Type: application/json
   "gradient": {
     "from": "#44AAFF",
     "to": "#FF66CC",
-    "directionX": 1.0,
-    "directionY": 0.0,
+    "angle": 1.0,
     "midpoint": 0.5
   }
 }
@@ -36,8 +35,7 @@ Content-Type: application/json
   "gradient": {
     "from": "#0000FF",
     "to": "#FFFF00",
-    "directionX": 0.0,
-    "directionY": 1.0,
+    "angle": 1.0,
     "midpoint":0.3
   }
 }

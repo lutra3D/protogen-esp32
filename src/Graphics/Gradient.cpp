@@ -1,12 +1,11 @@
 #include "Gradient.hpp"
 
-Gradient::Gradient() : from(255, 255, 255), to(255, 255, 255), directionX(1.0f), directionY(0.0f), midpoint(0.5f) {}
+Gradient::Gradient() : from(255, 255, 255), to(255, 255, 255), angle(0.0f), midpoint(0.5f) {}
 
-Gradient::Gradient(const Color &from, const Color &to, float directionX, float directionY, float midpoint)
+Gradient::Gradient(const Color &from, const Color &to, float angle, float midpoint)
     : from(from),
       to(to),
-      directionX(directionX),
-      directionY(directionY),
+      angle(angle),
       midpoint(midpoint) {}
 
 float Gradient::clampUnit(float value) const
@@ -33,16 +32,14 @@ uint8_t Gradient::interpolateComponent(uint8_t from, uint8_t to, float factor) c
 bool Gradient::setFromHex(
     const String &fromHex,
     const String &toHex,
-    float directionX,
-    float directionY,
+    float angle,
     float midpoint)
 {
   if (!from.setFromHex(fromHex) || !to.setFromHex(toHex))
   {
     return false;
   }
-  this->directionX = directionX;
-  this->directionY = directionY;
+  this->angle = angle;
   this->midpoint = clampUnit(midpoint);
 
   return true;
@@ -55,8 +52,8 @@ Color Gradient::rasterize(int index, int length, CircleDisplay display) const
     return from;
   }
 
-  float normalizedDirectionX = directionX;
-  float normalizedDirectionY = directionY;
+  float normalizedDirectionX = cosf(angle);
+  float normalizedDirectionY = sinf(angle);
   const float directionLength = sqrtf((normalizedDirectionX * normalizedDirectionX) + (normalizedDirectionY * normalizedDirectionY));
   if (directionLength <= 0.0f)
   {
@@ -68,9 +65,6 @@ Color Gradient::rasterize(int index, int length, CircleDisplay display) const
     normalizedDirectionX /= directionLength;
     normalizedDirectionY /= directionLength;
   }
-
-  Serial.println("dir: "+String(directionX)+","+String(directionY));
-  Serial.println("ndir: "+String(normalizedDirectionX)+","+String(normalizedDirectionY));
 
   const RasterPoint currentPoint = display.getRasterPoint(index, length);
 
@@ -141,8 +135,7 @@ void Gradient::serialize(JsonVariant gradientJson) const
 
   gradientJson["from"] = from.toHexString();
   gradientJson["to"] = to.toHexString();
-  gradientJson["directionX"] = directionX;
-  gradientJson["directionY"] = directionY;
+  gradientJson["angle"] = angle;
   gradientJson["midpoint"] = midpoint;
 }
 
@@ -156,13 +149,10 @@ bool Gradient::deserialize(const JsonObject &obj, String &error)
 
   String fromHex = obj["from"].as<String>();
   String toHex = obj["to"].as<String>();
-  float directionX = obj["directionX"].is<float>() ? obj["directionX"].as<float>() : 1.0f;
-  float directionY = obj["directionY"].is<float>() ? obj["directionY"].as<float>() : 0.0f;
+  float angle = obj["angle"].is<float>() ? obj["angle"].as<float>() : 0.0f;
   float midpoint = obj["midpoint"].is<float>() ? obj["midpoint"].as<float>() : 0.5f;
 
-  Serial.println("j: " + String(obj["directionX"].as<float>()) + "," + String(obj["directionY"].as<float>()) + "," + String(obj["midpoint"].as<float>()));
-
-  if (!setFromHex(fromHex, toHex, directionX, directionY, midpoint))
+  if (!setFromHex(fromHex, toHex, angle, midpoint))
   {
     error = "Invalid color format. Use #RRGGBB.";
     return false;
