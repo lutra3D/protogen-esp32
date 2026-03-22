@@ -12,6 +12,9 @@
       --border: rgba(28, 39, 51, 0.16);
       --accent: #616fff;
       --shadow: rgba(111, 97, 255, 0.3);
+      --danger: #d14949;
+      --danger-bg: rgba(238, 64, 64, 0.12);
+      --muted: #5a6a7b;
     }
 
     body {
@@ -69,6 +72,7 @@
     }
 
     input,
+    select,
     button {
       font: inherit;
       border-radius: 10px;
@@ -78,7 +82,8 @@
     input[type="text"],
     input[type="file"],
     input[type="range"],
-    input[type="color"] {
+    input[type="color"],
+    select {
       border: 1px solid var(--border);
       padding: 10px 12px;
       background: rgba(255, 255, 255, 0.82);
@@ -89,10 +94,11 @@
       padding: 6px 0;
     }
 
-    input:focus {
+    input:focus,
+    select:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 4px rgba(255, 111, 97, 0.);
+      box-shadow: 0 0 0 4px rgba(97, 111, 255, 0.18);
     }
 
     input[type="color"] {
@@ -128,6 +134,13 @@
       box-shadow: 0 6px 14px var(--shadow);
     }
 
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      transform: none;
+      box-shadow: none;
+    }
+
     .row {
       display: flex;
       flex-wrap: wrap;
@@ -142,7 +155,8 @@
     }
 
     .row input[type="text"],
-    .row input[type="range"] {
+    .row input[type="range"],
+    .row select {
       flex: 2 1 220px;
     }
 
@@ -152,36 +166,6 @@
 
     .row button {
       flex: 0 0 auto;
-    }
-
-    .emotion-buttons {
-      gap: 10px;
-      justify-content: flex-start;
-    }
-
-    .emotion-buttons button {
-      flex: 0 0 auto;
-      background: rgba(97, 111, 255, 0.12);
-      color: #3b4a5a;
-      box-shadow: none;
-      border: 1px solid rgba(97, 111, 255, 0.25);
-      padding: 8px 14px;
-    }
-
-    .emotion-buttons button:hover {
-      background: rgba(97, 111, 255, 0.2);
-    }
-
-    .emotion-buttons button.is-active {
-      background: linear-gradient(135deg, var(--accent), #a172ff);
-      color: #fff;
-      border-color: transparent;
-      box-shadow: 0 6px 16px var(--shadow);
-    }
-
-    .emotion-empty {
-      color: #5a6a7b;
-      font-style: italic;
     }
 
     .display-row {
@@ -212,12 +196,47 @@
       line-height: 1;
     }
 
-    .file-list {
-      margin-top: 16px;
-      display: grid;
-      gap: 10px;
+    .ghost-button {
+      background: rgba(97, 111, 255, 0.12);
+      color: #3b4a5a;
+      border: 1px solid rgba(97, 111, 255, 0.25);
+      box-shadow: none;
     }
 
+    .ghost-button:hover {
+      background: rgba(97, 111, 255, 0.2);
+      box-shadow: none;
+    }
+
+    .danger-button,
+    .delete-button {
+      background: var(--danger-bg);
+      color: var(--danger);
+      box-shadow: none;
+      border: 1px solid rgba(209, 73, 73, 0.2);
+    }
+
+    .danger-button:hover,
+    .delete-button:hover {
+      background: rgba(238, 64, 64, 0.18);
+      box-shadow: none;
+    }
+
+    .emotion-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .emotion-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .emotion-item,
     .file-item {
       display: flex;
       align-items: center;
@@ -230,27 +249,159 @@
       gap: 12px;
     }
 
-    .file-item.empty {
+    .emotion-item {
+      align-items: stretch;
+    }
+
+    .emotion-item.is-active {
+      border-color: rgba(97, 111, 255, 0.5);
+      box-shadow: 0 10px 18px rgba(97, 111, 255, 0.16);
+    }
+
+    .emotion-summary {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+    }
+
+    .emotion-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .emotion-name {
+      font-weight: 700;
+      font-size: 1rem;
+      word-break: break-word;
+    }
+
+    .emotion-path,
+    .emotion-meta,
+    .emotion-empty,
+    .helper-text,
+    .status-hint {
+      color: var(--muted);
+    }
+
+    .emotion-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .emotion-details {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid rgba(97, 111, 255, 0.22);
+      border-radius: 14px;
+      background: rgba(97, 111, 255, 0.06);
+      display: grid;
+      gap: 14px;
+    }
+
+    .emotion-details[hidden],
+    .color-fields[hidden],
+    .gradient-fields[hidden] {
+      display: none;
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .detail-header h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: #314154;
+    }
+
+    .detail-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .field-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field-group label {
+      margin: 0;
+    }
+
+    .radio-row,
+    .slider-group,
+    .detail-actions,
+    .file-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .radio-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.74);
+      font-weight: 600;
+    }
+
+    .radio-option input {
+      margin: 0;
+    }
+
+    .slider-group {
+      align-items: flex-end;
+    }
+
+    .slider-group input[type="range"] {
+      flex: 1 1 220px;
+      width: 100%;
+      margin: 0;
+    }
+
+    .slider-group .value {
+      min-width: 48px;
+      text-align: right;
+    }
+
+    .gradient-preview,
+    .color-preview {
+      width: 100%;
+      min-height: 46px;
+      border-radius: 12px;
+      border: 1px solid rgba(28, 39, 51, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+    }
+
+    .file-item.empty,
+    .emotion-empty {
       justify-content: center;
-      color: #5a6a7b;
       font-style: italic;
+    }
+
+    .file-list {
+      margin-top: 16px;
+      display: grid;
     }
 
     .file-name {
       font-weight: 600;
       word-break: break-word;
-    }
-
-    .delete-button {
-      background: rgba(238, 64, 64, 0.12);
-      color: #d14949;
-      box-shadow: none;
-      border: 1px solid rgba(209, 73, 73, 0.2);
-    }
-
-    .delete-button:hover {
-      background: rgba(238, 64, 64, 0.18);
-      box-shadow: none;
     }
 
     .status {
@@ -278,12 +429,21 @@
         padding: 0 14px 28px;
       }
 
-      .row {
+      .row,
+      .emotion-item,
+      .display-row,
+      .detail-header,
+      .emotion-toolbar,
+      .emotion-actions,
+      .slider-group {
         flex-direction: column;
         align-items: stretch;
       }
 
-      .row>* {
+      .row>*,
+      .emotion-actions>*,
+      .detail-actions>*,
+      .slider-group>* {
         width: 100%;
       }
 
@@ -299,13 +459,85 @@
     <h1>Protogen Web Control</h1>
 
     <section>
-      <h2>Emotion</h2>
+      <div class="emotion-toolbar">
+        <h2>Emotion</h2>
+        <div class="emotion-actions">
+          <button id="emotionAdd" class="icon-button" type="button" aria-label="Add emotion" title="Add emotion">+</button>
+          <button id="emotionRefresh" class="icon-button" type="button" aria-label="Refresh emotions" title="Refresh">↻</button>
+        </div>
+      </div>
       <div class="display-row">
         <div class="value-display">Current: <span id="emotionCurrent" class="value">--</span></div>
-        <button id="emotionRefresh" class="icon-button" type="button" aria-label="Refresh emotion"
-          title="Refresh">↻</button>
       </div>
-      <div id="emotionButtons" class="row emotion-buttons" aria-live="polite"></div>
+      <div id="emotionList" class="emotion-list" aria-live="polite"></div>
+      <div id="emotionDetails" class="emotion-details" hidden>
+        <div class="detail-header">
+          <h3 id="emotionFormTitle">New emotion</h3>
+          <button id="emotionCancel" type="button" class="ghost-button">Close</button>
+        </div>
+        <form id="emotionForm">
+          <div class="detail-grid">
+            <div class="field-group">
+              <label for="emotionNameInput">Emotion name</label>
+              <input id="emotionNameInput" type="text" placeholder="Happy" required>
+            </div>
+            <div class="field-group">
+              <label for="emotionPathSelect">Animation file</label>
+              <select id="emotionPathSelect" required></select>
+              <div id="emotionPathPreview" class="helper-text">Choose an uploaded file.</div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label>Ear color mode</label>
+            <div class="radio-row">
+              <label class="radio-option"><input type="radio" name="earColorMode" value="solid" checked>Color</label>
+              <label class="radio-option"><input type="radio" name="earColorMode" value="gradient">Gradient</label>
+            </div>
+          </div>
+
+          <div id="solidColorFields" class="color-fields field-group">
+            <label for="emotionColorInput">Ear color</label>
+            <div class="row">
+              <input id="emotionColorInput" type="color" value="#ffffff">
+              <div id="solidColorPreview" class="color-preview" aria-hidden="true"></div>
+            </div>
+          </div>
+
+          <div id="gradientFields" class="gradient-fields" hidden>
+            <div class="detail-grid">
+              <div class="field-group">
+                <label for="gradientFromInput">Gradient color 1</label>
+                <input id="gradientFromInput" type="color" value="#44aaff">
+              </div>
+              <div class="field-group">
+                <label for="gradientToInput">Gradient color 2</label>
+                <input id="gradientToInput" type="color" value="#ff66cc">
+              </div>
+            </div>
+            <div class="field-group">
+              <label for="gradientDirectionX">Direction X</label>
+              <div class="slider-group">
+                <input id="gradientDirectionX" type="range" min="-1" max="1" step="0.01" value="1">
+                <span id="gradientDirectionXValue" class="value">1.00</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <label for="gradientDirectionY">Direction Y</label>
+              <div class="slider-group">
+                <input id="gradientDirectionY" type="range" min="-1" max="1" step="0.01" value="0">
+                <span id="gradientDirectionYValue" class="value">0.00</span>
+              </div>
+            </div>
+            <div id="gradientPreview" class="gradient-preview" aria-hidden="true"></div>
+          </div>
+
+          <div class="status-hint">Save creates a new emotion with <code>POST /emotion</code> or updates the current one with <code>PUT /emotion</code>.</div>
+          <div class="detail-actions">
+            <button id="emotionSave" type="submit">Save</button>
+          </div>
+        </form>
+      </div>
       <div id="emotionStatus" class="status"></div>
     </section>
 
@@ -393,6 +625,8 @@
     (function () {
       function $(id) { return document.getElementById(id); }
       function setText(node, text) { node.textContent = text; }
+      function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
+      function toFixedLabel(value) { return Number(value).toFixed(2); }
 
       var uploadForm = $("uploadForm");
       var fileInput = $("fileInput");
@@ -402,8 +636,28 @@
       var filesStatus = $("filesStatus");
       var emotionCurrent = $("emotionCurrent");
       var emotionStatus = $("emotionStatus");
-      var emotionButtons = $("emotionButtons");
+      var emotionList = $("emotionList");
+      var emotionDetails = $("emotionDetails");
+      var emotionForm = $("emotionForm");
+      var emotionFormTitle = $("emotionFormTitle");
+      var emotionNameInput = $("emotionNameInput");
+      var emotionPathSelect = $("emotionPathSelect");
+      var emotionPathPreview = $("emotionPathPreview");
+      var emotionColorInput = $("emotionColorInput");
+      var solidColorFields = $("solidColorFields");
+      var solidColorPreview = $("solidColorPreview");
+      var gradientFields = $("gradientFields");
+      var gradientFromInput = $("gradientFromInput");
+      var gradientToInput = $("gradientToInput");
+      var gradientDirectionX = $("gradientDirectionX");
+      var gradientDirectionY = $("gradientDirectionY");
+      var gradientDirectionXValue = $("gradientDirectionXValue");
+      var gradientDirectionYValue = $("gradientDirectionYValue");
+      var gradientPreview = $("gradientPreview");
       var currentEmotionPath = "";
+      var emotionDefinitions = [];
+      var animationFiles = [];
+      var editingEmotionName = null;
       var fanDuty = $("fanDuty");
       var fanPercent = $("fanPercent");
       var fanSlider = $("fanSlider");
@@ -457,25 +711,210 @@
         });
       }
 
+      function updateEmotionModeVisibility() {
+        var mode = (emotionForm.elements.earColorMode.value || "solid").toLowerCase();
+        solidColorFields.hidden = mode !== "solid";
+        gradientFields.hidden = mode !== "gradient";
+      }
+
+      function updateColorPreview() {
+        solidColorPreview.style.background = emotionColorInput.value;
+      }
+
+      function updateGradientPreview() {
+        var colorA = gradientFromInput.value;
+        var colorB = gradientToInput.value;
+        var x = parseFloat(gradientDirectionX.value) || 0;
+        var y = parseFloat(gradientDirectionY.value) || 0;
+        setText(gradientDirectionXValue, toFixedLabel(x));
+        setText(gradientDirectionYValue, toFixedLabel(y));
+        var angle = Math.atan2(y, x || 0.0001) * (180 / Math.PI);
+        if (!isFinite(angle)) {
+          angle = 0;
+        }
+        gradientPreview.style.background = "linear-gradient(" + angle + "deg, " + colorA + ", " + colorB + ")";
+      }
+
+      function updatePathPreview() {
+        var value = emotionPathSelect.value;
+        setText(emotionPathPreview, value ? "Selected file: " + value : "Choose an uploaded file.");
+      }
+
+      function normalizeColor(value, fallback) {
+        return /^#[0-9a-f]{6}$/i.test(value || "") ? value : fallback;
+      }
+
       function highlightEmotion(name) {
         var active = (name || "").trim();
-        var buttons = emotionButtons.querySelectorAll("[data-emotion]");
-        buttons.forEach(function (button) {
-          var matches = button.getAttribute("data-emotion") === active;
-          button.classList.toggle("is-active", matches);
-          button.setAttribute("aria-pressed", matches ? "true" : "false");
+        var items = emotionList.querySelectorAll("[data-emotion-item]");
+        items.forEach(function (item) {
+          var matches = item.getAttribute("data-emotion-path") === active;
+          item.classList.toggle("is-active", matches);
         });
       }
 
-      function refreshEmotion(options) {
+      function renderEmotionPathOptions(selectedPath) {
+        emotionPathSelect.innerHTML = "";
+        if (!animationFiles.length) {
+          var placeholder = document.createElement("option");
+          placeholder.value = "";
+          placeholder.textContent = "No uploaded files available";
+          emotionPathSelect.appendChild(placeholder);
+          emotionPathSelect.disabled = true;
+          updatePathPreview();
+          return;
+        }
+
+        emotionPathSelect.disabled = false;
+        animationFiles.forEach(function (file) {
+          var option = document.createElement("option");
+          option.value = file.path;
+          option.textContent = file.path;
+          emotionPathSelect.appendChild(option);
+        });
+
+        var target = selectedPath || animationFiles[0].path;
+        emotionPathSelect.value = target;
+        if (emotionPathSelect.value !== target) {
+          emotionPathSelect.value = animationFiles[0].path;
+        }
+        updatePathPreview();
+      }
+
+      function renderEmotionList() {
+        emotionList.innerHTML = "";
+        if (!emotionDefinitions.length) {
+          var empty = document.createElement("div");
+          empty.className = "emotion-item emotion-empty";
+          empty.textContent = "No emotions configured yet.";
+          emotionList.appendChild(empty);
+          return;
+        }
+
+        var fragment = document.createDocumentFragment();
+        emotionDefinitions.forEach(function (emotion) {
+          var item = document.createElement("div");
+          item.className = "emotion-item";
+          item.setAttribute("data-emotion-item", "true");
+          item.setAttribute("data-emotion-path", emotion.path || "");
+
+          var summary = document.createElement("div");
+          summary.className = "emotion-summary";
+
+          var main = document.createElement("div");
+          main.className = "emotion-main";
+
+          var name = document.createElement("span");
+          name.className = "emotion-name";
+          name.textContent = emotion.name || "(unnamed)";
+
+          var active = document.createElement("span");
+          active.className = "emotion-meta";
+          active.textContent = currentEmotionPath === emotion.path ? "Active" : "Tap Set to activate";
+
+          main.appendChild(name);
+          main.appendChild(active);
+
+          var path = document.createElement("div");
+          path.className = "emotion-path";
+          path.textContent = emotion.path || "No file selected";
+
+          var meta = document.createElement("div");
+          meta.className = "emotion-meta";
+          meta.textContent = (emotion.earColorMode === "gradient" ? "Gradient" : "Color") + " ears";
+
+          summary.appendChild(main);
+          summary.appendChild(path);
+          summary.appendChild(meta);
+
+          var actions = document.createElement("div");
+          actions.className = "emotion-actions";
+
+          var setButton = document.createElement("button");
+          setButton.type = "button";
+          setButton.className = currentEmotionPath === emotion.path ? "ghost-button" : "";
+          setButton.setAttribute("data-emotion-set", emotion.name);
+          setButton.textContent = currentEmotionPath === emotion.path ? "Active" : "Set";
+          setButton.disabled = currentEmotionPath === emotion.path;
+
+          var editButton = document.createElement("button");
+          editButton.type = "button";
+          editButton.className = "icon-button ghost-button";
+          editButton.setAttribute("data-emotion-edit", emotion.name);
+          editButton.setAttribute("aria-label", "Edit " + emotion.name);
+          editButton.title = "Edit";
+          editButton.textContent = "✎";
+
+          var deleteButton = document.createElement("button");
+          deleteButton.type = "button";
+          deleteButton.className = "icon-button delete-button";
+          deleteButton.setAttribute("data-emotion-delete", emotion.name);
+          deleteButton.setAttribute("aria-label", "Delete " + emotion.name);
+          deleteButton.title = "Delete";
+          deleteButton.textContent = "🗑";
+
+          actions.appendChild(setButton);
+          actions.appendChild(editButton);
+          actions.appendChild(deleteButton);
+
+          item.appendChild(summary);
+          item.appendChild(actions);
+          fragment.appendChild(item);
+        });
+
+        emotionList.appendChild(fragment);
+        highlightEmotion(currentEmotionPath);
+      }
+
+      function openEmotionForm(mode, emotion) {
+        editingEmotionName = mode === "edit" && emotion ? emotion.name : null;
+        emotionDetails.hidden = false;
+        emotionFormTitle.textContent = mode === "edit" ? "Edit emotion" : "New emotion";
+        emotionNameInput.value = emotion && emotion.name ? emotion.name : "";
+        renderEmotionPathOptions(emotion && emotion.path ? emotion.path : "");
+        emotionColorInput.value = normalizeColor(emotion && emotion.earColor, "#ffffff");
+        gradientFromInput.value = normalizeColor(emotion && emotion.gradient && emotion.gradient.from, "#44aaff");
+        gradientToInput.value = normalizeColor(emotion && emotion.gradient && emotion.gradient.to, "#ff66cc");
+        gradientDirectionX.value = clamp(Number(emotion && emotion.gradient ? emotion.gradient.directionX : 1), -1, 1);
+        gradientDirectionY.value = clamp(Number(emotion && emotion.gradient ? emotion.gradient.directionY : 0), -1, 1);
+        var modeInput = emotionForm.querySelector("input[name='earColorMode'][value='" + ((emotion && emotion.earColorMode) || "solid") + "']");
+        if (modeInput) {
+          modeInput.checked = true;
+        } else {
+          emotionForm.querySelector("input[name='earColorMode'][value='solid']").checked = true;
+        }
+        updateEmotionModeVisibility();
+        updateColorPreview();
+        updateGradientPreview();
+        updatePathPreview();
+      }
+
+      function closeEmotionForm() {
+        editingEmotionName = null;
+        emotionDetails.hidden = true;
+        emotionForm.reset();
+        emotionForm.querySelector("input[name='earColorMode'][value='solid']").checked = true;
+        emotionColorInput.value = "#ffffff";
+        gradientFromInput.value = "#44aaff";
+        gradientToInput.value = "#ff66cc";
+        gradientDirectionX.value = 1;
+        gradientDirectionY.value = 0;
+        updateEmotionModeVisibility();
+        updateColorPreview();
+        updateGradientPreview();
+        renderEmotionPathOptions("");
+      }
+
+      function refreshCurrentEmotion(options) {
         var preserveStatus = options && options.preserveStatus;
         return fetchJson("/emotion").then(function (data) {
-          var payload = (data && typeof data === "object") ? data : {};
+          var payload = (data && typeof data === "object" && !Array.isArray(data)) ? data : {};
           var name = (payload.name || "").trim();
           var path = (payload.path || "").trim();
           currentEmotionPath = path;
           setText(emotionCurrent, name || path || "(empty)");
           highlightEmotion(currentEmotionPath);
+          renderEmotionList();
           if (!preserveStatus) {
             setText(emotionStatus, "");
           }
@@ -488,42 +927,65 @@
         });
       }
 
-      function renderEmotionButtons(files) {
-        emotionButtons.innerHTML = "";
-        var list = Array.isArray(files) ? files : [];
-        if (!list.length) {
-          var empty = document.createElement("div");
-          empty.className = "emotion-empty";
-          empty.textContent = "No emotions available.";
-          emotionButtons.appendChild(empty);
-          return;
-        }
-
-        var fragment = document.createDocumentFragment();
-        list.forEach(function (emotion) {
-          var button = document.createElement("button");
-          button.type = "button";
-          button.textContent = emotion.name;
-          button.setAttribute("data-emotion", emotion.path);
-          button.setAttribute("aria-pressed", "false");
-          fragment.appendChild(button);
+      function refreshEmotionDefinitions(options) {
+        var preserveStatus = options && options.preserveStatus;
+        return fetchJson("/emotions").then(function (data) {
+          emotionDefinitions = Array.isArray(data) ? data : [];
+          renderEmotionList();
+          if (!preserveStatus) {
+            setText(emotionStatus, "");
+          }
+          return emotionDefinitions;
+        }).catch(function (error) {
+          emotionDefinitions = [];
+          renderEmotionList();
+          if (!preserveStatus) {
+            setText(emotionStatus, "Error: " + error.message);
+          }
+          return [];
         });
-        emotionButtons.appendChild(fragment);
-        highlightEmotion(currentEmotionPath);
       }
 
-      function setEmotion(name) {
+      function setCurrentEmotion(name) {
         var body = new URLSearchParams({ name: name });
-        return fetchText("/emotion", {
+        return fetchText("/emotion/current", {
           method: "PUT",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: body
         }).then(function (text) {
           setText(emotionStatus, text);
-          refreshEmotion();
-        }).catch(function (error) {
-          setText(emotionStatus, "Error: " + error.message);
+          return refreshCurrentEmotion({ preserveStatus: true });
         });
+      }
+
+      function saveEmotion(payload, method) {
+        return fetchText("/emotion", {
+          method: method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      function deleteEmotion(name) {
+        return fetchText("/emotion?name=" + encodeURIComponent(name), { method: "DELETE" });
+      }
+
+      function buildEmotionPayload() {
+        var mode = emotionForm.elements.earColorMode.value || "solid";
+        var payload = {
+          name: emotionNameInput.value.trim(),
+          path: emotionPathSelect.value,
+          earColorMode: mode,
+          earColor: emotionColorInput.value,
+          gradient: {
+            from: gradientFromInput.value,
+            to: gradientToInput.value,
+            directionX: parseFloat(gradientDirectionX.value) || 0,
+            directionY: parseFloat(gradientDirectionY.value) || 0,
+            midpoint: 0.5
+          }
+        };
+        return payload;
       }
 
       function refreshFan() {
@@ -657,19 +1119,19 @@
         }
 
         var fragment = document.createDocumentFragment();
-        files.forEach(function (emotion) {
+        files.forEach(function (file) {
           var item = document.createElement("div");
           item.className = "file-item";
 
           var label = document.createElement("span");
           label.className = "file-name";
-          label.textContent = emotion.path;
+          label.textContent = file.path;
 
           var button = document.createElement("button");
           button.type = "button";
           button.className = "icon-button delete-button";
-          button.setAttribute("data-file-delete", emotion.path);
-          button.setAttribute("aria-label", "Delete " + emotion.path);
+          button.setAttribute("data-file-delete", file.path);
+          button.setAttribute("aria-label", "Delete " + file.path);
           button.title = "Delete";
           button.textContent = "🗑";
 
@@ -682,18 +1144,21 @@
       }
 
       function refreshFiles() {
-        fetchJson("/files").then(function (files) {
-          var list = Array.isArray(files) ? files : [];
-          renderFileList(list);
-          renderEmotionButtons(list);
+        return fetchJson("/files").then(function (files) {
+          animationFiles = Array.isArray(files) ? files : [];
+          renderFileList(animationFiles);
+          renderEmotionPathOptions(emotionPathSelect.value);
           setText(filesStatus, "");
+          return animationFiles;
         }).catch(function (error) {
+          animationFiles = [];
           renderFileList([]);
-          renderEmotionButtons([]);
+          renderEmotionPathOptions("");
           setText(filesStatus, "Error: " + error.message);
           if (!emotionStatus.textContent) {
-            setText(emotionStatus, "Error loading emotions: " + error.message);
+            setText(emotionStatus, "Error loading animation files: " + error.message);
           }
+          return [];
         });
       }
 
@@ -717,26 +1182,108 @@
         }
       });
 
-      $("emotionRefresh").addEventListener("click", function () {
-        refreshEmotion();
-        refreshFiles();
+      emotionList.addEventListener("click", function (event) {
+        var setButton = event.target.closest("[data-emotion-set]");
+        if (setButton) {
+          var name = setButton.getAttribute("data-emotion-set") || "";
+          if (name) {
+            setText(emotionStatus, "Updating emotion...");
+            setCurrentEmotion(name).catch(function (error) {
+              setText(emotionStatus, "Error: " + error.message);
+            });
+          }
+          return;
+        }
+
+        var editButton = event.target.closest("[data-emotion-edit]");
+        if (editButton) {
+          var editName = editButton.getAttribute("data-emotion-edit") || "";
+          var emotion = emotionDefinitions.find(function (item) { return item.name === editName; }) || null;
+          openEmotionForm("edit", emotion);
+          return;
+        }
+
+        var deleteButton = event.target.closest("[data-emotion-delete]");
+        if (deleteButton) {
+          var deleteName = deleteButton.getAttribute("data-emotion-delete") || "";
+          if (!deleteName) {
+            return;
+          }
+          setText(emotionStatus, "Deleting emotion...");
+          deleteEmotion(deleteName).then(function (text) {
+            setText(emotionStatus, text);
+            if (editingEmotionName === deleteName) {
+              closeEmotionForm();
+            }
+            return Promise.all([
+              refreshEmotionDefinitions({ preserveStatus: true }),
+              refreshCurrentEmotion({ preserveStatus: true })
+            ]);
+          }).catch(function (error) {
+            setText(emotionStatus, "Error: " + error.message);
+          });
+        }
       });
 
-      emotionButtons.addEventListener("click", function (event) {
-        var button = event.target.closest("[data-emotion]");
-        if (!button) { return; }
-        var name = button.getAttribute("data-emotion") || "";
-        if (!name) { return; }
-        setText(emotionStatus, "Updating emotion...");
-        setEmotion(name).then(function (text) {
-          currentEmotionPath = name;
-          setText(emotionCurrent, name);
-          highlightEmotion(currentEmotionPath);
-          setText(emotionStatus, text);
+      $("emotionAdd").addEventListener("click", function () {
+        openEmotionForm("new");
+      });
+
+      $("emotionCancel").addEventListener("click", function () {
+        closeEmotionForm();
+      });
+
+      $("emotionRefresh").addEventListener("click", function () {
+        setText(emotionStatus, "Refreshing emotions...");
+        Promise.all([
+          refreshFiles(),
+          refreshEmotionDefinitions({ preserveStatus: true }),
+          refreshCurrentEmotion({ preserveStatus: true })
+        ]).then(function () {
+          setText(emotionStatus, "");
         }).catch(function (error) {
           setText(emotionStatus, "Error: " + error.message);
         });
       });
+
+      emotionPathSelect.addEventListener("change", updatePathPreview);
+      emotionColorInput.addEventListener("input", updateColorPreview);
+      gradientFromInput.addEventListener("input", updateGradientPreview);
+      gradientToInput.addEventListener("input", updateGradientPreview);
+      gradientDirectionX.addEventListener("input", updateGradientPreview);
+      gradientDirectionY.addEventListener("input", updateGradientPreview);
+      Array.prototype.forEach.call(emotionForm.querySelectorAll("input[name='earColorMode']"), function (input) {
+        input.addEventListener("change", updateEmotionModeVisibility);
+      });
+
+      emotionForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (!emotionNameInput.value.trim()) {
+          setText(emotionStatus, "Emotion name is required.");
+          emotionNameInput.focus();
+          return;
+        }
+        if (!emotionPathSelect.value) {
+          setText(emotionStatus, "Choose an uploaded animation file first.");
+          emotionPathSelect.focus();
+          return;
+        }
+
+        var payload = buildEmotionPayload();
+        var method = editingEmotionName ? "PUT" : "POST";
+        setText(emotionStatus, method === "POST" ? "Creating emotion..." : "Saving emotion...");
+        saveEmotion(payload, method).then(function (text) {
+          setText(emotionStatus, text);
+          closeEmotionForm();
+          return Promise.all([
+            refreshEmotionDefinitions({ preserveStatus: true }),
+            refreshCurrentEmotion({ preserveStatus: true })
+          ]);
+        }).catch(function (error) {
+          setText(emotionStatus, "Error: " + error.message);
+        });
+      });
+
       $("fanRefresh").addEventListener("click", refreshFan);
       $("fanApply").addEventListener("click", applyFan);
       $("earRefresh").addEventListener("click", refreshEars);
@@ -744,8 +1291,12 @@
       $("heapRefresh").addEventListener("click", refreshHeap);
       $("gyroRefresh").addEventListener("click", refreshGyro);
 
+      updateEmotionModeVisibility();
+      updateColorPreview();
+      updateGradientPreview();
       refreshFiles();
-      refreshEmotion();
+      refreshEmotionDefinitions();
+      refreshCurrentEmotion();
       refreshFan();
       refreshEars();
       refreshHeap();
