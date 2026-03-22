@@ -11,7 +11,7 @@ POST {{baseUrl}}/emotion
 Content-Type: application/json
 
 {
-  "name": "REST Test",
+  "name": "RESTTest",
   "path": "/anims/rest-test-upload.txt",
   "earColorMode": "gradient",
   "earColor": "#44AAFF",
@@ -29,16 +29,16 @@ PUT {{baseUrl}}/emotion
 Content-Type: application/json
 
 {
-  "name": "REST Test",
+  "name": "RESTTest",
   "path": "/anims/rest-test-upload.txt",
-  "earColorMode": "solid",
+  "earColorMode": "gradient",
   "earColor": "#00FF88",
   "gradient": {
     "from": "#00FF88",
-    "to": "#0044FF",
+    "to": "#FFFF00",
     "directionX": 0.0,
     "directionY": 1.0,
-    "midpoint": 0.35
+    "midpoint": 0.55
   }
 }
 
@@ -46,7 +46,7 @@ Content-Type: application/json
 PUT {{baseUrl}}/emotion/current
 Content-Type: application/x-www-form-urlencoded
 
-name=Evil
+name=RESTTest
 
 ### Delete an emotion definition by name
-DELETE {{baseUrl}}/emotion?name=REST%20Test
+DELETE {{baseUrl}}/emotion?name=RESTTest

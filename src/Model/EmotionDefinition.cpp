@@ -40,21 +40,21 @@ void EmotionDefinition::serialize(JsonVariant object) const
 
 bool EmotionDefinition::deserialize(const JsonObject &object, String &error)
 {
-    if (!object.containsKey("name") || !object["name"].is<String>())
+    if (!object["name"].is<String>())
     {
         error = F("Emotion 'name' is required and must be a string.");
         return false;
     }
     name = object["name"].as<String>();
 
-    if (!object.containsKey("path") || !object["path"].is<String>())
+    if (!object["path"].is<String>())
     {
         error = F("Emotion 'path' is required and must be a string.");
         return false;
     }
     path = object["path"].as<String>();
 
-    if (object.containsKey("earColorMode"))
+    if (object["earColorMode"].is<String>())
     {
         String modeStr = object["earColorMode"].as<String>();
         earColorMode = modeStr == "gradient"
@@ -62,7 +62,7 @@ bool EmotionDefinition::deserialize(const JsonObject &object, String &error)
                            : ColorMode::Solid;
     }
 
-    if (object.containsKey("earColor"))
+    if (object["earColor"].is<String>())
     {
         String colorHex = object["earColor"].as<String>();
         if (!earColor.setFromHex(colorHex))
@@ -72,7 +72,7 @@ bool EmotionDefinition::deserialize(const JsonObject &object, String &error)
         }
     }
 
-    if (object.containsKey("gradient") && object["gradient"].is<JsonObject>())
+    if (object["gradient"].is<JsonObject>())
     {
         JsonObject gradientObj = object["gradient"].as<JsonObject>();
         if (!earGradient.deserialize(gradientObj, error))

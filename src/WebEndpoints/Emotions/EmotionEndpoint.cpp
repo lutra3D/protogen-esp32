@@ -88,6 +88,11 @@ Response EmotionEndpoint::handlePut(AsyncWebServerRequest *request, JsonDocument
   EmotionDefinition emotion;
   String error;
   
+  if (!emotion.deserialize(doc.as<JsonObject>(), error))
+  {
+    return { error, "text/plain", 400};
+  }
+
   if (emotionState_.getEmotionDefinitionByName(emotion.name) == nullptr &&
       emotionState_.getEmotionDefinitionByPath(emotion.path) == nullptr)
   {

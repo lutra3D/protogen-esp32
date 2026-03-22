@@ -5,7 +5,9 @@
 EarController::EarController(uint16_t ledCount, uint8_t dataPin)
     : ledCount_(ledCount),
       earLeds_(ledCount, dataPin, NEO_GRB + NEO_KHZ800),
-      ear_() {}
+      ear_(),
+      display_()
+      { }
 
 bool EarController::begin() {
   earLeds_.begin();
@@ -54,7 +56,7 @@ void EarController::update() {
     const auto &gradient = ear_.getGradient();
     for (uint16_t index = 0; index < ledCount_; ++index)
     {
-      auto color = gradient.rasterizeColor(index, ledCount_);
+      auto color = gradient.rasterize(index, ledCount_, display_);
       earLeds_.setPixelColor(index, Adafruit_NeoPixel::Color(color.getRed(), color.getGreen(), color.getBlue()));
     }
   }

@@ -48,33 +48,82 @@ bool Gradient::setFromHex(
   return true;
 }
 
-Color Gradient::rasterizeColor(int index, int length) const
+Color Gradient::rasterize(int index, int length, CircleDisplay display) const
 {
-  float position = length > 1
-                       ? static_cast<float>(index) / static_cast<float>(length - 1)
-                       : 0.0f;
-
-  const float directionInfluence = (this->directionX + this->directionY) * 0.5f;
-  position = clampUnit(position + (directionInfluence * 0.25f));
-
-  float blend = 0.0f;
-  if (this->midpoint <= 0.0f)
+  if (length <= 1)
   {
-    blend = 1.0f;
+    return from;
   }
-  else if (this->midpoint >= 1.0f)
+
+  float normalizedDirectionX = directionX;
+  float normalizedDirectionY = directionY;
+  const float directionLength = sqrtf((normalizedDirectionX * normalizedDirectionX) + (normalizedDirectionY * normalizedDirectionY));
+  if (directionLength <= 0.0f)
   {
-    blend = 0.0f;
+    normalizedDirectionX = 1.0f;
+    normalizedDirectionY = 0.0f;
   }
   else
   {
-    blend = position / this->midpoint;
+    normalizedDirectionX /= directionLength;
+    normalizedDirectionY /= directionLength;
   }
-  blend = clampUnit(blend);
+
+  const RasterPoint currentPoint = display.getRasterPoint(index, length);
+
+  float minProjection = 0.0f;
+  float maxProjection = 0.0f;
+  bool firstPoint = true;
+  for (int ledIndex = 0; ledIndex < length; ++ledIndex)
+  {
+    const RasterPoint point = display.getRasterPoint(ledIndex, length);
+    const float projection = (point.x * normalizedDirectionX) + (point.y * normalizedDirectionY);
+    if (firstPoint)
+    {
+      minProjection = projection;
+      maxProjection = projection;
+      firstPoint = false;
+      continue;
+    }
+
+    if (projection < minProjection)
+    {
+      minProjection = projection;
+    }
+    if (projection > maxProjection)
+    {
+      maxProjection = projection;
+    }
+  }
+
+  const float currentProjection = (currentPoint.x * normalizedDirectionX) + (currentPoint.y * normalizedDirectionY);
+  const float projectionRange = maxProjection - minProjection;
+  float position = projectionRange > 0.0f
+                       ? (currentProjection - minProjection) / projectionRange
+                       : 0.0f;
+  position = clampUnit(position);
+
+  const float adjustedMidpoint = midpoint <= 0.0f
+                                     ? 0.0001f
+                                     : midpoint >= 1.0f
+                                           ? 0.9999f
+                                           : midpoint;
+
+  float blend = 0.0f;
+  if (position <= adjustedMidpoint)
+  {
+    blend = 0.5f * (position / adjustedMidpoint);
+  }
+  else
+  {
+    blend = 0.5f + (0.5f * ((position - adjustedMidpoint) / (1.0f - adjustedMidpoint)));
+  }
 
   const uint8_t red = interpolateComponent(from.getRed(), to.getRed(), blend);
   const uint8_t green = interpolateComponent(from.getGreen(), to.getGreen(), blend);
   const uint8_t blue = interpolateComponent(from.getBlue(), to.getBlue(), blend);
+
+  Serial.print("Rasterizing LED "+String(red)+","+String(green)+","+String(blue)+" at position "+String(position)+" with blend "+String(blend)+"\n");
 
   Color color(red, green, blue);
   return color;
@@ -96,7 +145,7 @@ void Gradient::serialize(JsonVariant gradientJson) const
 
 bool Gradient::deserialize(const JsonObject &obj, String &error)
 {
-  if (!obj.containsKey("from") || !obj.containsKey("to"))
+  if (!obj["from"].is<String>() || !obj["to"].is<String>())
   {
     error = "Missing required 'from' or 'to' color fields.";
     return false;
@@ -104,9 +153,9 @@ bool Gradient::deserialize(const JsonObject &obj, String &error)
 
   String fromHex = obj["from"].as<String>();
   String toHex = obj["to"].as<String>();
-  float directionX = obj.containsKey("directionX") ? obj["directionX"].as<float>() : 1.0f;
-  float directionY = obj.containsKey("directionY") ? obj["directionY"].as<float>() : 0.0f;
-  float midpoint = obj.containsKey("midpoint") ? obj["midpoint"].as<float>() : 0.5f;
+  float directionX = obj["directionX"].is<float>() ? obj["directionX"].as<float>() : 1.0f;
+  float directionY = obj["directionY"].is<float>() ? obj["directionY"].as<float>() : 0.0f;
+  float midpoint = obj["midpoint"].is<float>() ? obj["midpoint"].as<float>() : 0.5f;
 
   if (!setFromHex(fromHex, toHex, directionX, directionY, midpoint))
   {

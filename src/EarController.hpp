@@ -30,6 +30,7 @@ private:
   uint16_t ledCount_;
   Adafruit_NeoPixel earLeds_;
   Ear ear_;
+  CircleDisplay display_;
 };
 
 #endif // EAR_CONTROLLER_HPP
