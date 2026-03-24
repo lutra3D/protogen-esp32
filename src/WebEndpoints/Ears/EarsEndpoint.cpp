@@ -31,8 +31,7 @@ void EarsEndpoint::handlePut(AsyncWebServerRequest *request)
   bool updated = false;
   Ear &ear = earController_.getEar();
 
-  if (!updateColor(request, ear, updated) ||
-      !updateBrightness(request, ear, updated))
+  if (!updateBrightness(request, ear, updated))
   {
     return;
   }
@@ -43,27 +42,7 @@ void EarsEndpoint::handlePut(AsyncWebServerRequest *request)
     return;
   }
 
-  request->send(200, "text/plain", F("Color/brightness set."));
-}
-
-bool EarsEndpoint::updateColor(AsyncWebServerRequest *request, Ear &ear,
-                               bool &updated)
-{
-  if (!request->hasParam("color", true))
-  {
-    return true;
-  }
-
-  const String color = request->getParam("color", true)->value();
-  if (!ear.setColorFromHex(color))
-  {
-    request->send(400, "text/plain",
-                  F("Could not set color use #FFFFFF format."));
-    return false;
-  }
-
-  updated = true;
-  return true;
+  request->send(200, "text/plain", F("Brightness set."));
 }
 
 bool EarsEndpoint::updateBrightness(AsyncWebServerRequest *request, Ear &ear,
