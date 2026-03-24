@@ -617,8 +617,6 @@
         <button id="earRefresh" class="icon-button" type="button" aria-label="Refresh ears" title="Refresh">↻</button>
       </div>
       <div class="row">
-        <label for="earColor">Color</label>
-        <input id="earColor" type="color" value="#ffffff">
         <label for="earBrightness">Brightness</label>
         <input id="earBrightness" type="range" min="0" max="100" value="50">
         <span id="earBrightnessValue" class="value">50%</span>
@@ -718,7 +716,6 @@
       var fanSlider = $("fanSlider");
       var fanSliderValue = $("fanSliderValue");
       var fanStatus = $("fanStatus");
-      var earColor = $("earColor");
       var earColorText = $("earColorText");
       var earBrightness = $("earBrightness");
       var earBrightnessText = $("earBrightnessText");
@@ -1197,9 +1194,6 @@
           var color = typeof payload.color === "string" ? payload.color.toLowerCase() : "#ffffff";
           var brightnessPercent = Number(payload.brightnessPercent);
           setText(earColorText, color);
-          if (/^#[0-9a-f]{6}$/i.test(color)) {
-            earColor.value = color;
-          }
           if (isFinite(brightnessPercent)) {
             var rounded = Math.round(brightnessPercent);
             setText(earBrightnessText, rounded + "%");
@@ -1217,7 +1211,6 @@
 
       function applyEars() {
         var body = new URLSearchParams({
-          color: earColor.value,
           brightnessPercent: earBrightness.value
         });
         fetchText("/ears", {

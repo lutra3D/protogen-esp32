@@ -14,7 +14,6 @@ public:
 private:
   void handleGet(AsyncWebServerRequest *request);
   void handlePut(AsyncWebServerRequest *request);
-  bool updateColor(AsyncWebServerRequest *request, Ear &ear, bool &updated);
   bool updateBrightness(AsyncWebServerRequest *request, Ear &ear,
                         bool &updated);
 
