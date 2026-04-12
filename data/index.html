@@ -613,7 +613,7 @@
     <section>
       <h2>Ears</h2>
       <div class="display-row">
-        <div class="value-display">Color: <span id="earColorText" class="value">--</span> | Brightness: <span id="earBrightnessText" class="value">--%</span></div>
+        <div class="value-display">Brightness: <span id="earBrightnessText" class="value">--%</span></div>
         <button id="earRefresh" class="icon-button" type="button" aria-label="Refresh ears" title="Refresh">↻</button>
       </div>
       <div class="row">
@@ -716,7 +716,6 @@
       var fanSlider = $("fanSlider");
       var fanSliderValue = $("fanSliderValue");
       var fanStatus = $("fanStatus");
-      var earColorText = $("earColorText");
       var earBrightness = $("earBrightness");
       var earBrightnessText = $("earBrightnessText");
       var earBrightnessValue = $("earBrightnessValue");
@@ -1191,9 +1190,7 @@
       function refreshEars() {
         fetchJson("/ears").then(function (data) {
           var payload = (data && typeof data === "object" && !Array.isArray(data)) ? data : {};
-          var color = typeof payload.color === "string" ? payload.color.toLowerCase() : "#ffffff";
           var brightnessPercent = Number(payload.brightnessPercent);
-          setText(earColorText, color);
           if (isFinite(brightnessPercent)) {
             var rounded = Math.round(brightnessPercent);
             setText(earBrightnessText, rounded + "%");
