@@ -25,20 +25,15 @@ private:
 
   void handleGet(AsyncWebServerRequest *request);
   void handleUploadComplete(AsyncWebServerRequest *request);
-  void handleUploadChunk(AsyncWebServerRequest *request, String filename,
-                         size_t index, uint8_t *data, size_t len,
-                         bool final);
+  void handleUploadChunk(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
   void handleDelete(AsyncWebServerRequest *request);
 
-  void initializeUploadContext(AsyncWebServerRequest *request, String filename,
-                               size_t index);
-  void writeUploadChunk(AsyncWebServerRequest *request, size_t index, size_t len,
-                        uint8_t *data);
+  void initializeUploadContext(AsyncWebServerRequest *request, String filename, size_t index);
+  void writeUploadChunk(AsyncWebServerRequest *request, size_t index, size_t len, uint8_t *data);
   void finalizeUpload(AsyncWebServerRequest *request);
 
-  bool resolveAndValidateFilePath(AsyncWebServerRequest *request,
-                                  String &resolvedPath) const;
-  bool normalizeFilePath(const String &input, String &normalizedPath) const;
+  bool resolveAndValidateFilePath(AsyncWebServerRequest *request, String &resolvedPath, bool animationsOnly) const;
+  bool normalizeFilePath(const String &input, String &normalizedPath, bool animationsOnly) const;
   void sanitizeFilename(String &filename) const;
   UploadContext *getUploadContext(AsyncWebServerRequest *request) const;
 

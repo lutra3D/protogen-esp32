@@ -15,5 +15,8 @@ Content-Type: text/plain
 This is a test upload created from test/http-files/Files.http.
 --ProtogenBoundary--
 
+### Get file content 
+GET {{baseUrl}}/file?file=/anims/rest-test-upload.txt
+
 ### Delete the uploaded test animation file
 DELETE {{baseUrl}}/file?file=/anims/rest-test-upload.txt

@@ -10,23 +10,21 @@
 class BLEController 
 {
     public:
-        BLEController(FileManager &fileManager, EmotionState &emotionState);
+        BLEController(EmotionState &emotionState);
         bool begin();
         void update();
     private:
         BLEServer *pServer = NULL;
         BLECharacteristic * pCharacteristic;
         BLEAdvertising* pAdvertising;
-        FileManager &fileManager_;
         EmotionState &emotionState_;
 
         class CharacteristicCallbacks : public NimBLECharacteristicCallbacks {
             public:
-                CharacteristicCallbacks(FileManager &fileManager, EmotionState &emotionState);
+                CharacteristicCallbacks(EmotionState &emotionState);
                 void onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo) override;
 
             private:
-                FileManager &fileManager_;
                 EmotionState &emotionState_;
         };
 };

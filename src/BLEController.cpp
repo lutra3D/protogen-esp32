@@ -1,15 +1,14 @@
 #include "BLEController.hpp"
 #include "NimBLEDevice.h"
 
-BLEController::CharacteristicCallbacks::CharacteristicCallbacks(FileManager &fileManager, EmotionState &emotionState)
-    : fileManager_(fileManager),
-      emotionState_(emotionState)
+BLEController::CharacteristicCallbacks::CharacteristicCallbacks(EmotionState &emotionState)
+    : emotionState_(emotionState)
 {
 }
 
 void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo)
 {
-    auto emotions = fileManager_.getAnimationFiles();
+    auto emotions = emotionState_.getEmotionDefinitions();
     auto emotionCount = emotions.size();
 
     String characteristicValue = String(pCharacteristic->getValue().c_str());
@@ -77,15 +76,14 @@ class ServerCallbacks : public NimBLEServerCallbacks
     }
 } serverCallbacks;
 
-BLEController::BLEController(FileManager &fileManager, EmotionState &emotionState)
-    : fileManager_(fileManager),
-    emotionState_(emotionState)
+BLEController::BLEController(EmotionState &emotionState)
+  :  emotionState_(emotionState)
 {
 }
 
 bool BLEController::begin()
 {
-    auto emotions = fileManager_.getAnimationFiles();
+    auto emotions = emotionState_.getEmotionDefinitions();
     std::string stdStr("Proto", 5);
     BLEDevice::init(stdStr);
     NimBLEDevice::setPower(ESP_PWR_LVL_P9);
@@ -101,7 +99,7 @@ bool BLEController::begin()
                                                          NIMBLE_PROPERTY::INDICATE);
     pCharacteristic->setValue(emotions.size());
 
-    auto chrCallbacks = new CharacteristicCallbacks(fileManager_, emotionState_);
+    auto chrCallbacks = new CharacteristicCallbacks(emotionState_);
 
     pCharacteristic->setCallbacks(chrCallbacks);
 

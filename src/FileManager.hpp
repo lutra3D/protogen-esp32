@@ -11,7 +11,6 @@
 class FileManager {
 public:
   bool begin(bool formatOnFail = true);
-  std::vector<Model::File> getAnimationFiles() const;
   std::vector<Model::File> getFiles(const String &filter = "") const;
   void printEmotions() const;
 

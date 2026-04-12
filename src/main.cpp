@@ -50,7 +50,7 @@ WebServerManager webServerManager(emotionState, fanController, earController,
                                   tiltController, fileManager,
                                   onSettingsChanged);
 DisplayManager displayManager(PIN_SDA, PIN_SCL, emotionState, fanController, earController);
-BLEController bleController(fileManager, emotionState); 
+BLEController bleController(emotionState); 
 
 void setup() {
   Serial.begin(115200);

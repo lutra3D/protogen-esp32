@@ -45,7 +45,7 @@ void FileEndpoint::registerEndpoint(AsyncWebServer &server)
 void FileEndpoint::handleGet(AsyncWebServerRequest *request)
 {
   String filePath;
-  if (!resolveAndValidateFilePath(request, filePath))
+  if (!resolveAndValidateFilePath(request, filePath, false))
   {
     request->send(400, "text/plain",
                   F("Missing or invalid 'file' parameter (use /anims/* path)."));
@@ -109,10 +109,9 @@ void FileEndpoint::handleUploadChunk(AsyncWebServerRequest *request,
 void FileEndpoint::handleDelete(AsyncWebServerRequest *request)
 {
   String filePath;
-  if (!resolveAndValidateFilePath(request, filePath))
+  if (!resolveAndValidateFilePath(request, filePath, true))
   {
-    request->send(400, "text/plain",
-                  F("Missing or invalid 'file' parameter (use /anims/* path)."));
+    request->send(400, "text/plain", F("Missing or invalid 'file' parameter (use /anims/* path)."));
     return;
   }
 
@@ -167,7 +166,7 @@ void FileEndpoint::initializeUploadContext(AsyncWebServerRequest *request,
     return;
   }
 
-  if (!normalizeFilePath(filename, context->targetPath))
+  if (!normalizeFilePath(filename, context->targetPath, true))
   {
     context->error = true;
     context->statusCode = 400;
@@ -262,24 +261,22 @@ void FileEndpoint::finalizeUpload(AsyncWebServerRequest *request)
   context->message = context->overwrite ? F("File was updated.") : F("File was created.");
 }
 
-bool FileEndpoint::resolveAndValidateFilePath(AsyncWebServerRequest *request,
-                                              String &resolvedPath) const
+bool FileEndpoint::resolveAndValidateFilePath(AsyncWebServerRequest *request, String &resolvedPath, bool animationsOnly) const
 {
   if (request->hasParam("file"))
   {
-    return normalizeFilePath(request->getParam("file")->value(), resolvedPath);
+    return normalizeFilePath(request->getParam("file")->value(), resolvedPath, animationsOnly);
   }
 
   if (request->hasParam("path"))
   {
-    return normalizeFilePath(request->getParam("path")->value(), resolvedPath);
+    return normalizeFilePath(request->getParam("path")->value(), resolvedPath, animationsOnly);
   }
 
   return false;
 }
 
-bool FileEndpoint::normalizeFilePath(const String &input,
-                                     String &normalizedPath) const
+bool FileEndpoint::normalizeFilePath(const String &input,  String &normalizedPath, bool animationsOnly) const
 {
   normalizedPath = input;
   normalizedPath.trim();
@@ -290,6 +287,10 @@ bool FileEndpoint::normalizeFilePath(const String &input,
   }
 
   sanitizeFilename(normalizedPath);
+
+  if(!animationsOnly){
+    return true;
+  }
 
   if (normalizedPath.startsWith("/anims/"))
   {

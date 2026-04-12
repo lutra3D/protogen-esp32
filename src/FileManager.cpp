@@ -51,11 +51,6 @@ bool FileManager::begin(bool formatOnFail)
   return true;
 }
 
-std::vector<Model::File> FileManager::getAnimationFiles() const
-{
-  return getFiles();
-}
-
 std::vector<Model::File> FileManager::getFiles(const String &filter) const
 {
   std::vector<Model::File> files;
@@ -77,7 +72,7 @@ std::vector<Model::File> FileManager::getFiles(const String &filter) const
 
 void FileManager::printEmotions() const
 {
-  const auto animations = getAnimationFiles();
+  const auto animations = getFiles();
   for (const auto &anim : animations)
   {
     Serial.printf("Animation: %s, Path: %s\n", anim.name.c_str(), anim.path.c_str());
