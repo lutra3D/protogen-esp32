@@ -9,7 +9,7 @@ WebServerManager::WebServerManager(
     std::function<void()> onSettingsChanged)
     : server_(80),
       staticContentEndpoint_(),
-      fileEndpoint_(),
+      fileEndpoint_(fileManager),
       filesEndpoint_(fileManager),
       emotionsEndpoint_(emotionState),
       emotionEndpoint_(emotionState, earController, onSettingsChanged),

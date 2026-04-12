@@ -9,7 +9,7 @@ BLEController::CharacteristicCallbacks::CharacteristicCallbacks(FileManager &fil
 
 void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo)
 {
-    auto emotions = fileManager_.getEmotions();
+    auto emotions = fileManager_.getAnimationFiles();
     auto emotionCount = emotions.size();
 
     String characteristicValue = String(pCharacteristic->getValue().c_str());
@@ -85,7 +85,7 @@ BLEController::BLEController(FileManager &fileManager, EmotionState &emotionStat
 
 bool BLEController::begin()
 {
-    auto emotions = fileManager_.getEmotions();
+    auto emotions = fileManager_.getAnimationFiles();
     std::string stdStr("Proto", 5);
     BLEDevice::init(stdStr);
     NimBLEDevice::setPower(ESP_PWR_LVL_P9);
