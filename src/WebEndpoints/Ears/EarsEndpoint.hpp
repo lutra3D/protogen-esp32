@@ -2,12 +2,14 @@
 #define WEB_ENDPOINTS_DEVICES_EARS_ENDPOINT_HPP
 
 #include <ESPAsyncWebServer.h>
+#include <functional>
 
 #include "EarController.hpp"
 
 class EarsEndpoint {
 public:
-  explicit EarsEndpoint(EarController &earController);
+  EarsEndpoint(EarController &earController,
+               std::function<void()> onSettingsChanged);
 
   void registerEndpoint(AsyncWebServer &server);
 
@@ -18,6 +20,7 @@ private:
                         bool &updated);
 
   EarController &earController_;
+  std::function<void()> onSettingsChanged_;
 };
 
 #endif // WEB_ENDPOINTS_DEVICES_EARS_ENDPOINT_HPP

@@ -2,8 +2,10 @@
 
 #include <ArduinoJson.h>
 
-EarsEndpoint::EarsEndpoint(EarController &earController)
-    : earController_(earController)
+EarsEndpoint::EarsEndpoint(EarController &earController,
+                           std::function<void()> onSettingsChanged)
+    : earController_(earController),
+      onSettingsChanged_(onSettingsChanged)
 {
 }
 
@@ -43,6 +45,10 @@ void EarsEndpoint::handlePut(AsyncWebServerRequest *request)
   }
 
   request->send(200, "text/plain", F("Brightness set."));
+  if (onSettingsChanged_)
+  {
+    onSettingsChanged_();
+  }
 }
 
 bool EarsEndpoint::updateBrightness(AsyncWebServerRequest *request, Ear &ear,

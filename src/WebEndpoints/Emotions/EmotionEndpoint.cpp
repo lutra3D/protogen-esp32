@@ -3,8 +3,11 @@
 #include <ArduinoJson.h>
 
 EmotionEndpoint::EmotionEndpoint(EmotionState &emotionState,
-                                 EarController &earController)
-    : emotionState_(emotionState), earController_(earController)
+                                 EarController &earController,
+                                 std::function<void()> onSettingsChanged)
+    : emotionState_(emotionState),
+      earController_(earController),
+      onSettingsChanged_(onSettingsChanged)
 {
 }
 
@@ -75,6 +78,10 @@ Response EmotionEndpoint::handlePost(AsyncWebServerRequest *request, JsonDocumen
     return {F("Emotion already exists."), "text/plain", 409};
   }
 
+  if (onSettingsChanged_)
+  {
+    onSettingsChanged_();
+  }
   return {F("Emotion created."), "text/plain", 201};
 }
 
@@ -108,6 +115,10 @@ Response EmotionEndpoint::handlePut(AsyncWebServerRequest *request, JsonDocument
     applyEmotionEarColor(emotionState_.getCurrentEmotionDefinition());
   }
 
+  if (onSettingsChanged_)
+  {
+    onSettingsChanged_();
+  }
   return {F("Emotion updated."), "text/plain", 200};
 }
 
@@ -133,6 +144,10 @@ void EmotionEndpoint::handleSetCurrentEmotion(AsyncWebServerRequest *request)
 {
   emotionState_.setCurrentEmotion(request->getParam("name", true)->value());
   applyEmotionEarColor(emotionState_.getCurrentEmotionDefinition());
+  if (onSettingsChanged_)
+  {
+    onSettingsChanged_();
+  }
   request->send(200, "text/plain", F("Emotion changed."));
 }
 

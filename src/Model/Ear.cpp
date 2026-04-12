@@ -83,3 +83,64 @@ void Ear::serialize(JsonVariant json) const {
   JsonObject gradientJson = json["gradient"].to<JsonObject>();
   gradient_.serialize(gradientJson);
 }
+
+bool Ear::deserialize(const JsonObject &object, String &error)
+{
+  if (object["mode"].is<String>())
+  {
+    const String mode = object["mode"].as<String>();
+    colorMode_ = mode == "gradient" ? ColorMode::Gradient : ColorMode::Solid;
+  }
+
+  if (object["color"].is<String>())
+  {
+    const String colorHex = object["color"].as<String>();
+    if (!color_.setFromHex(colorHex))
+    {
+      error = F("Invalid 'color' hex string.");
+      return false;
+    }
+  }
+
+  if (object["brightness"].is<int>())
+  {
+    const int brightness = object["brightness"].as<int>();
+    if (brightness < 0 || brightness > 255)
+    {
+      error = F("Ear 'brightness' must be between 0 and 255.");
+      return false;
+    }
+    setBrightness(static_cast<uint8_t>(brightness));
+  }
+  else if (object["brightnessPercent"].is<float>())
+  {
+    const float brightnessPercent = object["brightnessPercent"].as<float>();
+    if (brightnessPercent < 0.0f || brightnessPercent > 100.0f)
+    {
+      error = F("Ear 'brightnessPercent' must be between 0 and 100.");
+      return false;
+    }
+    setBrightnessPercent(brightnessPercent);
+  }
+
+  if (object["gradient"].is<JsonObject>())
+  {
+    Gradient gradient;
+    if (!gradient.deserialize(object["gradient"].as<JsonObject>(), error))
+    {
+      return false;
+    }
+    gradient_ = gradient;
+  }
+
+  if (colorMode_ == ColorMode::Gradient)
+  {
+    setGradient(gradient_);
+  }
+  else
+  {
+    setColor(color_);
+  }
+
+  return true;
+}

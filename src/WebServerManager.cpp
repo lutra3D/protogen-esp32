@@ -5,16 +5,17 @@ WebServerManager::WebServerManager(
     FanController &fanController,
     EarController &earController,
     TiltController &tiltController,
-    AnimationManager &animationManager)
+    AnimationManager &animationManager,
+    std::function<void()> onSettingsChanged)
     : server_(80),
       staticContentEndpoint_(),
       fileEndpoint_(),
       filesEndpoint_(animationManager),
       emotionsEndpoint_(emotionState),
-      emotionEndpoint_(emotionState, earController),
+      emotionEndpoint_(emotionState, earController, onSettingsChanged),
       heapEndpoint_(),
-      fanEndpoint_(fanController),
-      earsEndpoint_(earController),
+      fanEndpoint_(fanController, onSettingsChanged),
+      earsEndpoint_(earController, onSettingsChanged),
       gyroEndpoint_(tiltController),
       notFoundEndpoint_()
 {
