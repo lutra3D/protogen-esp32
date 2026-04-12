@@ -35,11 +35,6 @@ void EarController::setGradient(Gradient gradient) {
   ear_.setGradient(gradient);
 }
 
-
-String EarController::getColorHexString() const {
-  return ear_.getColorHexString();
-}
-
 float EarController::getBrightnessPercent() const {
   return ear_.getBrightnessPercent();
 }
