@@ -1,8 +1,8 @@
-#include "AnimationManager.hpp"
+#include "FaceDisplay.hpp"
 
-AnimationManager *AnimationManager::instance_ = nullptr;
+FaceDisplay *FaceDisplay::instance_ = nullptr;
 
-AnimationManager::AnimationManager(int panelResX, int panelResY, int panelChainLength)
+FaceDisplay::FaceDisplay(int panelResX, int panelResY, int panelChainLength)
     : panelResX_(panelResX),
       panelResY_(panelResY),
       panelChainLength_(panelChainLength),
@@ -10,33 +10,29 @@ AnimationManager::AnimationManager(int panelResX, int panelResY, int panelChainL
       gifFile_(),
       activeEmotionPath_(),
       isEmotionPlaying_(false),
-      colorRed_(0),
-      colorGreen_(0),
       colorBlue_(0),
-      colorWhite_(0),
-      colorYellow_(0),
-      colorCyan_(0),
-      colorMagenta_(0),
       colorBlack_(0)
 {
   instance_ = this;
 }
 
-AnimationManager::~AnimationManager()
+FaceDisplay::~FaceDisplay()
 {
   closeEmotion();
+
   if (display_ != nullptr)
   {
     delete display_;
     display_ = nullptr;
   }
+
   if (instance_ == this)
   {
     instance_ = nullptr;
   }
 }
 
-bool AnimationManager::begin()
+bool FaceDisplay::begin()
 {
   HUB75_I2S_CFG mxconfig(panelResX_, panelResY_, panelChainLength_);
   mxconfig.gpio.e = 18;
@@ -50,23 +46,18 @@ bool AnimationManager::begin()
   display_->fillScreen(colorBlack_);
   display_->setCursor(5, 0);
   display_->setTextColor(colorBlue_);
-  display_->println("Startup...");
-
-  if (!SPIFFS.begin(true))
-  {
-    Serial.println(F("SPIFFS mount failed!"));
-    return false;
-  }
+  display_->setTextSize(1);
+  display_->println("ProtoFW 2.0");
+  display_->setCursor(12, 10);
+  display_->println("Lutra 3D");
 
   gif_.begin(LITTLE_ENDIAN_PIXELS);
-
-  printEmotions();
   return true;
 }
 
-void AnimationManager::playEmotion(const String &emotionPath)
+void FaceDisplay::playEmotion(const String &emotionPath)
 {
-  if (!display_)
+  if (display_ == nullptr)
   {
     return;
   }
@@ -79,92 +70,55 @@ void AnimationManager::playEmotion(const String &emotionPath)
     }
   }
 
-  int result = gif_.playFrame(true, nullptr);
-
-  if (result < 0)
+  const int result = gif_.playFrame(true, nullptr);
+  if (result >= 0)
   {
-    Serial.printf("[E] GIF play error: %i\n", gif_.getLastError());
-    if (!restartEmotion())
-    {
-      closeEmotion();
-      Serial.printf("[E] Failed to continue GIF %s\n", emotionPath.c_str());
-      return;
-    }
-
-    gif_.playFrame(true, nullptr);
+    return;
   }
+
+  Serial.printf("[E] GIF play error: %i\n", gif_.getLastError());
+  if (!restartEmotion())
+  {
+    closeEmotion();
+    Serial.printf("[E] Failed to continue GIF %s\n", emotionPath.c_str());
+    return;
+  }
+
+  gif_.playFrame(true, nullptr);
 }
 
-std::vector<AnimationFile> AnimationManager::getEmotions()
+void FaceDisplay::GIFDrawWrapper(GIFDRAW *pDraw)
 {
-  std::vector<AnimationFile> animations;
-
-  File animationsDir = SPIFFS.open("/anims");
-  if (!animationsDir || !animationsDir.isDirectory())
-  {
-    Serial.println(F("[E] Failed to open animation directory"));
-    return animations;
-  }
-
-  File file = animationsDir.openNextFile();
-  while (file)
-  {
-    AnimationFile info;
-    info.path = file.path();
-    info.name = FileHelper::GetNameOnly(info.path);
-
-    if (info.path.endsWith(".gif"))
-    {
-      animations.push_back(std::move(info));
-    }
-    file.close();
-    file = animationsDir.openNextFile();
-  }
-  animationsDir.close();
-  return animations;
-}
-
-void AnimationManager::printEmotions()
-{
-  auto animations = getEmotions();
-  for (const auto &anim : animations)
-  {
-    Serial.printf("Animation: %s, Path: %s\n", anim.name.c_str(), anim.path.c_str());
-  }
-}
-
-void AnimationManager::GIFDrawWrapper(GIFDRAW *pDraw)
-{
-  if (instance_)
+  if (instance_ != nullptr)
   {
     instance_->GIFDraw(pDraw);
   }
 }
 
-void *AnimationManager::fileOpenWrapper(const char *filename, int32_t *pFileSize)
+void *FaceDisplay::fileOpenWrapper(const char *filename, int32_t *pFileSize)
 {
-  return instance_ ? instance_->fileOpen(filename, pFileSize) : nullptr;
+  return instance_ != nullptr ? instance_->fileOpen(filename, pFileSize) : nullptr;
 }
 
-void AnimationManager::fileCloseWrapper(void *pHandle)
+void FaceDisplay::fileCloseWrapper(void *pHandle)
 {
-  if (instance_)
+  if (instance_ != nullptr)
   {
     instance_->fileClose(pHandle);
   }
 }
 
-int32_t AnimationManager::fileReadWrapper(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
+int32_t FaceDisplay::fileReadWrapper(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
 {
-  return instance_ ? instance_->fileRead(pHandle, pBuf, iLen) : 0;
+  return instance_ != nullptr ? instance_->fileRead(pHandle, pBuf, iLen) : 0;
 }
 
-int32_t AnimationManager::fileSeekWrapper(GIFFILE *pHandle, int32_t iPosition)
+int32_t FaceDisplay::fileSeekWrapper(GIFFILE *pHandle, int32_t iPosition)
 {
-  return instance_ ? instance_->fileSeek(pHandle, iPosition) : -1;
+  return instance_ != nullptr ? instance_->fileSeek(pHandle, iPosition) : -1;
 }
 
-void AnimationManager::GIFDraw(GIFDRAW *pDraw)
+void FaceDisplay::GIFDraw(GIFDRAW *pDraw)
 {
   uint8_t *s;
   uint16_t *d, *usPalette, usTemp[320];
@@ -248,7 +202,7 @@ void AnimationManager::GIFDraw(GIFDRAW *pDraw)
   }
 }
 
-void *AnimationManager::fileOpen(const char *filename, int32_t *pFileSize)
+void *FaceDisplay::fileOpen(const char *filename, int32_t *pFileSize)
 {
   gifFile_ = SPIFFS.open(filename, FILE_READ);
   if (!gifFile_)
@@ -257,12 +211,13 @@ void *AnimationManager::fileOpen(const char *filename, int32_t *pFileSize)
     *pFileSize = 0;
     return nullptr;
   }
+
   *pFileSize = gifFile_.size();
   Serial.printf("[I] Opened file: %s %d B\n", filename, gifFile_.size());
   return &gifFile_;
 }
 
-void AnimationManager::fileClose(void *pHandle)
+void FaceDisplay::fileClose(void *pHandle)
 {
   (void)pHandle;
   if (gifFile_)
@@ -271,9 +226,9 @@ void AnimationManager::fileClose(void *pHandle)
   }
 }
 
-int32_t AnimationManager::fileRead(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
+int32_t FaceDisplay::fileRead(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
 {
-  if (!pHandle || !pHandle->fHandle)
+  if (pHandle == nullptr || !pHandle->fHandle)
   {
     return 0;
   }
@@ -301,9 +256,9 @@ int32_t AnimationManager::fileRead(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen
   return bytesRead;
 }
 
-int32_t AnimationManager::fileSeek(GIFFILE *pHandle, int32_t iPosition)
+int32_t FaceDisplay::fileSeek(GIFFILE *pHandle, int32_t iPosition)
 {
-  if (!pHandle || !pHandle->fHandle)
+  if (pHandle == nullptr || !pHandle->fHandle)
   {
     return -1;
   }
@@ -333,7 +288,7 @@ int32_t AnimationManager::fileSeek(GIFFILE *pHandle, int32_t iPosition)
   return pHandle->iPos;
 }
 
-bool AnimationManager::openEmotion(const String &emotionPath, bool logTransition)
+bool FaceDisplay::openEmotion(const String &emotionPath, bool logTransition)
 {
   if (emotionPath.isEmpty())
   {
@@ -344,7 +299,8 @@ bool AnimationManager::openEmotion(const String &emotionPath, bool logTransition
 
   closeEmotion();
 
-  if (!gif_.open(emotionPath.c_str(), fileOpenWrapper, fileCloseWrapper, fileReadWrapper, fileSeekWrapper, GIFDrawWrapper))
+  if (!gif_.open(emotionPath.c_str(), fileOpenWrapper, fileCloseWrapper, fileReadWrapper,
+                 fileSeekWrapper, GIFDrawWrapper))
   {
     Serial.printf("[E] Failed to open GIF %s\n", emotionPath.c_str());
     return false;
@@ -352,14 +308,16 @@ bool AnimationManager::openEmotion(const String &emotionPath, bool logTransition
 
   activeEmotionPath_ = emotionPath;
   isEmotionPlaying_ = true;
+
   if (logTransition)
   {
     Serial.printf("[I] Playing GIF %s\n", emotionPath.c_str());
   }
+
   return true;
 }
 
-void AnimationManager::closeEmotion()
+void FaceDisplay::closeEmotion()
 {
   if (isEmotionPlaying_)
   {
@@ -375,25 +333,20 @@ void AnimationManager::closeEmotion()
   activeEmotionPath_ = "";
 }
 
-bool AnimationManager::restartEmotion()
+bool FaceDisplay::restartEmotion()
 {
   if (activeEmotionPath_.isEmpty())
   {
     return false;
   }
+
   const String path = activeEmotionPath_;
   closeEmotion();
   return openEmotion(path, false);
 }
 
-void AnimationManager::initializeColors()
+void FaceDisplay::initializeColors()
 {
-  colorRed_ = display_->color565(255, 0, 0);
-  colorGreen_ = display_->color565(0, 255, 0);
   colorBlue_ = display_->color565(0, 0, 255);
-  colorWhite_ = display_->color565(255, 255, 255);
-  colorYellow_ = display_->color565(255, 255, 0);
-  colorCyan_ = display_->color565(0, 255, 255);
-  colorMagenta_ = display_->color565(255, 0, 255);
   colorBlack_ = display_->color565(0, 0, 0);
 }

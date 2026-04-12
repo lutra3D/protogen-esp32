@@ -2,7 +2,8 @@
 #ifdef MAIN
 #include <Arduino.h>
 
-#include "AnimationManager.hpp"
+#include "FaceDisplay.hpp"
+#include "FileManager.hpp"
 #include "DisplayManager.hpp"
 #include "EarController.hpp"
 #include "EmotionState.hpp"
@@ -38,28 +39,38 @@ EmotionState emotionState;
 FanController fanController(FAN_PWM_PIN, FAN_PWM_CHANNEL, FAN_PWM_FREQUENCY, FAN_PWM_RESOLUTION);
 EarController earController(LEDS_PER_DISPLAY, DATA_PIN_EARS);
 TiltController tiltController(emotionState, PIN_SDA, PIN_SCL);
-AnimationManager animationManager(PANEL_RES_X, PANEL_RES_Y, PANEL_CHAIN);
+FileManager fileManager;
+FaceDisplay faceDisplay(PANEL_RES_X, PANEL_RES_Y, PANEL_CHAIN);
 SettingsStorage settingsStorage(emotionState, fanController, earController);
 void onSettingsChanged()
 {
   settingsStorage.save();
 }
 WebServerManager webServerManager(emotionState, fanController, earController,
-                                  tiltController, animationManager,
+                                  tiltController, fileManager,
                                   onSettingsChanged);
 DisplayManager displayManager(PIN_SDA, PIN_SCL, emotionState, fanController, earController);
-BLEController bleController(animationManager, emotionState); 
+BLEController bleController(fileManager, emotionState); 
 
 void setup() {
   Serial.begin(115200);
 
   tiltController.begin();
 
-  if (!animationManager.begin()) {
+  if (!fileManager.begin()) {
     while (true) {
       delay(1000);
     }
   }
+
+
+  if (!faceDisplay.begin()) {
+    while (true) {
+      delay(1000);
+    }
+  }
+
+  fileManager.printEmotions();
 
   fanController.begin();
 
@@ -86,7 +97,7 @@ void setup() {
 void loop() {
   webServerManager.loop();
   tiltController.update();
-  animationManager.playEmotion(emotionState.getCurrentEmotion());
+  faceDisplay.playEmotion(emotionState.getCurrentEmotion());
   earController.update();
   displayManager.update();
 }

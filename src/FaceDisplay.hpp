@@ -1,5 +1,5 @@
-#ifndef ANIMATION_MANAGER_HPP
-#define ANIMATION_MANAGER_HPP
+#ifndef FACE_DISPLAY_HPP
+#define FACE_DISPLAY_HPP
 
 #include <AnimatedGIF.h>
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
@@ -7,21 +7,16 @@
 
 #include <Arduino.h>
 
-#include "float_helper.hpp"
-#include "Model/AnimationFile.hpp"
-
-class AnimationManager {
+class FaceDisplay {
 public:
-  AnimationManager(int panelResX, int panelResY, int panelChainLength);
-  ~AnimationManager();
+  FaceDisplay(int panelResX, int panelResY, int panelChainLength);
+  ~FaceDisplay();
 
   bool begin();
   void playEmotion(const String &emotionPath);
-  std::vector<AnimationFile> getEmotions();
-  void printEmotions();
 
 private:
-  static AnimationManager *instance_;
+  static FaceDisplay *instance_;
 
   static void GIFDrawWrapper(GIFDRAW *pDraw);
   static void *fileOpenWrapper(const char *filename, int32_t *pFileSize);
@@ -49,14 +44,8 @@ private:
   String activeEmotionPath_;
   bool isEmotionPlaying_;
 
-  uint16_t colorRed_;
-  uint16_t colorGreen_;
   uint16_t colorBlue_;
-  uint16_t colorWhite_;
-  uint16_t colorYellow_;
-  uint16_t colorCyan_;
-  uint16_t colorMagenta_;
   uint16_t colorBlack_;
 };
 
-#endif // ANIMATION_MANAGER_HPP
+#endif // FACE_DISPLAY_HPP

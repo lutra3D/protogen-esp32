@@ -3,18 +3,18 @@
 
 #include <ESPAsyncWebServer.h>
 
-#include "AnimationManager.hpp"
+#include "FileManager.hpp"
 
 class FilesEndpoint {
 public:
-  explicit FilesEndpoint(AnimationManager &animationManager);
+  explicit FilesEndpoint(FileManager &fileManager);
 
   void registerEndpoint(AsyncWebServer &server);
 
 private:
   void handleGet(AsyncWebServerRequest *request);
 
-  AnimationManager &animationManager_;
+  FileManager &fileManager_;
 };
 
 #endif // WEB_ENDPOINTS_FILES_FILES_ENDPOINT_HPP
