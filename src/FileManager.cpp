@@ -2,6 +2,44 @@
 
 #include "float_helper.hpp"
 
+namespace {
+
+void collectFilesRecursive(File directory, const String &normalizedFilter,
+                           std::vector<Model::File> &files)
+{
+  if (!directory || !directory.isDirectory())
+  {
+    return;
+  }
+
+  File entry = directory.openNextFile();
+  while (entry)
+  {
+    if (entry.isDirectory())
+    {
+      collectFilesRecursive(entry, normalizedFilter, files);
+      entry.close();
+      entry = directory.openNextFile();
+      continue;
+    }
+
+    Model::File info;
+    info.path = entry.path();
+    info.name = FileHelper::GetNameOnly(info.path);
+
+    if (normalizedFilter.isEmpty() || info.name.indexOf(normalizedFilter) >= 0 ||
+        info.path.indexOf(normalizedFilter) >= 0)
+    {
+      files.push_back(std::move(info));
+    }
+
+    entry.close();
+    entry = directory.openNextFile();
+  }
+}
+
+} // namespace
+
 bool FileManager::begin(bool formatOnFail)
 {
   if (!SPIFFS.begin(formatOnFail))
@@ -20,36 +58,21 @@ std::vector<Model::File> FileManager::getAnimationFiles() const
 
 std::vector<Model::File> FileManager::getFiles(const String &filter) const
 {
-  std::vector<Model::File> animations;
+  std::vector<Model::File> files;
 
-  File animationsDir = SPIFFS.open("/anims");
-  if (!animationsDir || !animationsDir.isDirectory())
+  File rootDir = SPIFFS.open("/");
+  if (!rootDir || !rootDir.isDirectory())
   {
-    Serial.println(F("[E] Failed to open animation directory"));
-    return animations;
+    Serial.println(F("[E] Failed to open SPIFFS root directory"));
+    return files;
   }
 
   const String normalizedFilter = String(filter);
-  File file = animationsDir.openNextFile();
-  while (file)
-  {
-    Model::File info;
-    info.path = file.path();
-    info.name = FileHelper::GetNameOnly(info.path);
 
-    if (info.path.endsWith(".gif") &&
-        (normalizedFilter.isEmpty() || info.name.indexOf(normalizedFilter) >= 0 ||
-         info.path.indexOf(normalizedFilter) >= 0))
-    {
-      animations.push_back(std::move(info));
-    }
+  collectFilesRecursive(rootDir, normalizedFilter, files);
 
-    file.close();
-    file = animationsDir.openNextFile();
-  }
-
-  animationsDir.close();
-  return animations;
+  rootDir.close();
+  return files;
 }
 
 void FileManager::printEmotions() const
