@@ -13,14 +13,14 @@ void AnimationFile::serialize(JsonVariant json) const
 
 bool AnimationFile::deserialize(const JsonObject &object, String &error)
 {
-    if (!object.containsKey("name") || !object["name"].is<String>())
+    if (!object["name"].is<String>())
     {
         error = F("AnimationFile 'name' is required and must be a string.");
         return false;
     }
     name = object["name"].as<String>();
 
-    if (!object.containsKey("path") || !object["path"].is<String>())
+    if (!object["path"].is<String>())
     {
         error = F("AnimationFile 'path' is required and must be a string.");
         return false;

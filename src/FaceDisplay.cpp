@@ -46,7 +46,10 @@ bool FaceDisplay::begin()
   display_->fillScreen(colorBlack_);
   display_->setCursor(5, 0);
   display_->setTextColor(colorBlue_);
-  display_->println("Startup...");
+  display_->setTextSize(1);
+  display_->println("Protogen FW 2.0");
+  display_->setCursor(12, 10);
+  display_->println("Lutra 3D");
 
   gif_.begin(LITTLE_ENDIAN_PIXELS);
   return true;
