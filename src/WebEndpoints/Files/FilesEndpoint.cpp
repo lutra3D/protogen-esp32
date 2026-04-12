@@ -15,7 +15,10 @@ void FilesEndpoint::registerEndpoint(AsyncWebServer &server)
 
 void FilesEndpoint::handleGet(AsyncWebServerRequest *request)
 {
-  const auto emotionFiles = fileManager_.getEmotions();
+  const String filter = request->hasParam("filter")
+                            ? request->getParam("filter")->value()
+                            : String();
+  const auto emotionFiles = fileManager_.getFiles(filter);
 
   JsonDocument document;
   JsonArray files = document.to<JsonArray>();
