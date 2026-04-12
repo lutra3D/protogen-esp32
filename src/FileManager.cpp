@@ -37,13 +37,14 @@ std::vector<Model::File> FileManager::getFiles(const String &filter) const
     info.path = file.path();
     info.name = FileHelper::GetNameOnly(info.path);
 
-    if (info.path.endsWith(".gif") &&
-        (normalizedFilter.isEmpty() || info.name.indexOf(normalizedFilter) >= 0 ||
-         info.path.indexOf(normalizedFilter) >= 0))
+    if (!normalizedFilter.isEmpty() && 
+        info.name.indexOf(normalizedFilter) < 0 && 
+        info.path.indexOf(normalizedFilter) < 0)
     {
-      animations.push_back(std::move(info));
+      continue;
     }
-
+    animations.push_back(std::move(info));
+    
     file.close();
     file = animationsDir.openNextFile();
   }

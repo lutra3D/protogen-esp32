@@ -9,7 +9,7 @@ POST {{baseUrl}}/file
 Content-Type: multipart/form-data; boundary=ProtogenBoundary
 
 --ProtogenBoundary
-Content-Disposition: form-data; name="file"; filename="rest-test-upload.txt"
+Content-Disposition: form-data; name="/anim/rest-test-upload.txt"; filename="rest-test-upload.txt"
 Content-Type: text/plain
 
 This is a test upload created from test/http-files/Files.http.

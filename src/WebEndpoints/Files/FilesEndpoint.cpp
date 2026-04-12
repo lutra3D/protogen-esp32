@@ -18,15 +18,15 @@ void FilesEndpoint::handleGet(AsyncWebServerRequest *request)
   const String filter = request->hasParam("filter")
                             ? request->getParam("filter")->value()
                             : String();
-  const auto emotionFiles = fileManager_.getFiles(filter);
+  const auto files = fileManager_.getFiles(filter);
 
   JsonDocument document;
-  JsonArray files = document.to<JsonArray>();
+  JsonArray jsonfiles = document.to<JsonArray>();
 
-  for (const auto &file : emotionFiles)
+  for (const auto &file : files)
   {
-    JsonObject fileObject = files.add<JsonObject>();
-    file.serialize(fileObject);
+    JsonObject jsonFile = jsonfiles.add<JsonObject>();
+    file.serialize(jsonFile);
   }
 
   String json;
