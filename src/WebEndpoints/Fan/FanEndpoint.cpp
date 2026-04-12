@@ -1,7 +1,9 @@
 #include "WebEndpoints/Fan/FanEndpoint.hpp"
 
-FanEndpoint::FanEndpoint(FanController &fanController)
-    : fanController_(fanController)
+FanEndpoint::FanEndpoint(FanController &fanController,
+                         std::function<void()> onSettingsChanged)
+    : fanController_(fanController),
+      onSettingsChanged_(onSettingsChanged)
 {
 }
 
@@ -27,6 +29,10 @@ void FanEndpoint::handlePut(AsyncWebServerRequest *request)
     {
       request->send(200, "text/plain",
                     "Set PWM to: " + String(fanController_.getDutyCycle()));
+      if (onSettingsChanged_)
+      {
+        onSettingsChanged_();
+      }
       return;
     }
   }

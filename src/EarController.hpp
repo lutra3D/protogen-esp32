@@ -19,7 +19,6 @@ public:
   void setColor(Color color);
   void setGradient(Gradient gradient);
 
-  String getColorHexString() const;
   float getBrightnessPercent() const;
 
   Ear &getEar();

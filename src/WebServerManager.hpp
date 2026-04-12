@@ -6,6 +6,7 @@
 #include <WiFi.h>
 
 #include <Arduino.h>
+#include <functional>
 
 #include "AnimationManager.hpp"
 #include "EarController.hpp"
@@ -27,7 +28,8 @@ class WebServerManager
 public:
   WebServerManager(EmotionState &emotionState, FanController &fanController,
                    EarController &earController, TiltController &tiltController,
-                   AnimationManager &animationManager);
+                   AnimationManager &animationManager,
+                   std::function<void()> onSettingsChanged);
 
   void begin(const char *ssid, const char *password);
   void loop();

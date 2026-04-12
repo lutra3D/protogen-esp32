@@ -29,6 +29,7 @@ public:
   float getBrightnessPercent() const;
 
   void serialize(JsonVariant json) const;
+  bool deserialize(const JsonObject &object, String &error);
 
 private:
   Color color_;

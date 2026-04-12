@@ -2,6 +2,7 @@
 #define WEB_ENDPOINTS_EMOTIONS_EMOTION_ENDPOINT_HPP
 
 #include <ESPAsyncWebServer.h>
+#include <functional>
 
 #include "Web/JsonEndpoint.hpp"
 #include "EarController.hpp"
@@ -10,7 +11,8 @@
 class EmotionEndpoint : public JsonEndpoint
 {
 public:
-  EmotionEndpoint(EmotionState &emotionState, EarController &earController);
+  EmotionEndpoint(EmotionState &emotionState, EarController &earController,
+                  std::function<void()> onSettingsChanged);
 
   void registerEndpoint(AsyncWebServer &server);
 
@@ -26,6 +28,7 @@ private:
 
   EmotionState &emotionState_;
   EarController &earController_;
+  std::function<void()> onSettingsChanged_;
 };
 
 #endif // WEB_ENDPOINTS_EMOTIONS_EMOTION_ENDPOINT_HPP
