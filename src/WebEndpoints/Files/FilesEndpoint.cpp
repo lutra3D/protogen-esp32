@@ -2,8 +2,8 @@
 
 #include <ArduinoJson.h>
 
-FilesEndpoint::FilesEndpoint(AnimationManager &animationManager)
-    : animationManager_(animationManager)
+FilesEndpoint::FilesEndpoint(FileManager &fileManager)
+    : fileManager_(fileManager)
 {
 }
 
@@ -15,7 +15,7 @@ void FilesEndpoint::registerEndpoint(AsyncWebServer &server)
 
 void FilesEndpoint::handleGet(AsyncWebServerRequest *request)
 {
-  const auto emotionFiles = animationManager_.getEmotions();
+  const auto emotionFiles = fileManager_.getEmotions();
 
   JsonDocument document;
   JsonArray files = document.to<JsonArray>();

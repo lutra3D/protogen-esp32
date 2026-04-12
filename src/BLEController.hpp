@@ -2,7 +2,7 @@
 #define BLE_CONTROLLER_HPP
 
 #include "NimBLEDevice.h"
-#include "AnimationManager.hpp"
+#include "FileManager.hpp"
 #include "EmotionState.hpp"
 
 #include <Arduino.h>
@@ -10,23 +10,23 @@
 class BLEController 
 {
     public:
-        BLEController(AnimationManager &animationManager, EmotionState &emotionState);
+        BLEController(FileManager &fileManager, EmotionState &emotionState);
         bool begin();
         void update();
     private:
         BLEServer *pServer = NULL;
         BLECharacteristic * pCharacteristic;
         BLEAdvertising* pAdvertising;
-        AnimationManager &animationManager_;
+        FileManager &fileManager_;
         EmotionState &emotionState_;
 
         class CharacteristicCallbacks : public NimBLECharacteristicCallbacks {
             public:
-                CharacteristicCallbacks(AnimationManager &animationManager, EmotionState &emotionState);
+                CharacteristicCallbacks(FileManager &fileManager, EmotionState &emotionState);
                 void onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo) override;
 
             private:
-                AnimationManager &animationManager_;
+                FileManager &fileManager_;
                 EmotionState &emotionState_;
         };
 };

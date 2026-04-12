@@ -8,7 +8,7 @@
 #include <Arduino.h>
 #include <functional>
 
-#include "AnimationManager.hpp"
+#include "FileManager.hpp"
 #include "EarController.hpp"
 #include "EmotionState.hpp"
 #include "FanController.hpp"
@@ -28,7 +28,7 @@ class WebServerManager
 public:
   WebServerManager(EmotionState &emotionState, FanController &fanController,
                    EarController &earController, TiltController &tiltController,
-                   AnimationManager &animationManager,
+                   FileManager &fileManager,
                    std::function<void()> onSettingsChanged);
 
   void begin(const char *ssid, const char *password);
