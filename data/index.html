@@ -442,6 +442,12 @@
       gap: 12px;
     }
 
+    .file-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
     .file-item.empty {
       justify-content: center;
       color: var(--muted);
@@ -576,7 +582,7 @@
     </section>
 
     <section>
-      <h2>Animation Files</h2>
+      <h2>File Manager</h2>
       <form id="uploadForm">
         <div class="display-row">
           <label for="fileInput">File:</label>
@@ -587,7 +593,7 @@
           <input id="fileName" type="text" placeholder="example.gif" required>
         </div>
         <div class="row">
-          <button type="submit">Upload</button>
+          <button type="submit">Add File</button>
         </div>
       </form>
       <div id="uploadStatus" class="status"></div>
@@ -1254,7 +1260,7 @@
           setText(uploadStatus, "File name is required.");
           return;
         }
-        setText(uploadStatus, "Uploading...");
+        setText(uploadStatus, "Adding file...");
 
         var formData = new FormData();
         formData.append("file", file, name);
@@ -1274,7 +1280,7 @@
         if (!files.length) {
           var empty = document.createElement("div");
           empty.className = "file-item empty";
-          empty.textContent = "No animation files uploaded.";
+          empty.textContent = "No files uploaded.";
           fileList.appendChild(empty);
           return;
         }
@@ -1288,16 +1294,29 @@
           label.className = "file-name";
           label.textContent = file.path;
 
-          var button = document.createElement("button");
-          button.type = "button";
-          button.className = "icon-button delete-button";
-          button.setAttribute("data-file-delete", file.path);
-          button.setAttribute("aria-label", "Delete " + file.path);
-          button.title = "Delete";
-          button.textContent = "🗑";
+          var actions = document.createElement("div");
+          actions.className = "file-actions";
+
+          var downloadButton = document.createElement("button");
+          downloadButton.type = "button";
+          downloadButton.className = "icon-button secondary";
+          downloadButton.setAttribute("data-file-download", file.path);
+          downloadButton.setAttribute("aria-label", "Download " + file.path);
+          downloadButton.title = "Download";
+          downloadButton.textContent = "↓";
+
+          var deleteButton = document.createElement("button");
+          deleteButton.type = "button";
+          deleteButton.className = "icon-button delete-button";
+          deleteButton.setAttribute("data-file-delete", file.path);
+          deleteButton.setAttribute("aria-label", "Delete " + file.path);
+          deleteButton.title = "Delete";
+          deleteButton.textContent = "🗑";
 
           item.appendChild(label);
-          item.appendChild(button);
+          actions.appendChild(downloadButton);
+          actions.appendChild(deleteButton);
+          item.appendChild(actions);
           fragment.appendChild(item);
         });
 
@@ -1317,10 +1336,36 @@
           updateEmotionFormOptions();
           setText(filesStatus, "Error: " + error.message);
           if (!emotionStatus.textContent) {
-            setText(emotionStatus, "Error loading animation files: " + error.message);
+            setText(emotionStatus, "Error loading files: " + error.message);
           }
           return [];
         });
+      }
+
+      function downloadFile(name) {
+        var url = "/file?file=" + encodeURIComponent(name);
+        fetch(url)
+          .then(function (response) {
+            if (!response.ok) {
+              throw new Error("Download failed (" + response.status + ")");
+            }
+            return response.blob();
+          })
+          .then(function (blob) {
+            var downloadUrl = URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = downloadUrl;
+            link.download = name.split("/").pop() || "download";
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(downloadUrl);
+            setText(filesStatus, "Downloaded: " + name);
+          })
+          .catch(function (error) {
+            setText(filesStatus, "Error: " + error.message);
+          });
       }
 
       function deleteFile(name) {
@@ -1340,6 +1385,15 @@
       }
 
       fileList.addEventListener("click", function (event) {
+        var downloadButton = event.target.closest("[data-file-download]");
+        if (downloadButton) {
+          var downloadName = downloadButton.getAttribute("data-file-download") || "";
+          if (downloadName) {
+            downloadFile(downloadName);
+          }
+          return;
+        }
+
         var button = event.target.closest("[data-file-delete]");
         if (!button) { return; }
         var name = button.getAttribute("data-file-delete") || "";
