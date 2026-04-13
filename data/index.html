@@ -1344,28 +1344,14 @@
 
       function downloadFile(name) {
         var url = "/file?file=" + encodeURIComponent(name);
-        fetch(url)
-          .then(function (response) {
-            if (!response.ok) {
-              throw new Error("Download failed (" + response.status + ")");
-            }
-            return response.blob();
-          })
-          .then(function (blob) {
-            var downloadUrl = URL.createObjectURL(blob);
-            var link = document.createElement("a");
-            link.href = downloadUrl;
-            link.download = name.split("/").pop() || "download";
-            link.style.display = "none";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(downloadUrl);
-            setText(filesStatus, "Downloaded: " + name);
-          })
-          .catch(function (error) {
-            setText(filesStatus, "Error: " + error.message);
-          });
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = name.split("/").pop() || "download";
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setText(filesStatus, "Downloading: " + name);
       }
 
       function deleteFile(name) {
