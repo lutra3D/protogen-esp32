@@ -29,7 +29,7 @@ public:
   WebServerManager(EmotionState &emotionState, FanController &fanController,
                    EarController &earController, TiltController &tiltController,
                    FileManager &fileManager,
-                   std::function<void()> onSettingsChanged);
+                   std::function<void()> onSettingsChanged, bool allowAllFileChanges);
 
   void begin(const char *ssid, const char *password);
   void loop();

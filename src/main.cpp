@@ -35,6 +35,9 @@ constexpr uint8_t DATA_PIN_EARS = 33;
 constexpr uint8_t PIN_SDA = 21;
 constexpr uint8_t PIN_SCL = 22;
 
+constexpr bool ALLOW_ALL_FILE_CHANGES = true;
+
+
 EmotionState emotionState;
 FanController fanController(FAN_PWM_PIN, FAN_PWM_CHANNEL, FAN_PWM_FREQUENCY, FAN_PWM_RESOLUTION);
 EarController earController(LEDS_PER_DISPLAY, DATA_PIN_EARS);
@@ -48,7 +51,8 @@ void onSettingsChanged()
 }
 WebServerManager webServerManager(emotionState, fanController, earController,
                                   tiltController, fileManager,
-                                  onSettingsChanged);
+                                  onSettingsChanged, 
+                                  ALLOW_ALL_FILE_CHANGES);
 DisplayManager displayManager(PIN_SDA, PIN_SCL, emotionState, fanController, earController);
 BLEController bleController(emotionState); 
 

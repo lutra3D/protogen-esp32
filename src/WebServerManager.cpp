@@ -6,10 +6,11 @@ WebServerManager::WebServerManager(
     EarController &earController,
     TiltController &tiltController,
     FileManager &fileManager,
-    std::function<void()> onSettingsChanged)
+    std::function<void()> onSettingsChanged,
+    bool allowAllFileChanges)
     : server_(80),
       staticContentEndpoint_(),
-      fileEndpoint_(fileManager),
+      fileEndpoint_(fileManager, allowAllFileChanges),
       filesEndpoint_(fileManager),
       emotionsEndpoint_(emotionState),
       emotionEndpoint_(emotionState, earController, onSettingsChanged),

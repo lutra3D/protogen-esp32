@@ -4,8 +4,8 @@
 
 #include <FS.h>
 
-FileEndpoint::FileEndpoint(FileManager &fileManager)
-    : fileManager_(fileManager)
+FileEndpoint::FileEndpoint(FileManager &fileManager, bool allowAllFileChanges)
+    : fileManager_(fileManager), allowAllFileChanges_(allowAllFileChanges)
 {
 }
 
@@ -288,7 +288,7 @@ bool FileEndpoint::normalizeFilePath(const String &input,  String &normalizedPat
 
   sanitizeFilename(normalizedPath);
 
-  if(!animationsOnly){
+  if(!animationsOnly || allowAllFileChanges_){
     return true;
   }
 

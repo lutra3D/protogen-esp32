@@ -9,7 +9,7 @@
 
 class FileEndpoint {
 public:
-  explicit FileEndpoint(FileManager &fileManager);
+  explicit FileEndpoint(FileManager &fileManager, bool allowAllFileChanges);
 
   void registerEndpoint(AsyncWebServer &server);
 
@@ -38,6 +38,7 @@ private:
   UploadContext *getUploadContext(AsyncWebServerRequest *request) const;
 
   FileManager &fileManager_;
+  bool allowAllFileChanges_;
 };
 
 #endif // WEB_ENDPOINTS_FILES_FILE_ENDPOINT_HPP
