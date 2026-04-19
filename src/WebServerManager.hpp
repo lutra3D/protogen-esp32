@@ -20,6 +20,8 @@
 #include "WebEndpoints/Files/FileEndpoint.hpp"
 #include "WebEndpoints/Files/FilesEndpoint.hpp"
 #include "WebEndpoints/System/GyroEndpoint.hpp"
+#include "Capabilities/CapabilityManager.hpp"
+#include "WebEndpoints/Capabilities/CapabilitiesEndpoint.hpp"
 #include "WebEndpoints/System/HeapEndpoint.hpp"
 #include "WebEndpoints/System/NotFoundEndpoint.hpp"
 #include "WebEndpoints/System/StaticContentEndpoint.hpp"
@@ -47,6 +49,8 @@ private:
   FanEndpoint fanEndpoint_;
   EarsEndpoint earsEndpoint_;
   GyroEndpoint gyroEndpoint_;
+  CapabilityManager capabilityManager_;
+  CapabilitiesEndpoint capabilitiesEndpoint_;
   NotFoundEndpoint notFoundEndpoint_;
 };
 

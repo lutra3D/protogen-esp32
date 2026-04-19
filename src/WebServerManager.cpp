@@ -18,6 +18,8 @@ WebServerManager::WebServerManager(
       fanEndpoint_(fanController, onSettingsChanged),
       earsEndpoint_(earController, onSettingsChanged),
       gyroEndpoint_(tiltController),
+      capabilityManager_(earController, onSettingsChanged),
+      capabilitiesEndpoint_(capabilityManager_),
       notFoundEndpoint_()
 {
 }
@@ -49,5 +51,6 @@ void WebServerManager::registerRoutes()
   fanEndpoint_.registerEndpoint(server_);
   earsEndpoint_.registerEndpoint(server_);
   gyroEndpoint_.registerEndpoint(server_);
+  capabilitiesEndpoint_.registerEndpoint(server_);
   notFoundEndpoint_.registerEndpoint(server_);
 }
