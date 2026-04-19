@@ -6,6 +6,7 @@ WebServerManager::WebServerManager(
     EarController &earController,
     TiltController &tiltController,
     FileManager &fileManager,
+    CapabilityManager &capabilityManager,
     std::function<void()> onSettingsChanged,
     bool allowAllFileChanges)
     : server_(80),
@@ -18,8 +19,7 @@ WebServerManager::WebServerManager(
       fanEndpoint_(fanController, onSettingsChanged),
       earsEndpoint_(earController, onSettingsChanged),
       gyroEndpoint_(tiltController),
-      capabilityManager_(earController, onSettingsChanged),
-      capabilitiesEndpoint_(capabilityManager_),
+      capabilitiesEndpoint_(capabilityManager),
       notFoundEndpoint_()
 {
 }

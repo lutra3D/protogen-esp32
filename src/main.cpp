@@ -12,6 +12,7 @@
 #include "TiltController.hpp"
 #include "WebServerManager.hpp"
 #include "BLEController.hpp"
+#include "Capabilities/CapabilityManager.hpp"
 
 // Display configuration
 constexpr int PANEL_RES_X = 64;
@@ -49,12 +50,14 @@ void onSettingsChanged()
 {
   settingsStorage.save();
 }
+CapabilityManager capabilityManager(earController, onSettingsChanged);
 WebServerManager webServerManager(emotionState, fanController, earController,
                                   tiltController, fileManager,
+                                  capabilityManager,
                                   onSettingsChanged, 
                                   ALLOW_ALL_FILE_CHANGES);
 DisplayManager displayManager(PIN_SDA, PIN_SCL, emotionState, fanController, earController);
-BLEController bleController(emotionState); 
+BLEController bleController(emotionState, capabilityManager); 
 
 void setup() {
   Serial.begin(115200);

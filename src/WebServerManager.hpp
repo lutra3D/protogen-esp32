@@ -31,6 +31,7 @@ public:
   WebServerManager(EmotionState &emotionState, FanController &fanController,
                    EarController &earController, TiltController &tiltController,
                    FileManager &fileManager,
+                   CapabilityManager &capabilityManager,
                    std::function<void()> onSettingsChanged, bool allowAllFileChanges);
 
   void begin(const char *ssid, const char *password);
@@ -49,7 +50,6 @@ private:
   FanEndpoint fanEndpoint_;
   EarsEndpoint earsEndpoint_;
   GyroEndpoint gyroEndpoint_;
-  CapabilityManager capabilityManager_;
   CapabilitiesEndpoint capabilitiesEndpoint_;
   NotFoundEndpoint notFoundEndpoint_;
 };
