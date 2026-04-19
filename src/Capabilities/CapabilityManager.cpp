@@ -3,15 +3,13 @@
 #include "Capabilities/BrightnessDownCapability.hpp"
 #include "Capabilities/BrightnessUpCapability.hpp"
 
+
+
 CapabilityManager::CapabilityManager(EarController &earController,
                                      std::function<void()> onSettingsChanged)
 {
-  capabilities_.push_back(std::make_unique<BrightnessUpCapability>(
-      earController,
-      onSettingsChanged));
-  capabilities_.push_back(std::make_unique<BrightnessDownCapability>(
-      earController,
-      onSettingsChanged));
+  capabilities_.push_back(std::unique_ptr<BrightnessUpCapability>(new BrightnessUpCapability(earController, onSettingsChanged)));
+  capabilities_.push_back(std::unique_ptr<BrightnessDownCapability>(new BrightnessDownCapability(earController, onSettingsChanged)));
 }
 
 Capability *CapabilityManager::getCapabilityByName(const String &name) const
