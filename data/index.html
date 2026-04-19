@@ -1438,7 +1438,7 @@
         }).then(function (blob) {
           var formData = new FormData();
           formData.append("file", blob, newPath);
-          return fetchText("/file", { method: "PUT", body: formData });
+          return fetchText("/file", { method: "POST", body: formData });
         }).then(function () {
           return fetchText("/file?file=" + encodeURIComponent(path), { method: "DELETE" });
         }).then(function () {
