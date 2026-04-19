@@ -1,8 +1,8 @@
 #include "BLEController.hpp"
 #include "NimBLEDevice.h"
 
-BLEController::CharacteristicCallbacks::CharacteristicCallbacks(EmotionState &emotionState)
-    : emotionState_(emotionState)
+BLEController::CharacteristicCallbacks::CharacteristicCallbacks(EmotionState &emotionState, CapabilityManager &capabilityManager)
+    : emotionState_(emotionState), capabilityManager_(capabilityManager)
 {
 }
 
@@ -24,13 +24,37 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
 
     if (characteristicValue.charAt(0) == '?')
     {
+        auto capabilities = capabilityManager_.getAvailableCapabilities();
         String availableEmotionsMessage;
+        String availableCapabilitiesMessage;
+
         for (int i = 0; i < emotionCount; i++)
         {
             auto emotion = emotions[i];
             availableEmotionsMessage += emotion.name;
             availableEmotionsMessage += ";";
         }
+
+        for (const auto &capability : capabilities)
+        {
+            availableCapabilitiesMessage += capability;
+            availableCapabilitiesMessage += ";";
+        }
+
+        if (characteristicValue == "?cap")
+        {
+            pCharacteristic->setValue(availableCapabilitiesMessage);
+            pCharacteristic->notify(true);
+            return;
+        }
+
+        if (characteristicValue == "?all")
+        {
+            pCharacteristic->setValue("E:" + availableEmotionsMessage + "|C:" + availableCapabilitiesMessage);
+            pCharacteristic->notify(true);
+            return;
+        }
+
         pCharacteristic->setValue(availableEmotionsMessage);
         pCharacteristic->notify(true);
         return;
@@ -38,13 +62,39 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
 
     if (characteristicValue.charAt(0) == ';')
     { // command
-        if (characteristicValue.indexOf("rgb") > 0)
+        if (characteristicValue.startsWith(";cap:"))
+        {
+            auto capabilityName = characteristicValue.substring(5);
+            auto capability = capabilityManager_.getCapabilityByName(capabilityName);
+            if (capability == nullptr)
+            {
+                Serial.println("[W] Unknown capability: " + capabilityName);
+                return;
+            }
+
+            capability->handle();
+        }
+        else if (characteristicValue.indexOf("rgb") > 0)
         {
             //TODO: Use this for ear color
         }
         else if (characteristicValue.indexOf("set") > 0)
         {
             //TODO: Use this for ear brightness
+        }
+        else
+        {
+            auto emotionName = characteristicValue.substring(1);
+            for (int i = 0; i < emotionCount; i++)
+            {
+                auto emotion = emotions[i];
+                if (emotionName == emotion.name)
+                {
+                    Serial.println("[I] Setting emotion" + emotion.path);
+                    emotionState_.setCurrentEmotion(emotion.path);
+                    return;
+                }
+            }
         }
         return;
     }
@@ -76,8 +126,8 @@ class ServerCallbacks : public NimBLEServerCallbacks
     }
 } serverCallbacks;
 
-BLEController::BLEController(EmotionState &emotionState)
-  :  emotionState_(emotionState)
+BLEController::BLEController(EmotionState &emotionState, CapabilityManager &capabilityManager)
+  :  emotionState_(emotionState), capabilityManager_(capabilityManager)
 {
 }
 
@@ -99,7 +149,7 @@ bool BLEController::begin()
                                                          NIMBLE_PROPERTY::INDICATE);
     pCharacteristic->setValue(emotions.size());
 
-    auto chrCallbacks = new CharacteristicCallbacks(emotionState_);
+    auto chrCallbacks = new CharacteristicCallbacks(emotionState_, capabilityManager_);
 
     pCharacteristic->setCallbacks(chrCallbacks);
 
