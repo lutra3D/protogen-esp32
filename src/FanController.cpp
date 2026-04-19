@@ -24,10 +24,24 @@ bool FanController::setDutyCycle(int dutyCycle) {
   return true;
 }
 
+
+
+bool FanController::setDutyCyclePercent(float percent) {
+  if (percent < 0.0f || percent > 100.0f) {
+    return false;
+  }
+
+  const int maxValue = getMaxDutyCycle();
+  const int dutyCycle = static_cast<int>((percent / 100.0f) * static_cast<float>(maxValue));
+  return setDutyCycle(dutyCycle);
+}
+
 int FanController::getDutyCycle() const { return dutyCycle_; }
 
+int FanController::getMaxDutyCycle() const { return (1 << resolution_) - 1; }
+
 float FanController::getDutyCyclePercent() const {
-  const int maxValue = (1 << resolution_) - 1;
+  const int maxValue = getMaxDutyCycle();
   if (maxValue <= 0) {
     return 0.0f;
   }

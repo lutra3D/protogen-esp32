@@ -50,7 +50,7 @@ void onSettingsChanged()
 {
   settingsStorage.save();
 }
-CapabilityManager capabilityManager(earController, onSettingsChanged);
+CapabilityManager capabilityManager(earController, fanController, onSettingsChanged);
 WebServerManager webServerManager(emotionState, fanController, earController,
                                   tiltController, fileManager,
                                   capabilityManager,
