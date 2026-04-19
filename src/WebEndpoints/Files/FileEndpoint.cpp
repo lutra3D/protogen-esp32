@@ -3,6 +3,14 @@
 #include <SPIFFS.h>
 
 #include <FS.h>
+#include <memory>
+
+namespace
+{
+constexpr size_t kDownloadChunkSizeBytes = 1024;
+constexpr size_t kMaxDownloadBytes = 512 * 1024;
+constexpr uint32_t kMinDownloadFreeHeapBytes = 20 * 1024;
+}
 
 FileEndpoint::FileEndpoint(FileManager &fileManager, bool allowAllFileChanges)
     : fileManager_(fileManager), allowAllFileChanges_(allowAllFileChanges)
@@ -58,7 +66,82 @@ void FileEndpoint::handleGet(AsyncWebServerRequest *request)
     return;
   }
 
-  request->send(SPIFFS, filePath, String(), true);
+  if (ESP.getFreeHeap() < kMinDownloadFreeHeapBytes)
+  {
+    request->send(503, "text/plain", F("Insufficient heap to serve file."));
+    return;
+  }
+
+  File file = SPIFFS.open(filePath, FILE_READ);
+  if (!file)
+  {
+    request->send(500, "text/plain", F("Failed to open file."));
+    return;
+  }
+
+  const size_t fileSize = file.size();
+  if (fileSize > kMaxDownloadBytes)
+  {
+    file.close();
+    request->send(413, "text/plain", F("File too large for this endpoint."));
+    return;
+  }
+
+  struct DownloadContext
+  {
+    File file;
+    size_t remaining = 0;
+  };
+
+  auto context = std::make_shared<DownloadContext>();
+  context->file = std::move(file);
+  context->remaining = fileSize;
+
+  AsyncWebServerResponse *response = request->beginChunkedResponse(
+      "application/octet-stream",
+      [context](uint8_t *buffer, size_t maxLen, size_t /*index*/) mutable -> size_t
+      {
+        if (!context || !context->file || context->remaining == 0)
+        {
+          if (context && context->file)
+          {
+            context->file.close();
+          }
+          context.reset();
+          return 0;
+        }
+
+        size_t toRead = maxLen;
+        if (toRead > kDownloadChunkSizeBytes)
+        {
+          toRead = kDownloadChunkSizeBytes;
+        }
+
+        if (toRead > context->remaining)
+        {
+          toRead = context->remaining;
+        }
+
+        const size_t bytesRead = context->file.read(buffer, toRead);
+        if (bytesRead == 0)
+        {
+          context->file.close();
+          context.reset();
+          return 0;
+        }
+
+        context->remaining -= bytesRead;
+        if (context->remaining == 0)
+        {
+          context->file.close();
+          context.reset();
+        }
+
+        return bytesRead;
+      });
+
+  response->addHeader("Content-Disposition", "attachment");
+  request->send(response);
 }
 
 void FileEndpoint::handleUploadComplete(AsyncWebServerRequest *request)
