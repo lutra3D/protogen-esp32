@@ -50,11 +50,12 @@ void onSettingsChanged()
 {
   settingsStorage.save();
 }
+CapabilityManager capabilityManager(earController, onSettingsChanged);
 WebServerManager webServerManager(emotionState, fanController, earController,
                                   tiltController, fileManager,
+                                  capabilityManager,
                                   onSettingsChanged, 
                                   ALLOW_ALL_FILE_CHANGES);
-CapabilityManager capabilityManager(earController, onSettingsChanged);
 DisplayManager displayManager(PIN_SDA, PIN_SCL, emotionState, fanController, earController);
 BLEController bleController(emotionState, capabilityManager); 
 

@@ -15,6 +15,11 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
 
     Serial.println("[I] BT Received: " + String(characteristicValue));
 
+    if (characteristicValue.length() == 0)
+    {
+        return;
+    }
+
     if (characteristicValue.charAt(0) == 'g')
     { // legacy remote reasons
         pCharacteristic->setValue("i" + String(emotionCount));
