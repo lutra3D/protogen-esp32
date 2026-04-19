@@ -7,11 +7,13 @@
 
 #include "Capabilities/Capability.hpp"
 #include "EarController.hpp"
+#include "FanController.hpp"
 
 class CapabilityManager
 {
 public:
   CapabilityManager(EarController &earController,
+                    FanController &fanController,
                     std::function<void()> onSettingsChanged);
 
   Capability *getCapabilityByName(const String &name) const;

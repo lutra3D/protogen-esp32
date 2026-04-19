@@ -9,7 +9,9 @@ public:
 
   void begin();
   bool setDutyCycle(int dutyCycle);
+  bool setDutyCyclePercent(float percent);
   int getDutyCycle() const;
+  int getMaxDutyCycle() const;
   float getDutyCyclePercent() const;
 
 private:
