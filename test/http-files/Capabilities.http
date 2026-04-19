@@ -1,0 +1,2 @@
+### Get all available remote-control capabilities
+GET http://192.168.4.1/capabilities
