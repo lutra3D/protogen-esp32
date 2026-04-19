@@ -33,15 +33,16 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
         String availableEmotionsMessage;
         String availableCapabilitiesMessage;
 
-        for (int i = 0; i < emotionCount; i++)
+        for (const auto &emotion : emotions)
         {
-            auto emotion = emotions[i];
+            availableEmotionsMessage += "E:";
             availableEmotionsMessage += emotion.name;
             availableEmotionsMessage += ";";
         }
 
         for (const auto &capability : capabilities)
         {
+            availableCapabilitiesMessage += "C:";
             availableCapabilitiesMessage += capability;
             availableCapabilitiesMessage += ";";
         }
@@ -55,7 +56,8 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
 
         if (characteristicValue == "?all")
         {
-            pCharacteristic->setValue("E:" + availableEmotionsMessage + "|C:" + availableCapabilitiesMessage);
+            Serial.println("[I] message:"+ availableEmotionsMessage + availableCapabilitiesMessage);
+            pCharacteristic->setValue(availableEmotionsMessage + availableCapabilitiesMessage);
             pCharacteristic->notify(true);
             return;
         }
