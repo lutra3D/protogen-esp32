@@ -576,7 +576,7 @@
     </section>
 
     <section>
-      <h2>Animation Files</h2>
+      <h2>File Manager</h2>
       <form id="uploadForm">
         <div class="display-row">
           <label for="fileInput">File:</label>
@@ -725,6 +725,7 @@
       var gyroValue = $("gyroValue");
       var gyroStatus = $("gyroStatus");
 
+      var allFiles = [];
       var animationFiles = [];
       var emotionDefinitions = [];
       var currentEmotionPath = "";
@@ -798,6 +799,24 @@
           option.textContent = file.path;
           emotionPathSelect.appendChild(option);
         });
+      }
+
+      function getFileNameFromPath(path) {
+        var safePath = String(path || "");
+        var slashIndex = safePath.lastIndexOf("/");
+        return slashIndex >= 0 ? safePath.slice(slashIndex + 1) : safePath;
+      }
+
+      function getFileParentPath(path) {
+        var safePath = String(path || "");
+        var slashIndex = safePath.lastIndexOf("/");
+        if (slashIndex <= 0) { return "/"; }
+        return safePath.slice(0, slashIndex + 1);
+      }
+
+      function canManageAnimFile(path) {
+        var safePath = String(path || "");
+        return safePath.startsWith("/anim/") || safePath.startsWith("/anims/");
       }
 
       function applyEmotionModeVisibility() {
@@ -1274,7 +1293,7 @@
         if (!files.length) {
           var empty = document.createElement("div");
           empty.className = "file-item empty";
-          empty.textContent = "No animation files uploaded.";
+          empty.textContent = "No files found.";
           fileList.appendChild(empty);
           return;
         }
@@ -1288,16 +1307,43 @@
           label.className = "file-name";
           label.textContent = file.path;
 
-          var button = document.createElement("button");
-          button.type = "button";
-          button.className = "icon-button delete-button";
-          button.setAttribute("data-file-delete", file.path);
-          button.setAttribute("aria-label", "Delete " + file.path);
-          button.title = "Delete";
-          button.textContent = "🗑";
+          var actions = document.createElement("div");
+          actions.className = "row";
+          actions.style.marginTop = "0";
+
+          var downloadButton = document.createElement("button");
+          downloadButton.type = "button";
+          downloadButton.className = "icon-button secondary";
+          downloadButton.setAttribute("data-file-download", file.path);
+          downloadButton.setAttribute("aria-label", "Download " + file.path);
+          downloadButton.title = "Download";
+          downloadButton.textContent = "↓";
+
+          actions.appendChild(downloadButton);
+
+          if (canManageAnimFile(file.path)) {
+            var renameButton = document.createElement("button");
+            renameButton.type = "button";
+            renameButton.className = "icon-button secondary";
+            renameButton.setAttribute("data-file-rename", file.path);
+            renameButton.setAttribute("aria-label", "Rename " + file.path);
+            renameButton.title = "Rename";
+            renameButton.textContent = "✎";
+
+            var deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "icon-button delete-button";
+            deleteButton.setAttribute("data-file-delete", file.path);
+            deleteButton.setAttribute("aria-label", "Delete " + file.path);
+            deleteButton.title = "Delete";
+            deleteButton.textContent = "🗑";
+
+            actions.appendChild(renameButton);
+            actions.appendChild(deleteButton);
+          }
 
           item.appendChild(label);
-          item.appendChild(button);
+          item.appendChild(actions);
           fragment.appendChild(item);
         });
 
@@ -1306,12 +1352,17 @@
 
       function refreshFiles() {
         return fetchJson("/files").then(function (files) {
-          animationFiles = Array.isArray(files) ? files : [];
-          renderFileList(animationFiles);
+          allFiles = Array.isArray(files) ? files : [];
+          animationFiles = allFiles.filter(function (file) {
+            var filePath = (file && file.path) ? String(file.path) : "";
+            return filePath.startsWith("/anims/") && filePath.toLowerCase().endsWith(".gif");
+          });
+          renderFileList(allFiles);
           updateEmotionFormOptions();
           setText(filesStatus, "");
-          return animationFiles;
+          return allFiles;
         }).catch(function (error) {
+          allFiles = [];
           animationFiles = [];
           renderFileList([]);
           updateEmotionFormOptions();
@@ -1324,6 +1375,10 @@
       }
 
       function deleteFile(name) {
+        if (!canManageAnimFile(name)) {
+          setText(filesStatus, "Only files in /anim/ can be deleted.");
+          return;
+        }
         fetchText("/file?file=" + encodeURIComponent(name), { method: "DELETE" })
           .then(function (text) {
             setText(filesStatus, text);
@@ -1339,7 +1394,80 @@
           });
       }
 
+      function downloadFile(path) {
+        var filePath = String(path || "");
+        if (!filePath) { return; }
+        var link = document.createElement("a");
+        link.href = "/file?file=" + encodeURIComponent(filePath);
+        link.download = getFileNameFromPath(filePath) || "download.bin";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+
+      function renameFile(path) {
+        if (!canManageAnimFile(path)) {
+          setText(filesStatus, "Only files in /anim/ can be renamed.");
+          return;
+        }
+
+        var currentName = getFileNameFromPath(path);
+        var newName = window.prompt("Enter new file name (name only):", currentName);
+        if (newName === null) { return; }
+
+        var trimmedName = newName.trim();
+        if (!trimmedName) {
+          setText(filesStatus, "New file name is required.");
+          return;
+        }
+        if (trimmedName.indexOf("/") >= 0 || trimmedName.indexOf("\\") >= 0) {
+          setText(filesStatus, "Only the filename can be changed (no path separators).");
+          return;
+        }
+
+        var newPath = getFileParentPath(path) + trimmedName;
+        if (newPath === path) {
+          setText(filesStatus, "File name is unchanged.");
+          return;
+        }
+
+        setText(filesStatus, "Renaming file...");
+        fetch("/file?file=" + encodeURIComponent(path)).then(function (response) {
+          if (!response.ok) { throw new Error("Failed to read original file."); }
+          return response.blob();
+        }).then(function (blob) {
+          var formData = new FormData();
+          formData.append("file", blob, newPath);
+          return fetchText("/file", { method: "PUT", body: formData });
+        }).then(function () {
+          return fetchText("/file?file=" + encodeURIComponent(path), { method: "DELETE" });
+        }).then(function () {
+          setText(filesStatus, "File was renamed.");
+          return refreshFiles();
+        }).catch(function (error) {
+          setText(filesStatus, "Error: " + error.message);
+        });
+      }
+
       fileList.addEventListener("click", function (event) {
+        var downloadButton = event.target.closest("[data-file-download]");
+        if (downloadButton) {
+          var downloadPath = downloadButton.getAttribute("data-file-download") || "";
+          if (downloadPath) {
+            downloadFile(downloadPath);
+          }
+          return;
+        }
+
+        var renameButton = event.target.closest("[data-file-rename]");
+        if (renameButton) {
+          var renamePath = renameButton.getAttribute("data-file-rename") || "";
+          if (renamePath) {
+            renameFile(renamePath);
+          }
+          return;
+        }
+
         var button = event.target.closest("[data-file-delete]");
         if (!button) { return; }
         var name = button.getAttribute("data-file-delete") || "";
