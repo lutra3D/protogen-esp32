@@ -7,5 +7,5 @@ void StaticContentEndpoint::registerEndpoint(AsyncWebServer &server)
 
 void StaticContentEndpoint::registerStaticContent(AsyncWebServer &server)
 {
-  server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+  server.serveStatic("/", LittleFS, "/").setDefaultFile("index.html");
 }

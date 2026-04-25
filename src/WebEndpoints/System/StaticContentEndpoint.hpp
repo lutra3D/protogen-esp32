@@ -2,7 +2,7 @@
 #define WEB_ENDPOINTS_SYSTEM_STATIC_CONTENT_ENDPOINT_HPP
 
 #include <ESPAsyncWebServer.h>
-#include <SPIFFS.h>
+#include <LittleFS.h>
 
 class StaticContentEndpoint {
 public:

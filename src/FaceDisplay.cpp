@@ -204,10 +204,10 @@ void FaceDisplay::GIFDraw(GIFDRAW *pDraw)
 
 void *FaceDisplay::fileOpen(const char *filename, int32_t *pFileSize)
 {
-  gifFile_ = SPIFFS.open(filename, FILE_READ);
+  gifFile_ = LittleFS.open(filename, FILE_READ);
   if (!gifFile_)
   {
-    Serial.printf("Failed to open GIF file from SPIFFS: %s\n", filename);
+    Serial.printf("Failed to open GIF file from LittleFS: %s\n", filename);
     *pFileSize = 0;
     return nullptr;
   }
