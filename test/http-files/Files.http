@@ -4,7 +4,7 @@
 GET {{baseUrl}}/files
 
 ### Get data partition usage info
-GET {{baseUrl}}/files/info
+GET {{baseUrl}}/files-info
 
 ### Upload a test animation file
 # @name uploadTestAnimation

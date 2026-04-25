@@ -434,6 +434,26 @@
       gap: 10px;
     }
 
+    .disk-usage {
+      margin-top: 12px;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .disk-usage-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: #2f3d4f;
+    }
+
+    .disk-usage progress {
+      width: 100%;
+      height: 14px;
+    }
+
     .file-item {
       display: flex;
       align-items: center;
@@ -577,6 +597,7 @@
 
     <section>
       <h2>File Manager</h2>
+     
       <form id="uploadForm">
         <div class="display-row">
           <label for="fileInput">File:</label>
@@ -591,8 +612,13 @@
         </div>
       </form>
       <div id="uploadStatus" class="status"></div>
-      <div id="filesStatus" class="status"></div>
+      
+       <div class="disk-usage">
+        <div id="diskUsageLabel" class="disk-usage-label">💽 Used: -- KB/ -- KB</div>
+        <progress id="diskUsageBar" value="0" max="100" aria-label="Disk usage"></progress>
+      </div>
       <div id="fileList" class="file-list" aria-live="polite"></div>
+      <div id="filesStatus" class="status"></div>
     </section>
 
     <section>
@@ -689,6 +715,8 @@
       var uploadStatus = $("uploadStatus");
       var fileList = $("fileList");
       var filesStatus = $("filesStatus");
+      var diskUsageLabel = $("diskUsageLabel");
+      var diskUsageBar = $("diskUsageBar");
       var emotionCurrent = $("emotionCurrent");
       var emotionStatus = $("emotionStatus");
       var emotionList = $("emotionList");
@@ -1360,6 +1388,7 @@
           renderFileList(allFiles);
           updateEmotionFormOptions();
           setText(filesStatus, "");
+          refreshFilesInfo();
           return allFiles;
         }).catch(function (error) {
           allFiles = [];
@@ -1367,10 +1396,38 @@
           renderFileList([]);
           updateEmotionFormOptions();
           setText(filesStatus, "Error: " + error.message);
+          refreshFilesInfo();
           if (!emotionStatus.textContent) {
             setText(emotionStatus, "Error loading animation files: " + error.message);
           }
           return [];
+        });
+      }
+
+      function refreshFilesInfo() {
+        return fetchJson("/files-info").then(function (info) {
+          var payload = (info && typeof info === "object" && !Array.isArray(info)) ? info : {};
+          var usedKb = Number(payload.usedSizeBytes)/1024;
+          var availableKb = Number(payload.totalSizeBytes)/1024;
+          var percent = Number(payload.usedPercentage);
+          if (!isFinite(availableKb)) {
+            availableKb = Number(payload.availableKb);
+          }
+
+          if (!isFinite(usedKb) || !isFinite(availableKb) || availableKb <= 0) {
+            throw new Error("Invalid files-info response.");
+          }
+
+          diskUsageBar.max = 100;
+          diskUsageBar.value = percent;
+          setText(diskUsageLabel, "💽 Used: " + usedKb + " KB/ " + availableKb + " KB");
+        }).catch(function (error) {
+          diskUsageBar.max = 100;
+          diskUsageBar.value = 0;
+          setText(diskUsageLabel, "💽 Used: -- KB/ -- KB");
+          if (!filesStatus.textContent) {
+            setText(filesStatus, "Error: " + error.message);
+          }
         });
       }
 

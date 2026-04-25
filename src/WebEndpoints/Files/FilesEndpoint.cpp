@@ -11,7 +11,7 @@ void FilesEndpoint::registerEndpoint(AsyncWebServer &server)
 {
   server.on("/files", HTTP_GET, [this](AsyncWebServerRequest *request)
             { handleGet(request); });
-  server.on("/files/info", HTTP_GET, [this](AsyncWebServerRequest *request)
+  server.on("/files-info", HTTP_GET, [this](AsyncWebServerRequest *request)
             { handleGetInfo(request); });
 }
 
