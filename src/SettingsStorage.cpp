@@ -2,7 +2,7 @@
 
 #include <ArduinoJson.h>
 #include <FS.h>
-#include <SPIFFS.h>
+#include <LittleFS.h>
 
 SettingsStorage::SettingsStorage(EmotionState &emotionState,
                                  FanController &fanController,
@@ -15,13 +15,13 @@ SettingsStorage::SettingsStorage(EmotionState &emotionState,
 
 bool SettingsStorage::load()
 {
-  if (!SPIFFS.exists(kSettingsPath))
+  if (!LittleFS.exists(kSettingsPath))
   {
     Serial.println(F("[I] No settings file found. Using defaults."));
     return true;
   }
 
-  File file = SPIFFS.open(kSettingsPath, FILE_READ);
+  File file = LittleFS.open(kSettingsPath, FILE_READ);
   if (!file)
   {
     Serial.println(F("[E] Could not open settings file for reading."));
@@ -107,7 +107,7 @@ bool SettingsStorage::save() const
   JsonObject fanObject = document["fan"].to<JsonObject>();
   fanObject["dutyCycle"] = fanController_.getDutyCycle();
 
-  File file = SPIFFS.open(kSettingsPath, FILE_WRITE);
+  File file = LittleFS.open(kSettingsPath, FILE_WRITE);
   if (!file)
   {
     Serial.println(F("[E] Could not open settings file for writing."));

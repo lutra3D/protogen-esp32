@@ -1,6 +1,6 @@
 #include "WebEndpoints/Files/FileEndpoint.hpp"
 
-#include <SPIFFS.h>
+#include <LittleFS.h>
 
 #include <FS.h>
 #include <memory>
@@ -72,7 +72,7 @@ void FileEndpoint::handleGet(AsyncWebServerRequest *request)
     return;
   }
 
-  File file = SPIFFS.open(filePath, FILE_READ);
+  File file = LittleFS.open(filePath, FILE_READ);
   if (!file)
   {
     request->send(500, "text/plain", F("Failed to open file."));

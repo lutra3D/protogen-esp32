@@ -42,9 +42,9 @@ void collectFilesRecursive(File directory, const String &normalizedFilter,
 
 bool FileManager::begin(bool formatOnFail)
 {
-  if (!SPIFFS.begin(formatOnFail))
+  if (!LittleFS.begin(formatOnFail))
   {
-    Serial.println(F("SPIFFS mount failed!"));
+    Serial.println(F("LittleFS mount failed!"));
     return false;
   }
 
@@ -55,10 +55,10 @@ std::vector<Model::File> FileManager::getFiles(const String &filter) const
 {
   std::vector<Model::File> files;
 
-  File rootDir = SPIFFS.open("/");
+  File rootDir = LittleFS.open("/");
   if (!rootDir || !rootDir.isDirectory())
   {
-    Serial.println(F("[E] Failed to open SPIFFS root directory"));
+    Serial.println(F("[E] Failed to open LittleFS root directory"));
     return files;
   }
 
@@ -81,12 +81,12 @@ void FileManager::printEmotions() const
 
 bool FileManager::exists(const String &path) const
 {
-  return SPIFFS.exists(path);
+  return LittleFS.exists(path);
 }
 
 bool FileManager::readFile(const String &path, String &content) const
 {
-  File file = SPIFFS.open(path, FILE_READ);
+  File file = LittleFS.open(path, FILE_READ);
   if (!file)
   {
     return false;
@@ -101,7 +101,7 @@ bool FileManager::writeFile(const String &path, const uint8_t *data, size_t len,
                             bool append) const
 {
   const char *mode = append ? FILE_APPEND : FILE_WRITE;
-  File file = SPIFFS.open(path, mode);
+  File file = LittleFS.open(path, mode);
   if (!file)
   {
     return false;
@@ -114,10 +114,10 @@ bool FileManager::writeFile(const String &path, const uint8_t *data, size_t len,
 
 bool FileManager::removeFile(const String &path) const
 {
-  return SPIFFS.remove(path);
+  return LittleFS.remove(path);
 }
 
 bool FileManager::renameFile(const String &from, const String &to) const
 {
-  return SPIFFS.rename(from, to);
+  return LittleFS.rename(from, to);
 }

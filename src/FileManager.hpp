@@ -1,7 +1,7 @@
 #ifndef FILE_MANAGER_HPP
 #define FILE_MANAGER_HPP
 
-#include <SPIFFS.h>
+#include <LittleFS.h>
 
 #include <Arduino.h>
 #include <vector>
