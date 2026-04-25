@@ -84,6 +84,16 @@ bool FileManager::exists(const String &path) const
   return LittleFS.exists(path);
 }
 
+size_t FileManager::totalBytes() const
+{
+  return LittleFS.totalBytes();
+}
+
+size_t FileManager::usedBytes() const
+{
+  return LittleFS.usedBytes();
+}
+
 bool FileManager::readFile(const String &path, String &content) const
 {
   File file = LittleFS.open(path, FILE_READ);

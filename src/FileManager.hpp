@@ -15,6 +15,8 @@ public:
   void printEmotions() const;
 
   bool exists(const String &path) const;
+  size_t totalBytes() const;
+  size_t usedBytes() const;
   bool readFile(const String &path, String &content) const;
   bool writeFile(const String &path, const uint8_t *data, size_t len,
                  bool append = false) const;

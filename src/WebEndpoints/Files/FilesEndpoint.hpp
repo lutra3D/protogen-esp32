@@ -13,6 +13,7 @@ public:
 
 private:
   void handleGet(AsyncWebServerRequest *request);
+  void handleGetInfo(AsyncWebServerRequest *request);
 
   FileManager &fileManager_;
 };
