@@ -71,7 +71,7 @@ Base URL (default AP): `http://192.168.4.1`
 - `GET /capabilities`
 - `GET /files`
 - `GET /files-info`
-- `GET|POST|DELETE /file`
+- `GET|POST|PUT|DELETE /file`
 
 Ready-to-run API samples are in `test/http-files/*.http`.
 
@@ -113,7 +113,3 @@ OTA is enabled via ElegantOTA on the async web server.
 - `test/http-files/` - HTTP request collections for manual endpoint testing
 - `platformio.ini` - board/env config and dependencies
 
-## Notes
-
-- Default `ALLOW_ALL_FILE_CHANGES = true` in `src/main.cpp`; review before production use.
-- Consider moving credentials out of source code for shared/public deployments.
