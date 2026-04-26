@@ -462,6 +462,15 @@
       gap: 12px;
     }
 
+    .file-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+      flex-shrink: 0;
+      margin-top: 0;
+    }
+
     .file-item.empty {
       justify-content: center;
       color: var(--muted);
@@ -469,6 +478,8 @@
     }
 
     .file-name {
+      flex: 1 1 auto;
+      min-width: 0;
       font-weight: 600;
       word-break: break-word;
     }
@@ -498,6 +509,10 @@
 
       .slider-readout {
         text-align: left;
+      }
+
+      .file-actions {
+        flex-direction: row;
       }
     }
   </style>
@@ -1336,8 +1351,7 @@
           label.textContent = file.path;
 
           var actions = document.createElement("div");
-          actions.className = "row";
-          actions.style.marginTop = "0";
+          actions.className = "file-actions";
 
           var downloadButton = document.createElement("button");
           downloadButton.type = "button";
