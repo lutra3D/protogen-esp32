@@ -21,6 +21,7 @@ public:
   GifFaceDisplay();
 
   virtual void drawPixel(int x, int y, Color color) = 0;
+  virtual void afterFrameRendered();
 
   bool initGif();
 

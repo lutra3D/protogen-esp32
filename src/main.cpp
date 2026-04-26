@@ -2,7 +2,11 @@
 #ifdef MAIN
 #include <Arduino.h>
 
+#if defined(FACE_NEOPIXEL_OUT_L) && defined(FACE_NEOPIXEL_OUT_R) && defined(FACE_NEOPIXEL_PANEL_WIDTH) && defined(FACE_NEOPIXEL_PANEL_HEIGHT)
+#include "FaceDisplay/NeopixelFaceDisplay.hpp"
+#else
 #include "FaceDisplay/P3MatrixFaceDisplay.hpp"
+#endif
 #include "FileManager.hpp"
 #include "DisplayManager.hpp"
 #include "EarController.hpp"
@@ -21,7 +25,11 @@ FanController fanController(FAN_PWM_PIN, FAN_PWM_CHANNEL, FAN_PWM_FREQUENCY, FAN
 EarController earController(LEDS_PER_DISPLAY, DATA_PIN_EARS);
 TiltController tiltController(emotionState, PIN_SDA, PIN_SCL);
 FileManager fileManager;
+#if defined(FACE_NEOPIXEL_OUT_L) && defined(FACE_NEOPIXEL_OUT_R) && defined(FACE_NEOPIXEL_PANEL_WIDTH) && defined(FACE_NEOPIXEL_PANEL_HEIGHT)
+NeopixelFaceDisplay faceDisplay(FACE_NEOPIXEL_OUT_L, FACE_NEOPIXEL_OUT_R, FACE_NEOPIXEL_PANEL_WIDTH, FACE_NEOPIXEL_PANEL_HEIGHT);
+#else
 P3MatrixFaceDisplay faceDisplay(PANEL_RES_X, PANEL_RES_Y, PANEL_CHAIN);
+#endif
 SettingsStorage settingsStorage(emotionState, fanController, earController);
 void onSettingsChanged()
 {
