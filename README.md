@@ -5,6 +5,7 @@ Project is a firmware for **ESP32-based Protogens**. It is intended to be modula
 ## What the UI provides
 The built-in web interface (served from `data/`) gives a quick control surface for:
 - switching the active emotion/animation,
+- configuring complex emotions that combine face-display animation with ear LED color/gradient profiles,
 - adjusting ear LED brightness,
 - controlling fan speed,
 - viewing basic device status and diagnostics,
