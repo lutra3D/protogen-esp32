@@ -10,7 +10,7 @@ public:
   ~P3MatrixFaceDisplay() override;
   bool begin() override;
   void drawPixel(int x, int y, Color color) override;
-  bool displayReady() const override { return display_ != nullptr; }
+  bool displayReady() const override;
 
 private:
   void initializeColors();

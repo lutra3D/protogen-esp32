@@ -11,21 +11,18 @@
 class GifFaceDisplay {
 public:
   virtual ~GifFaceDisplay();
+  virtual bool begin() = 0;
+  virtual bool displayReady() const = 0;
 
-  virtual bool begin();
-  virtual bool displayReady() const;
+
   void playEmotion(const String &emotionPath);
 
-protected:
+  protected:
   GifFaceDisplay();
 
-  bool initGif();
+  virtual void drawPixel(int x, int y, Color color) = 0;
 
-  static void GIFDrawWrapper(GIFDRAW *pDraw);
-  static void *fileOpenWrapper(const char *filename, int32_t *pFileSize);
-  static void fileCloseWrapper(void *pHandle);
-  static int32_t fileReadWrapper(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen);
-  static int32_t fileSeekWrapper(GIFFILE *pHandle, int32_t iPosition);
+  bool initGif();
 
   void GIFDraw(GIFDRAW *pDraw);
   void *fileOpen(const char *filename, int32_t *pFileSize);
@@ -37,7 +34,11 @@ protected:
   bool restartEmotion();
   void initializeColors();
 
-  virtual void drawPixel(int x, int y, Color color);
+  static void GIFDrawWrapper(GIFDRAW *pDraw);
+  static void *fileOpenWrapper(const char *filename, int32_t *pFileSize);
+  static void fileCloseWrapper(void *pHandle);
+  static int32_t fileReadWrapper(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen);
+  static int32_t fileSeekWrapper(GIFFILE *pHandle, int32_t iPosition);
 
   static GifFaceDisplay *instance_;
 

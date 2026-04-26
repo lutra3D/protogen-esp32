@@ -10,6 +10,17 @@ GifFaceDisplay::GifFaceDisplay()
   instance_ = this;
 }
 
+GifFaceDisplay::~GifFaceDisplay()
+{
+  closeEmotion();
+
+  if (instance_ == this)
+  {
+    instance_ = nullptr;
+  }
+}
+
+
 bool GifFaceDisplay::initGif()
 {
   gif_.begin(LITTLE_ENDIAN_PIXELS);
