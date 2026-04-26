@@ -45,6 +45,7 @@ void GifFaceDisplay::playEmotion(const String &emotionPath)
   const int result = gif_.playFrame(true, nullptr);
   if (result >= 0)
   {
+    afterFrameRendered();
     return;
   }
 
@@ -57,6 +58,11 @@ void GifFaceDisplay::playEmotion(const String &emotionPath)
   }
 
   gif_.playFrame(true, nullptr);
+  afterFrameRendered();
+}
+
+void GifFaceDisplay::afterFrameRendered()
+{
 }
 
 void GifFaceDisplay::GIFDrawWrapper(GIFDRAW *pDraw)
