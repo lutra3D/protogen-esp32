@@ -1,9 +1,10 @@
 # Protogen firmware
 Project is a firmware for **ESP32-based Protogens**. It is intended to be modular and extensible, and can be controlled over a **Web UI**, **Bluetooth remote**, or **REST API**.
 
-## What the UI provides
-
+![Electronics photo](/images/protogen-insides.png)
 ![UI screenshots](/images/UI.png)
+
+## What the UI provides
 
 The built-in web interface (served from `data/`) gives a quick control surface for:
 - switching the active emotion/animation,
