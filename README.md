@@ -1,5 +1,4 @@
-# protogen-esp32
-
+# Protogen firmware
 Project is a firmware for **ESP32-based Protogens**. It is intended to be modular and extensible, and can be controlled over a **Web UI**, **Bluetooth remote**, or **REST API**.
 
 ## What the UI provides
@@ -29,15 +28,15 @@ The same functionality is also exposed by HTTP endpoints for automation and exte
 - Set duty cycle over HTTP endpoint.
 
 ### File management
-- Upload animation assets.
-- List files and data partition usage.
-- Read/delete files.
+- Upload animation files.
+- List files on flash storage.
+- View partition usage.
+- Read/edit/rename/delete files.
 
 ### System and diagnostics
 - Heap usage endpoint.
 - Gyro/tilt endpoint.
 - Static content hosting from `data/`.
-- OTA updates through ElegantOTA.
 
 ### BLE remote control
 - Query available emotions/capabilities.
@@ -81,7 +80,7 @@ Ready-to-run API samples are in `test/http-files/*.http`.
 - Core libs: `ESPAsyncWebServer`, `AsyncTCP`, `ElegantOTA`, `NimBLE-Arduino`, `ArduinoJson`, `ESP32-HUB75-MatrixPanel-DMA`, `AnimatedGIF`, `MPU6050_tockn`, `Adafruit_NeoPixel`, `Adafruit GFX`, `Adafruit SSD1306`, `esp32-sh1106-oled`.
 - Exact versions/sources: `platformio.ini`.
 
-## Setup (compact)
+## Setup
 
 1. Install PlatformIO (VS Code extension or CLI).
 2. Clone and enter the repo:
@@ -102,14 +101,9 @@ Ready-to-run API samples are in `test/http-files/*.http`.
    ```
 6. Connect to the AP and open `http://192.168.4.1`.
 
-## OTA updates
-
-OTA is enabled via ElegantOTA on the async web server.
-
 ## Project layout
 
 - `src/` - firmware modules (controllers, endpoints, models, capabilities)
 - `data/` - static web assets and animation files copied to LittleFS
 - `test/http-files/` - HTTP request collections for manual endpoint testing
 - `platformio.ini` - board/env config and dependencies
-
