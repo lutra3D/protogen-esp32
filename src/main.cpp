@@ -19,18 +19,21 @@
 #include "Capabilities/CapabilityManager.hpp"
 #include "config.hpp"
 
+#if defined(FACE_NEOPIXEL_OUT_L) && defined(FACE_NEOPIXEL_OUT_R) && defined(FACE_NEOPIXEL_PANEL_WIDTH) && defined(FACE_NEOPIXEL_PANEL_HEIGHT)
+NeopixelFaceDisplay faceDisplay(FACE_NEOPIXEL_OUT_L, FACE_NEOPIXEL_OUT_R, FACE_NEOPIXEL_PANEL_WIDTH, FACE_NEOPIXEL_PANEL_HEIGHT);
+#elif defined(PANEL_RES_X) && defined(PANEL_RES_Y) && defined(PANEL_CHAIN)
+P3MatrixFaceDisplay faceDisplay(PANEL_RES_X, PANEL_RES_Y, PANEL_CHAIN);
+#else
+#error "No valid face display configuration found. Please define either Neopixel or HUB75 display parameters in config.hpp."
+#endif
 
 EmotionState emotionState;
 FanController fanController(FAN_PWM_PIN, FAN_PWM_CHANNEL, FAN_PWM_FREQUENCY, FAN_PWM_RESOLUTION);
 EarController earController(LEDS_PER_DISPLAY, DATA_PIN_EARS);
 TiltController tiltController(emotionState, PIN_SDA, PIN_SCL);
 FileManager fileManager;
-#if defined(FACE_NEOPIXEL_OUT_L) && defined(FACE_NEOPIXEL_OUT_R) && defined(FACE_NEOPIXEL_PANEL_WIDTH) && defined(FACE_NEOPIXEL_PANEL_HEIGHT)
-NeopixelFaceDisplay faceDisplay(FACE_NEOPIXEL_OUT_L, FACE_NEOPIXEL_OUT_R, FACE_NEOPIXEL_PANEL_WIDTH, FACE_NEOPIXEL_PANEL_HEIGHT);
-#else
-P3MatrixFaceDisplay faceDisplay(PANEL_RES_X, PANEL_RES_Y, PANEL_CHAIN);
-#endif
 SettingsStorage settingsStorage(emotionState, fanController, earController);
+
 void onSettingsChanged()
 {
   settingsStorage.save();
