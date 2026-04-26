@@ -6,17 +6,20 @@
 #include <LittleFS.h>
 
 #include <Arduino.h>
+#include <Graphics/Color.hpp>
 
-class FaceDisplay {
+class GifFaceDisplay {
 public:
-  FaceDisplay(int panelResX, int panelResY, int panelChainLength);
-  ~FaceDisplay();
+  virtual ~GifFaceDisplay();
 
-  bool begin();
+  virtual bool begin();
+  virtual bool displayReady() const;
   void playEmotion(const String &emotionPath);
 
-private:
-  static FaceDisplay *instance_;
+protected:
+  GifFaceDisplay();
+
+  bool initGif();
 
   static void GIFDrawWrapper(GIFDRAW *pDraw);
   static void *fileOpenWrapper(const char *filename, int32_t *pFileSize);
@@ -34,18 +37,14 @@ private:
   bool restartEmotion();
   void initializeColors();
 
-  int panelResX_;
-  int panelResY_;
-  int panelChainLength_;
+  virtual void drawPixel(int x, int y, Color color);
 
-  MatrixPanel_I2S_DMA *display_;
+  static GifFaceDisplay *instance_;
+
   AnimatedGIF gif_;
   File gifFile_;
   String activeEmotionPath_;
   bool isEmotionPlaying_;
-
-  uint16_t colorBlue_;
-  uint16_t colorBlack_;
 };
 
 #endif // FACE_DISPLAY_HPP

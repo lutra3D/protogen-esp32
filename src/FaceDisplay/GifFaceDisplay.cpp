@@ -1,63 +1,24 @@
-#include "FaceDisplay.hpp"
+#include "GifFaceDisplay.hpp"
 
-FaceDisplay *FaceDisplay::instance_ = nullptr;
+GifFaceDisplay *GifFaceDisplay::instance_ = nullptr;
 
-FaceDisplay::FaceDisplay(int panelResX, int panelResY, int panelChainLength)
-    : panelResX_(panelResX),
-      panelResY_(panelResY),
-      panelChainLength_(panelChainLength),
-      display_(nullptr),
-      gifFile_(),
+GifFaceDisplay::GifFaceDisplay()
+    : gifFile_(),
       activeEmotionPath_(),
-      isEmotionPlaying_(false),
-      colorBlue_(0),
-      colorBlack_(0)
+      isEmotionPlaying_(false)
 {
   instance_ = this;
 }
 
-FaceDisplay::~FaceDisplay()
+bool GifFaceDisplay::initGif()
 {
-  closeEmotion();
-
-  if (display_ != nullptr)
-  {
-    delete display_;
-    display_ = nullptr;
-  }
-
-  if (instance_ == this)
-  {
-    instance_ = nullptr;
-  }
-}
-
-bool FaceDisplay::begin()
-{
-  HUB75_I2S_CFG mxconfig(panelResX_, panelResY_, panelChainLength_);
-  mxconfig.gpio.e = 18;
-  mxconfig.clkphase = false;
-
-  display_ = new MatrixPanel_I2S_DMA(mxconfig);
-  display_->begin();
-
-  initializeColors();
-
-  display_->fillScreen(colorBlack_);
-  display_->setCursor(5, 0);
-  display_->setTextColor(colorBlue_);
-  display_->setTextSize(1);
-  display_->println("ProtoFW 2.0");
-  display_->setCursor(12, 10);
-  display_->println("Lutra 3D");
-
   gif_.begin(LITTLE_ENDIAN_PIXELS);
   return true;
 }
 
-void FaceDisplay::playEmotion(const String &emotionPath)
+void GifFaceDisplay::playEmotion(const String &emotionPath)
 {
-  if (display_ == nullptr)
+  if (!displayReady())
   {
     return;
   }
@@ -87,7 +48,7 @@ void FaceDisplay::playEmotion(const String &emotionPath)
   gif_.playFrame(true, nullptr);
 }
 
-void FaceDisplay::GIFDrawWrapper(GIFDRAW *pDraw)
+void GifFaceDisplay::GIFDrawWrapper(GIFDRAW *pDraw)
 {
   if (instance_ != nullptr)
   {
@@ -95,12 +56,12 @@ void FaceDisplay::GIFDrawWrapper(GIFDRAW *pDraw)
   }
 }
 
-void *FaceDisplay::fileOpenWrapper(const char *filename, int32_t *pFileSize)
+void *GifFaceDisplay::fileOpenWrapper(const char *filename, int32_t *pFileSize)
 {
   return instance_ != nullptr ? instance_->fileOpen(filename, pFileSize) : nullptr;
 }
 
-void FaceDisplay::fileCloseWrapper(void *pHandle)
+void GifFaceDisplay::fileCloseWrapper(void *pHandle)
 {
   if (instance_ != nullptr)
   {
@@ -108,17 +69,17 @@ void FaceDisplay::fileCloseWrapper(void *pHandle)
   }
 }
 
-int32_t FaceDisplay::fileReadWrapper(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
+int32_t GifFaceDisplay::fileReadWrapper(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
 {
   return instance_ != nullptr ? instance_->fileRead(pHandle, pBuf, iLen) : 0;
 }
 
-int32_t FaceDisplay::fileSeekWrapper(GIFFILE *pHandle, int32_t iPosition)
+int32_t GifFaceDisplay::fileSeekWrapper(GIFFILE *pHandle, int32_t iPosition)
 {
   return instance_ != nullptr ? instance_->fileSeek(pHandle, iPosition) : -1;
 }
 
-void FaceDisplay::GIFDraw(GIFDRAW *pDraw)
+void GifFaceDisplay::GIFDraw(GIFDRAW *pDraw)
 {
   uint8_t *s;
   uint16_t *d, *usPalette, usTemp[320];
@@ -167,7 +128,7 @@ void FaceDisplay::GIFDraw(GIFDRAW *pDraw)
       {
         for (int xOffset = 0; xOffset < iCount; xOffset++)
         {
-          display_->drawPixel(x + xOffset + pDraw->iX, y, usTemp[xOffset]);
+          drawPixel(x + xOffset + pDraw->iX, y, usTemp[xOffset]);
         }
         x += iCount;
         iCount = 0;
@@ -197,12 +158,12 @@ void FaceDisplay::GIFDraw(GIFDRAW *pDraw)
     s = pDraw->pPixels;
     for (x = 0; x < pDraw->iWidth; x++)
     {
-      display_->drawPixel(x + pDraw->iX, y, usPalette[*s++]);
+      drawPixel(x + pDraw->iX, y, usPalette[*s++]);
     }
   }
 }
 
-void *FaceDisplay::fileOpen(const char *filename, int32_t *pFileSize)
+void *GifFaceDisplay::fileOpen(const char *filename, int32_t *pFileSize)
 {
   gifFile_ = LittleFS.open(filename, FILE_READ);
   if (!gifFile_)
@@ -217,7 +178,7 @@ void *FaceDisplay::fileOpen(const char *filename, int32_t *pFileSize)
   return &gifFile_;
 }
 
-void FaceDisplay::fileClose(void *pHandle)
+void GifFaceDisplay::fileClose(void *pHandle)
 {
   (void)pHandle;
   if (gifFile_)
@@ -226,7 +187,7 @@ void FaceDisplay::fileClose(void *pHandle)
   }
 }
 
-int32_t FaceDisplay::fileRead(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
+int32_t GifFaceDisplay::fileRead(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
 {
   if (pHandle == nullptr || !pHandle->fHandle)
   {
@@ -256,7 +217,7 @@ int32_t FaceDisplay::fileRead(GIFFILE *pHandle, uint8_t *pBuf, int32_t iLen)
   return bytesRead;
 }
 
-int32_t FaceDisplay::fileSeek(GIFFILE *pHandle, int32_t iPosition)
+int32_t GifFaceDisplay::fileSeek(GIFFILE *pHandle, int32_t iPosition)
 {
   if (pHandle == nullptr || !pHandle->fHandle)
   {
@@ -288,7 +249,7 @@ int32_t FaceDisplay::fileSeek(GIFFILE *pHandle, int32_t iPosition)
   return pHandle->iPos;
 }
 
-bool FaceDisplay::openEmotion(const String &emotionPath, bool logTransition)
+bool GifFaceDisplay::openEmotion(const String &emotionPath, bool logTransition)
 {
   if (emotionPath.isEmpty())
   {
@@ -317,7 +278,7 @@ bool FaceDisplay::openEmotion(const String &emotionPath, bool logTransition)
   return true;
 }
 
-void FaceDisplay::closeEmotion()
+void GifFaceDisplay::closeEmotion()
 {
   if (isEmotionPlaying_)
   {
@@ -333,7 +294,7 @@ void FaceDisplay::closeEmotion()
   activeEmotionPath_ = "";
 }
 
-bool FaceDisplay::restartEmotion()
+bool GifFaceDisplay::restartEmotion()
 {
   if (activeEmotionPath_.isEmpty())
   {
@@ -343,10 +304,4 @@ bool FaceDisplay::restartEmotion()
   const String path = activeEmotionPath_;
   closeEmotion();
   return openEmotion(path, false);
-}
-
-void FaceDisplay::initializeColors()
-{
-  colorBlue_ = display_->color565(0, 0, 255);
-  colorBlack_ = display_->color565(0, 0, 0);
 }

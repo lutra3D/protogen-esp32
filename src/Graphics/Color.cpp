@@ -9,6 +9,13 @@ Color::Color(uint8_t r, uint8_t g, uint8_t b)
     blue = b;
 }
 
+Color::Color(uint16_t color565)
+{
+    red = expand5to8((color565 >> 11) & 0x1F);
+    green = expand6to8((color565 >> 5) & 0x3F);
+    blue = expand5to8(color565 & 0x1F);
+}
+
 void Color::set(uint8_t r, uint8_t g, uint8_t b)
 {
     red = r;
