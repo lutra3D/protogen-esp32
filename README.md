@@ -2,6 +2,9 @@
 Project is a firmware for **ESP32-based Protogens**. It is intended to be modular and extensible, and can be controlled over a **Web UI**, **Bluetooth remote**, or **REST API**.
 
 ## What the UI provides
+
+![UI screenshots](/images/UI.png)
+
 The built-in web interface (served from `data/`) gives a quick control surface for:
 - switching the active emotion/animation,
 - configuring complex emotions that combine face-display animation with ear LED color/gradient profiles,
