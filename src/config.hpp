@@ -14,10 +14,10 @@ const char *WIFI_PASS = "Test123456!";
 
 // Neopixel matrix configuration
 // Uncomment to use two Neopixel face panels instead of HUB75.
-// #define FACE_NEOPIXEL_PANEL_WIDTH 16 // Width of each Neopixel matrix panel
-// #define FACE_NEOPIXEL_PANEL_HEIGHT 16 // Height of each Neopixel matrix panel
-// #define FACE_NEOPIXEL_OUT_L 33 // GPIO pin for left Neopixel matrix
-// #define FACE_NEOPIXEL_OUT_R 32 // GPIO pin for right Neopixel matrix
+//#define FACE_NEOPIXEL_PANEL_WIDTH 16 // Width of each Neopixel matrix panel
+//#define FACE_NEOPIXEL_PANEL_HEIGHT 16 // Height of each Neopixel matrix panel
+//#define FACE_NEOPIXEL_OUT_L 32 // GPIO pin for left Neopixel matrix
+//#define FACE_NEOPIXEL_OUT_R 33 // GPIO pin for right Neopixel matrix
 
 // Fan configuration
 constexpr uint8_t FAN_PWM_PIN = 32;

@@ -2,11 +2,6 @@
 #ifdef MAIN
 #include <Arduino.h>
 
-#if defined(FACE_NEOPIXEL_OUT_L) && defined(FACE_NEOPIXEL_OUT_R) && defined(FACE_NEOPIXEL_PANEL_WIDTH) && defined(FACE_NEOPIXEL_PANEL_HEIGHT)
-#include "FaceDisplay/NeopixelFaceDisplay.hpp"
-#else
-#include "FaceDisplay/P3MatrixFaceDisplay.hpp"
-#endif
 #include "FileManager.hpp"
 #include "DisplayManager.hpp"
 #include "EarController.hpp"
@@ -20,8 +15,10 @@
 #include "config.hpp"
 
 #if defined(FACE_NEOPIXEL_OUT_L) && defined(FACE_NEOPIXEL_OUT_R) && defined(FACE_NEOPIXEL_PANEL_WIDTH) && defined(FACE_NEOPIXEL_PANEL_HEIGHT)
+#include "FaceDisplay/NeopixelFaceDisplay.hpp"
 NeopixelFaceDisplay faceDisplay(FACE_NEOPIXEL_OUT_L, FACE_NEOPIXEL_OUT_R, FACE_NEOPIXEL_PANEL_WIDTH, FACE_NEOPIXEL_PANEL_HEIGHT);
 #elif defined(PANEL_RES_X) && defined(PANEL_RES_Y) && defined(PANEL_CHAIN)
+#include "FaceDisplay/P3MatrixFaceDisplay.hpp"
 P3MatrixFaceDisplay faceDisplay(PANEL_RES_X, PANEL_RES_Y, PANEL_CHAIN);
 #else
 #error "No valid face display configuration found. Please define either Neopixel or HUB75 display parameters in config.hpp."
