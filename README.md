@@ -1,90 +1,103 @@
 # Protogen firmware
-Project is a firmware for **ESP32-based Protogens**. It is intended to be modular and extensible, and can be controlled over a **Web UI**, **Bluetooth remote**, or **REST API**.
+
+Project is firmware for **ESP32-based Protogens**. It is intended to be modular and extensible, and can be controlled over a **Web UI**, **Bluetooth remote**, or **REST API**.
 
 ![Electronics photo](/images/protogen-insides.png)
 ![UI screenshots](/images/UI.png)
 
-## What the UI provides
+## 🖥️ What the UI provides
 
 The built-in web interface (served from `data/`) gives a quick control surface for:
-- switching the active emotion/animation,
-- configuring complex emotions that combine face-display animation with ear LED color/gradient profiles,
-- adjusting ear LED brightness,
-- controlling fan speed,
-- viewing basic device status and diagnostics,
-- managing files/emotion assets without reflashing firmware.
+
+- 🎭 switching the active emotion/animation,
+- 🎨 configuring complex emotions that combine face-display animation with ear LED color/gradient profiles,
+- 💡 adjusting ear LED brightness,
+- 🌬️ controlling fan speed,
+- 📊 viewing basic device status and diagnostics,
+- 📁 managing files/emotion assets without reflashing firmware.
 
 The same functionality is also exposed by HTTP endpoints for automation and external apps.
 
-## Capabilities
+## ✨ Capabilities
 
-### Emotion playback and management
+### 🎭 Emotion playback and management
+
 - Load and play animation files from LittleFS.
 - Query and set the active emotion.
 - Create/update/delete emotion definitions (including ear color/gradient metadata).
 
-### Ear LED controls
+### 💡 Ear LED controls
+
 - Read current ear state.
 - Set brightness as percent or raw 0-255 value.
 
-### Fan controls
+### 🌬️ Fan controls
+
 - Read current duty cycle.
 - Set duty cycle over HTTP endpoint.
 
-### File management
+### 📁 File management
+
 - Upload animation files.
 - List files on flash storage.
 - View partition usage.
 - Read/edit/rename/delete files.
 
-### System and diagnostics
+### 🩺 System and diagnostics
+
 - Heap usage endpoint.
 - Gyro/tilt endpoint.
 - Static content hosting from `data/`.
 
-### BLE remote control
+### 📡 BLE remote control
+
 - Query available emotions/capabilities.
 - Switch emotion.
 - Trigger named capabilities (brightness up/down, fan speed up/down).
 
-## Hardware/firmware architecture
+## 🧱 Hardware/firmware architecture
 
 The firmware composes several controllers and managers:
-- `FaceDisplay` renders animation files to a chained 64x32 HUB75 matrix setup.
-- `EarController` drives ear LEDs (NeoPixel-compatible strip/ring).
-- `FanController` controls fan speed through PWM.
-- `TiltController` reads motion/tilt data over I2C.
-- `WebServerManager` serves the API and static web assets over Wi‑Fi AP mode.
-- `BLEController` exposes a BLE service/characteristic for remote commands.
-- `SettingsStorage` persists runtime-adjustable settings.
+
+| Module | Responsibility |
+| --- | --- |
+| `FaceDisplay` | Renders animation files to a chained 64x32 HUB75 matrix setup. |
+| `EarController` | Drives ear LEDs (NeoPixel-compatible strip/ring). |
+| `FanController` | Controls fan speed through PWM. |
+| `TiltController` | Reads motion/tilt data over I2C. |
+| `WebServerManager` | Serves the API and static web assets over Wi‑Fi AP mode. |
+| `BLEController` | Exposes a BLE service/characteristic for remote commands. |
+| `SettingsStorage` | Persists runtime-adjustable settings. |
 
 See `src/main.cpp` for wiring and startup order.
 
-## Web/API endpoints
+## 🔌 Web/API endpoints
 
 Base URL (default AP): `http://192.168.4.1`
 
-- `GET /heap`
-- `GET /gyro`
-- `GET /emotions`
-- `GET|POST|PUT|DELETE /emotion`
-- `PUT /emotion/current`
-- `GET|PUT /fan`
-- `GET|PUT /ears`
-- `GET /capabilities`
-- `GET /files`
-- `GET /files-info`
-- `GET|POST|PUT|DELETE /file`
+| Method(s) | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/heap` | Report current heap usage for diagnostics. |
+| `GET` | `/gyro` | Report tilt/gyro data from the motion controller. |
+| `GET` | `/emotions` | List available emotion definitions. |
+| `GET` / `POST` / `PUT` / `DELETE` | `/emotion` | Read, create, update, or delete emotion definitions. |
+| `PUT` | `/emotion/current` | Switch the active emotion. |
+| `GET` / `PUT` | `/fan` | Read or update fan duty cycle. |
+| `GET` / `PUT` | `/ears` | Read or update ear LED state and brightness. |
+| `GET` | `/capabilities` | List remote-triggerable capabilities. |
+| `GET` | `/files` | List files stored on flash. |
+| `GET` | `/files-info` | Show filesystem/partition usage. |
+| `GET` / `POST` / `PUT` / `DELETE` | `/file` | Read, upload, edit/rename, or delete a file. |
 
 Ready-to-run API samples are in `test/http-files/*.http`.
 
-## Tools and dependencies
+## 🛠️ Tools and dependencies
 
 - Build: [PlatformIO](https://platformio.org/) (Arduino framework, `espressif32`).
 - Core libs: `ESPAsyncWebServer`, `AsyncTCP`, `ElegantOTA`, `NimBLE-Arduino`, `ArduinoJson`, `ESP32-HUB75-MatrixPanel-DMA`, `AnimatedGIF`, `MPU6050_tockn`, `Adafruit_NeoPixel`, `Adafruit GFX`, `Adafruit SSD1306`, `esp32-sh1106-oled`.
 - Exact versions/sources: `platformio.ini`.
 
-## Setup
+## 🚀 Setup
 
 1. Install PlatformIO (VS Code extension or CLI).
 2. Clone and enter the repo:
@@ -105,9 +118,11 @@ Ready-to-run API samples are in `test/http-files/*.http`.
    ```
 6. Connect to the AP and open `http://192.168.4.1`.
 
-## Project layout
+## 🗺️ Project layout
 
-- `src/` - firmware modules (controllers, endpoints, models, capabilities)
-- `data/` - static web assets and animation files copied to LittleFS
-- `test/http-files/` - HTTP request collections for manual endpoint testing
-- `platformio.ini` - board/env config and dependencies
+| Path | Purpose |
+| --- | --- |
+| `src/` | Firmware modules (controllers, endpoints, models, capabilities). |
+| `data/` | Static web assets and animation files copied to LittleFS. |
+| `test/http-files/` | HTTP request collections for manual endpoint testing. |
+| `platformio.ini` | Board/env config and dependencies. |
