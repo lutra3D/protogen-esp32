@@ -41,6 +41,7 @@ void GifFaceDisplay::playEmotion(const String &emotionPath)
       return;
     }
   }
+  beforeFrameRendered();
 
   const int result = gif_.playFrame(true, nullptr);
   if (result >= 0)
@@ -56,7 +57,7 @@ void GifFaceDisplay::playEmotion(const String &emotionPath)
     Serial.printf("[E] Failed to continue GIF %s\n", emotionPath.c_str());
     return;
   }
-
+  beforeFrameRendered();
   gif_.playFrame(true, nullptr);
   afterFrameRendered();
 }
