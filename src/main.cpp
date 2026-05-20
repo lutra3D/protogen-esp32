@@ -14,9 +14,11 @@
 #include "Capabilities/CapabilityManager.hpp"
 #include "config.hpp"
 
+LedBrightnessController ledBrightnessController;
+
 #if defined(FACE_NEOPIXEL_OUT_L) && defined(FACE_NEOPIXEL_OUT_R) && defined(FACE_NEOPIXEL_PANEL_WIDTH) && defined(FACE_NEOPIXEL_PANEL_HEIGHT)
 #include "FaceDisplay/NeopixelFaceDisplay.hpp"
-NeopixelFaceDisplay faceDisplay(FACE_NEOPIXEL_OUT_L, FACE_NEOPIXEL_OUT_R, FACE_NEOPIXEL_PANEL_WIDTH, FACE_NEOPIXEL_PANEL_HEIGHT);
+NeopixelFaceDisplay faceDisplay(FACE_NEOPIXEL_OUT_L, FACE_NEOPIXEL_OUT_R, FACE_NEOPIXEL_PANEL_WIDTH, FACE_NEOPIXEL_PANEL_HEIGHT, ledBrightnessController);
 #elif defined(PANEL_RES_X) && defined(PANEL_RES_Y) && defined(PANEL_CHAIN)
 #include "FaceDisplay/P3MatrixFaceDisplay.hpp"
 P3MatrixFaceDisplay faceDisplay(PANEL_RES_X, PANEL_RES_Y, PANEL_CHAIN);
@@ -26,7 +28,6 @@ P3MatrixFaceDisplay faceDisplay(PANEL_RES_X, PANEL_RES_Y, PANEL_CHAIN);
 
 EmotionState emotionState;
 FanController fanController(FAN_PWM_PIN, FAN_PWM_CHANNEL, FAN_PWM_FREQUENCY, FAN_PWM_RESOLUTION);
-LedBrightnessController ledBrightnessController;
 EarController earController(LEDS_PER_DISPLAY, DATA_PIN_EARS, ledBrightnessController);
 TiltController tiltController(emotionState, PIN_SDA, PIN_SCL);
 FileManager fileManager;
@@ -91,9 +92,6 @@ void loop() {
   webServerManager.loop();
   tiltController.update();
   faceDisplay.playEmotion(emotionState.getCurrentEmotion());
-#if defined(FACE_NEOPIXEL_OUT_L) && defined(FACE_NEOPIXEL_OUT_R) && defined(FACE_NEOPIXEL_PANEL_WIDTH) && defined(FACE_NEOPIXEL_PANEL_HEIGHT)
-  faceDisplay.setBrightness(ledBrightnessController.getBrightness());
-#endif
   earController.update();
   displayManager.update();
 }
