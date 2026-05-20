@@ -33,6 +33,12 @@ const uint8_t BRIGHTNESS_ICON_12X12[] PROGMEM = {
   0x77, 0x00, 0x30, 0x00, 0x30, 0x00, 0x77, 0x00, 
 	0xe0, 0x00, 0xc0, 0x00, 0x06, 0x00, 0x03, 0x00
 };
+
+const unsigned char POWER_ICON_12X12 [] PROGMEM = {
+	0x00, 0x00, 0x00, 0x40, 0x01, 0xc0, 0x03, 0x80, 
+  0x07, 0x00, 0x06, 0x00, 0x07, 0x00, 0x03, 0x80, 
+	0x07, 0x00, 0x0e, 0x00, 0x18, 0x00, 0x00, 0x00
+};
 } // namespace
 
 DisplayManager::DisplayManager(uint8_t sdaPin, uint8_t sclPin,
@@ -66,6 +72,7 @@ void DisplayManager::update() {
 
 void DisplayManager::renderStatus() {
   const uint8_t lineHeight = 14;
+  const uint8_t firstLineHeight = 18;
   
   display_.clearDisplay();
   display_.setCursor(0, 0);
@@ -74,17 +81,17 @@ void DisplayManager::renderStatus() {
   display_.println(emotionState_.getDisplayEmotion());
   
   display_.setTextSize(1);
-  DrawIconLine(FAN_ICON_12X12, 18, formatFanInfo());
-  DrawIconLine(BRIGHTNESS_ICON_12X12, 18+lineHeight, formatEarInfo());
+  DrawIconLine(FAN_ICON_12X12, firstLineHeight, formatFanInfo());
+  DrawIconLine(BRIGHTNESS_ICON_12X12, firstLineHeight+lineHeight, formatEarInfo());
 
   uint8_t statusLine = 2;
   if (systemPowerController_.isEnabled()) {
-    DrawIconLine(BRIGHTNESS_ICON_12X12, 18 + statusLine * lineHeight, formatSystemPowerInfo());
-    statusLine++;
+    DrawIconLine(POWER_ICON_12X12, firstLineHeight + statusLine * lineHeight, formatSystemPowerInfo());
   }
-
-  IPAddress ip = WiFi.softAPIP();
-  DrawIconLine(WIFI_ICON_12X12, 18 + statusLine * lineHeight, ip.toString());
+  else {     
+    IPAddress ip = WiFi.softAPIP();
+    DrawIconLine(WIFI_ICON_12X12, firstLineHeight + statusLine * lineHeight, ip.toString());
+  }
 }
 
 void DisplayManager::DrawIconLine(const uint8_t* icon, uint8_t offsetTop, String text){
@@ -99,8 +106,7 @@ void DisplayManager::DrawIconLine(const uint8_t* icon, uint8_t offsetTop, String
 
 String DisplayManager::formatEarInfo() const {
   String line = F("");
-  line += F(" Brightness:");
-  line += String(static_cast<int>(brightnessController_.getBrightnessPercent() + 0.5f));
+S  line += String(static_cast<int>(brightnessController_.getBrightnessPercent() + 0.5f));
   line += F("%");
   return line;
 }

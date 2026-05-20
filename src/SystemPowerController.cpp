@@ -43,7 +43,7 @@ String SystemPowerController::readPowerInfo() {
   const float currentAmps = shuntVolts / kShuntResistorOhms;
   const float currentMilliamps = currentAmps * 1000.0f;
 
-  return String(voltage, 2) + F("V;") + String(currentMilliamps, 2) + F("mA");
+  return String(voltage, 2) + F("V  ") + String(currentMilliamps, 0) + F("mA");
 }
 
 bool SystemPowerController::readRegister16(uint8_t reg, uint16_t &value) const {
