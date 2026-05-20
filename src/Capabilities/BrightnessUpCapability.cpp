@@ -7,23 +7,23 @@ constexpr float kMaxPercent = 100.0f;
 }
 
 BrightnessUpCapability::BrightnessUpCapability(
-    EarController &earController,
+    LedBrightnessController &brightnessController,
     std::function<void()> onSettingsChanged)
     : Capability(F("brightness_up")),
-      earController_(earController),
+      brightnessController_(brightnessController),
       onSettingsChanged_(onSettingsChanged)
 {
 }
 
 bool BrightnessUpCapability::handle()
 {
-  float nextBrightness = earController_.getBrightnessPercent() + kStepPercent;
+  float nextBrightness = brightnessController_.getBrightnessPercent() + kStepPercent;
   if (nextBrightness > kMaxPercent)
   {
     nextBrightness = kMaxPercent;
   }
 
-  earController_.setBrightnessPercent(nextBrightness);
+  brightnessController_.setBrightnessPercent(nextBrightness);
 
   if (onSettingsChanged_)
   {

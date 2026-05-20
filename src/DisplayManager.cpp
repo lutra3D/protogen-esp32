@@ -38,12 +38,12 @@ const uint8_t EAR_ICON_12X12[] PROGMEM = {
 DisplayManager::DisplayManager(uint8_t sdaPin, uint8_t sclPin,
                                EmotionState &emotionState,
                                FanController &fanController,
-                               EarController &earController)
+                               LedBrightnessController &brightnessController)
     : sdaPin_(sdaPin),
       sclPin_(sclPin),
       emotionState_(emotionState),
       fanController_(fanController),
-      earController_(earController),
+      brightnessController_(brightnessController),
       display_() {}
 
 void DisplayManager::begin() {
@@ -92,7 +92,7 @@ void DisplayManager::DrawIconLine(const uint8_t* icon, uint8_t offsetTop, String
 String DisplayManager::formatEarInfo() const {
   String line = F("");
   line += F(" Brightness:");
-  line += String(static_cast<int>(earController_.getBrightnessPercent() + 0.5f));
+  line += String(static_cast<int>(brightnessController_.getBrightnessPercent() + 0.5f));
   line += F("%");
   return line;
 }

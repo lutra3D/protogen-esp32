@@ -6,10 +6,10 @@
 
 SettingsStorage::SettingsStorage(EmotionState &emotionState,
                                  FanController &fanController,
-                                 EarController &earController)
+                                 LedBrightnessController &brightnessController)
     : emotionState_(emotionState),
       fanController_(fanController),
-      earController_(earController)
+      brightnessController_(brightnessController)
 {
 }
 
@@ -74,12 +74,12 @@ bool SettingsStorage::load()
     }
   }
 
-  if (document["ear"].is<JsonObject>())
+  if (document["brightness"].is<JsonObject>())
   {
     String earError;
-    if (!earController_.getEar().deserialize(document["ear"].as<JsonObject>(), earError))
+    if (!brightnessController_.getLedBrightness().deserialize(document["brightness"].as<JsonObject>(), earError))
     {
-      Serial.printf("[E] Invalid ear settings: %s\n", earError.c_str());
+      Serial.printf("[E] Invalid brightness settings: %s\n", earError.c_str());
       return false;
     }
   }
@@ -92,8 +92,8 @@ bool SettingsStorage::save() const
 {
   JsonDocument document;
 
-  JsonObject earObject = document["ear"].to<JsonObject>();
-  earController_.getEar().serialize(earObject);
+  JsonObject brightnessObject = document["brightness"].to<JsonObject>();
+  brightnessController_.getLedBrightness().serialize(brightnessObject);
 
   JsonArray emotionsArray = document["emotions"].to<JsonArray>();
   for (const auto &emotion : emotionState_.getEmotionDefinitions())

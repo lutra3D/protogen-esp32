@@ -4,6 +4,7 @@ WebServerManager::WebServerManager(
     EmotionState &emotionState,
     FanController &fanController,
     EarController &earController,
+    LedBrightnessController &brightnessController,
     TiltController &tiltController,
     FileManager &fileManager,
     CapabilityManager &capabilityManager,
@@ -17,7 +18,7 @@ WebServerManager::WebServerManager(
       emotionEndpoint_(emotionState, earController, onSettingsChanged),
       heapEndpoint_(),
       fanEndpoint_(fanController, onSettingsChanged),
-      earsEndpoint_(earController, onSettingsChanged),
+      earsEndpoint_(brightnessController, onSettingsChanged),
       gyroEndpoint_(tiltController),
       capabilitiesEndpoint_(capabilityManager),
       notFoundEndpoint_()

@@ -1250,7 +1250,7 @@
       }
 
       function refreshEars() {
-        fetchJson("/ears").then(function (data) {
+        fetchJson("/brightness").then(function (data) {
           var payload = (data && typeof data === "object" && !Array.isArray(data)) ? data : {};
           var brightnessPercent = Number(payload.brightnessPercent);
           if (isFinite(brightnessPercent)) {
@@ -1272,7 +1272,7 @@
         var body = new URLSearchParams({
           brightnessPercent: earBrightness.value
         });
-        fetchText("/ears", {
+        fetchText("/brightness", {
           method: "PUT",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: body

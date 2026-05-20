@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#include "EarController.hpp"
+#include "LedBrightnessController.hpp"
 #include "EmotionState.hpp"
 #include "FanController.hpp"
 
@@ -11,7 +11,7 @@ class SettingsStorage
 {
 public:
   SettingsStorage(EmotionState &emotionState, FanController &fanController,
-                  EarController &earController);
+                  LedBrightnessController &brightnessController);
 
   bool load();
   bool save() const;
@@ -21,7 +21,7 @@ private:
 
   EmotionState &emotionState_;
   FanController &fanController_;
-  EarController &earController_;
+  LedBrightnessController &brightnessController_;
 };
 
 #endif // SETTINGS_STORAGE_HPP

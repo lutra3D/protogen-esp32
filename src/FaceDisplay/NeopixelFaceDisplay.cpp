@@ -45,6 +45,13 @@ bool NeopixelFaceDisplay::displayReady() const
   return initialized_;
 }
 
+
+void NeopixelFaceDisplay::setBrightness(uint8_t brightness)
+{
+  leftPanel_.setBrightness(brightness);
+  rightPanel_.setBrightness(brightness);
+}
+
 void NeopixelFaceDisplay::drawPixel(int x, int y, Color color)
 {
   if (!initialized_ || x < 0 || y < 0)

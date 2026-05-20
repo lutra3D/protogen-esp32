@@ -6,13 +6,13 @@
 #include <vector>
 
 #include "Capabilities/Capability.hpp"
-#include "EarController.hpp"
+#include "LedBrightnessController.hpp"
 #include "FanController.hpp"
 
 class CapabilityManager
 {
 public:
-  CapabilityManager(EarController &earController,
+  CapabilityManager(LedBrightnessController &brightnessController,
                     FanController &fanController,
                     std::function<void()> onSettingsChanged);
 

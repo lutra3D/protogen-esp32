@@ -5,14 +5,14 @@
 #include <Adafruit_SH1106.h>
 #include <Arduino.h>
 
-#include "EarController.hpp"
+#include "LedBrightnessController.hpp"
 #include "EmotionState.hpp"
 #include "FanController.hpp"
 
 class DisplayManager {
 public:
   DisplayManager(uint8_t sdaPin, uint8_t sclPin, EmotionState &emotionState,
-                 FanController &fanController, EarController &earController);
+                 FanController &fanController, LedBrightnessController &brightnessController);
 
   void begin();
   void update();
@@ -27,7 +27,7 @@ private:
     uint8_t sclPin_;
     EmotionState &emotionState_;
     FanController &fanController_;
-    EarController &earController_;
+    LedBrightnessController &brightnessController_;
     Adafruit_SH1106 display_;
 };
 

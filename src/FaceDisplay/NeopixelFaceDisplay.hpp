@@ -14,6 +14,7 @@ public:
   bool begin() override;
   bool displayReady() const override;
   void drawPixel(int x, int y, Color color) override;
+  void setBrightness(uint8_t brightness);
 
 protected:
   void afterFrameRendered() override;

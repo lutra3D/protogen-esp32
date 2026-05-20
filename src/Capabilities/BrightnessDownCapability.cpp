@@ -7,23 +7,23 @@ constexpr float kMinPercent = 0.0f;
 }
 
 BrightnessDownCapability::BrightnessDownCapability(
-    EarController &earController,
+    LedBrightnessController &brightnessController,
     std::function<void()> onSettingsChanged)
     : Capability(F("brightness_down")),
-      earController_(earController),
+      brightnessController_(brightnessController),
       onSettingsChanged_(onSettingsChanged)
 {
 }
 
 bool BrightnessDownCapability::handle()
 {
-  float nextBrightness = earController_.getBrightnessPercent() - kStepPercent;
+  float nextBrightness = brightnessController_.getBrightnessPercent() - kStepPercent;
   if (nextBrightness < kMinPercent)
   {
     nextBrightness = kMinPercent;
   }
 
-  earController_.setBrightnessPercent(nextBrightness);
+  brightnessController_.setBrightnessPercent(nextBrightness);
 
   if (onSettingsChanged_)
   {

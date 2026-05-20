@@ -1,6 +1,6 @@
 #include "Ear.hpp"
 
-Ear::Ear() : color_(0,0,0), gradient_(), colorMode_(ColorMode::Solid), brightness_() {}
+Ear::Ear() : color_(0,0,0), gradient_(), colorMode_(ColorMode::Solid) {}
 
 void Ear::setColor(uint8_t red, uint8_t green, uint8_t blue) {
   color_.set(red, green, blue);
@@ -54,21 +54,6 @@ ColorMode Ear::getColorMode() const
   return colorMode_;
 }
 
-void Ear::setBrightness(uint8_t brightness) {
-  brightness_.setValue(brightness);
-}
-
-void Ear::setBrightnessPercent(float percent) {
-  brightness_.setPercent(percent);
-}
-
-uint8_t Ear::getBrightness() const {
-  return brightness_.getValue();
-}
-
-float Ear::getBrightnessPercent() const {
-  return brightness_.getPercent();
-}
 
 void Ear::serialize(JsonVariant json) const {
   if (json.isNull()) {
@@ -77,8 +62,6 @@ void Ear::serialize(JsonVariant json) const {
 
   json["mode"] = colorMode_ == ColorMode::Gradient ? "gradient" : "solid";
   json["color"] = getColorHexString();
-  json["brightness"] = getBrightness();
-  json["brightnessPercent"] = getBrightnessPercent();
 
   JsonObject gradientJson = json["gradient"].to<JsonObject>();
   gradient_.serialize(gradientJson);
@@ -102,26 +85,6 @@ bool Ear::deserialize(const JsonObject &object, String &error)
     }
   }
 
-  if (object["brightness"].is<int>())
-  {
-    const int brightness = object["brightness"].as<int>();
-    if (brightness < 0 || brightness > 255)
-    {
-      error = F("Ear 'brightness' must be between 0 and 255.");
-      return false;
-    }
-    setBrightness(static_cast<uint8_t>(brightness));
-  }
-  else if (object["brightnessPercent"].is<float>())
-  {
-    const float brightnessPercent = object["brightnessPercent"].as<float>();
-    if (brightnessPercent < 0.0f || brightnessPercent > 100.0f)
-    {
-      error = F("Ear 'brightnessPercent' must be between 0 and 100.");
-      return false;
-    }
-    setBrightnessPercent(brightnessPercent);
-  }
 
   if (object["gradient"].is<JsonObject>())
   {

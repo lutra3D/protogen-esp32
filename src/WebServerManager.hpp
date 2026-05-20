@@ -10,6 +10,7 @@
 
 #include "FileManager.hpp"
 #include "EarController.hpp"
+#include "LedBrightnessController.hpp"
 #include "EmotionState.hpp"
 #include "FanController.hpp"
 #include "TiltController.hpp"
@@ -29,7 +30,7 @@ class WebServerManager
 {
 public:
   WebServerManager(EmotionState &emotionState, FanController &fanController,
-                   EarController &earController, TiltController &tiltController,
+                   EarController &earController, LedBrightnessController &brightnessController, TiltController &tiltController,
                    FileManager &fileManager,
                    CapabilityManager &capabilityManager,
                    std::function<void()> onSettingsChanged, bool allowAllFileChanges);

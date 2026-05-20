@@ -5,12 +5,12 @@
 #include "Capabilities/FanSpeedDownCapability.hpp"
 #include "Capabilities/FanSpeedUpCapability.hpp"
 
-CapabilityManager::CapabilityManager(EarController &earController,
+CapabilityManager::CapabilityManager(LedBrightnessController &brightnessController,
                                      FanController &fanController,
                                      std::function<void()> onSettingsChanged)
 {
-  capabilities_.push_back(std::unique_ptr<BrightnessUpCapability>(new BrightnessUpCapability(earController, onSettingsChanged)));
-  capabilities_.push_back(std::unique_ptr<BrightnessDownCapability>(new BrightnessDownCapability(earController, onSettingsChanged)));
+  capabilities_.push_back(std::unique_ptr<BrightnessUpCapability>(new BrightnessUpCapability(brightnessController, onSettingsChanged)));
+  capabilities_.push_back(std::unique_ptr<BrightnessDownCapability>(new BrightnessDownCapability(brightnessController, onSettingsChanged)));
   capabilities_.push_back(std::unique_ptr<FanSpeedUpCapability>(new FanSpeedUpCapability(fanController, onSettingsChanged)));
   capabilities_.push_back(std::unique_ptr<FanSpeedDownCapability>(new FanSpeedDownCapability(fanController, onSettingsChanged)));
 }
