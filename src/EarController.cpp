@@ -34,3 +34,21 @@ void EarController::update() {
   }
   earLeds_.show();
 }
+
+void EarController::applyEmotionEarColor(const EmotionDefinition *emotion)
+{
+  if (emotion == nullptr)
+  {
+    return;
+  }
+
+  if (emotion->earColorMode == ColorMode::Gradient)
+  {
+    Serial.println(F("[D] Setting ear gradient"));
+    ear_.setGradient(emotion->earGradient);
+    return;
+  }
+
+  Serial.println(F("[D] Setting ear color"));
+  ear_.setColor(emotion->earColor);
+}

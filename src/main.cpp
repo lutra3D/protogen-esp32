@@ -31,7 +31,7 @@ FanController fanController(FAN_PWM_PIN, FAN_PWM_CHANNEL, FAN_PWM_FREQUENCY, FAN
 EarController earController(LEDS_PER_DISPLAY, DATA_PIN_EARS, ledBrightnessController);
 TiltController tiltController(emotionState, PIN_SDA, PIN_SCL);
 FileManager fileManager;
-SettingsStorage settingsStorage(emotionState, fanController, ledBrightnessController);
+SettingsStorage settingsStorage(emotionState, fanController, ledBrightnessController, earController);
 
 void onSettingsChanged()
 {

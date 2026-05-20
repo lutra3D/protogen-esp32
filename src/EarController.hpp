@@ -6,6 +6,7 @@
 
 #include "LedBrightnessController.hpp"
 #include "Model/Ear.hpp"
+#include "Model/EmotionDefinition.hpp"
 
 class EarController {
 public:
@@ -14,6 +15,7 @@ public:
   bool begin();
   void setColor(Color color);
   void setGradient(Gradient gradient);
+  void applyEmotionEarColor(const EmotionDefinition *emotion);
   Ear &getEar();
   void update();
 

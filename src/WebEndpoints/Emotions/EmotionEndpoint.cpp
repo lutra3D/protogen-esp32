@@ -33,25 +33,6 @@ void EmotionEndpoint::registerEndpoint(AsyncWebServer &server)
   server.on("/emotion", HTTP_DELETE, [this](AsyncWebServerRequest *request)  { handleDelete(request); });
 }
 
-void EmotionEndpoint::applyEmotionEarColor(const EmotionDefinition *emotion)
-{
-  if (emotion == nullptr)
-  {
-    return;
-  }
-
-  Ear &ear = earController_.getEar();
-  if (emotion->earColorMode == ColorMode::Gradient)
-  {
-    Serial.println(F("[D] Setting ear gradient"));
-    ear.setGradient(emotion->earGradient);
-    return;
-  }
-
-  Serial.println(F("[D] Setting ear color"));
-  ear.setColor(emotion->earColor);
-}
-
 void EmotionEndpoint::handleGet(AsyncWebServerRequest *request)
 {
   const auto *emotion = emotionState_.getCurrentEmotionDefinition();
@@ -112,7 +93,7 @@ Response EmotionEndpoint::handlePut(AsyncWebServerRequest *request, JsonDocument
       (emotionState_.getCurrentEmotionDefinition() != nullptr &&
        emotionState_.getCurrentEmotionDefinition()->name == emotion.name))
   {
-    applyEmotionEarColor(emotionState_.getCurrentEmotionDefinition());
+    earController_.applyEmotionEarColor(emotionState_.getCurrentEmotionDefinition());
   }
 
   if (onSettingsChanged_)
@@ -143,7 +124,7 @@ void EmotionEndpoint::handleDelete(AsyncWebServerRequest *request)
 void EmotionEndpoint::handleSetCurrentEmotion(AsyncWebServerRequest *request)
 {
   emotionState_.setCurrentEmotion(request->getParam("name", true)->value());
-  applyEmotionEarColor(emotionState_.getCurrentEmotionDefinition());
+  earController_.applyEmotionEarColor(emotionState_.getCurrentEmotionDefinition());
   if (onSettingsChanged_)
   {
     onSettingsChanged_();

@@ -6,10 +6,12 @@
 
 SettingsStorage::SettingsStorage(EmotionState &emotionState,
                                  FanController &fanController,
-                                 LedBrightnessController &brightnessController)
+                                 LedBrightnessController &brightnessController,
+                                 EarController &earController)
     : emotionState_(emotionState),
       fanController_(fanController),
-      brightnessController_(brightnessController)
+      brightnessController_(brightnessController),
+      earController_(earController)
 {
 }
 
@@ -83,6 +85,8 @@ bool SettingsStorage::load()
       return false;
     }
   }
+
+  earController_.applyEmotionEarColor(emotionState_.getCurrentEmotionDefinition());
 
   Serial.println(F("[I] Settings loaded."));
   return true;
