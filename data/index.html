@@ -683,6 +683,15 @@
       </div>
       <div id="gyroStatus" class="status"></div>
     </section>
+
+    <section>
+      <h2>System Power</h2>
+      <div class="display-row">
+        <div class="value-display">Value: <span id="systemPowerValue" class="value">--</span></div>
+        <button id="systemPowerRefresh" class="icon-button" type="button" aria-label="Refresh system power" title="Refresh">↻</button>
+      </div>
+      <div id="systemPowerStatus" class="status"></div>
+    </section>
     <p>Lutra 3D, 2025</p>
   </main>
 
@@ -767,6 +776,8 @@
       var heapStatus = $("heapStatus");
       var gyroValue = $("gyroValue");
       var gyroStatus = $("gyroStatus");
+      var systemPowerValue = $("systemPowerValue");
+      var systemPowerStatus = $("systemPowerStatus");
 
       var allFiles = [];
       var animationFiles = [];
@@ -1304,6 +1315,16 @@
         });
       }
 
+      function refreshSystemPower() {
+        fetchText("/system-power").then(function (text) {
+          setText(systemPowerValue, text);
+          setText(systemPowerStatus, "");
+        }).catch(function (error) {
+          setText(systemPowerValue, "--");
+          setText(systemPowerStatus, "Error: " + error.message);
+        });
+      }
+
       uploadForm.addEventListener("submit", function (event) {
         event.preventDefault();
         if (!fileInput.files.length) {
@@ -1607,6 +1628,7 @@
       $("earApply").addEventListener("click", applyEars);
       $("heapRefresh").addEventListener("click", refreshHeap);
       $("gyroRefresh").addEventListener("click", refreshGyro);
+      $("systemPowerRefresh").addEventListener("click", refreshSystemPower);
 
       hideEmotionForm();
       Promise.all([
@@ -1621,6 +1643,7 @@
       refreshEars();
       refreshHeap();
       refreshGyro();
+      refreshSystemPower();
     })();
   </script>
 </body>

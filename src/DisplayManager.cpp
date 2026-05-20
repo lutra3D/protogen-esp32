@@ -38,12 +38,14 @@ const uint8_t BRIGHTNESS_ICON_12X12[] PROGMEM = {
 DisplayManager::DisplayManager(uint8_t sdaPin, uint8_t sclPin,
                                EmotionState &emotionState,
                                FanController &fanController,
-                               LedBrightnessController &brightnessController)
+                               LedBrightnessController &brightnessController,
+                               SystemPowerController &systemPowerController)
     : sdaPin_(sdaPin),
       sclPin_(sclPin),
       emotionState_(emotionState),
       fanController_(fanController),
       brightnessController_(brightnessController),
+      systemPowerController_(systemPowerController),
       display_() {}
 
 void DisplayManager::begin() {
@@ -75,8 +77,14 @@ void DisplayManager::renderStatus() {
   DrawIconLine(FAN_ICON_12X12, 18, formatFanInfo());
   DrawIconLine(BRIGHTNESS_ICON_12X12, 18+lineHeight, formatEarInfo());
 
+  uint8_t statusLine = 2;
+  if (systemPowerController_.isEnabled()) {
+    DrawIconLine(BRIGHTNESS_ICON_12X12, 18 + statusLine * lineHeight, formatSystemPowerInfo());
+    statusLine++;
+  }
+
   IPAddress ip = WiFi.softAPIP();
-  DrawIconLine(WIFI_ICON_12X12, 18+2*lineHeight, ip.toString());
+  DrawIconLine(WIFI_ICON_12X12, 18 + statusLine * lineHeight, ip.toString());
 }
 
 void DisplayManager::DrawIconLine(const uint8_t* icon, uint8_t offsetTop, String text){
@@ -102,4 +110,8 @@ String DisplayManager::formatFanInfo() const {
   line += String(static_cast<int>(fanController_.getDutyCyclePercent()));
   line += F("%");
   return line;
+}
+
+String DisplayManager::formatSystemPowerInfo() {
+  return systemPowerController_.readPowerInfo();
 }

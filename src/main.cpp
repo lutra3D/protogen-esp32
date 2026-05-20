@@ -9,6 +9,7 @@
 #include "FanController.hpp"
 #include "SettingsStorage.hpp"
 #include "TiltController.hpp"
+#include "SystemPowerController.hpp"
 #include "WebServerManager.hpp"
 #include "BLEController.hpp"
 #include "Capabilities/CapabilityManager.hpp"
@@ -30,6 +31,7 @@ EmotionState emotionState;
 FanController fanController(FAN_PWM_PIN, FAN_PWM_CHANNEL, FAN_PWM_FREQUENCY, FAN_PWM_RESOLUTION);
 EarController earController(LEDS_PER_DISPLAY, DATA_PIN_EARS, ledBrightnessController);
 TiltController tiltController(emotionState, PIN_SDA, PIN_SCL);
+SystemPowerController systemPowerController(PIN_SDA, PIN_SCL);
 FileManager fileManager;
 SettingsStorage settingsStorage(emotionState, fanController, ledBrightnessController, earController);
 
@@ -39,17 +41,18 @@ void onSettingsChanged()
 }
 CapabilityManager capabilityManager(ledBrightnessController, fanController, onSettingsChanged);
 WebServerManager webServerManager(emotionState, fanController, earController, ledBrightnessController,
-                                  tiltController, fileManager,
+                                  tiltController, systemPowerController, fileManager,
                                   capabilityManager,
                                   onSettingsChanged, 
                                   ALLOW_ALL_FILE_CHANGES);
-DisplayManager displayManager(PIN_SDA, PIN_SCL, emotionState, fanController, ledBrightnessController);
+DisplayManager displayManager(PIN_SDA, PIN_SCL, emotionState, fanController, ledBrightnessController, systemPowerController);
 BLEController bleController(emotionState, capabilityManager); 
 
 void setup() {
   Serial.begin(115200);
 
   tiltController.begin();
+  systemPowerController.begin();
 
   if (!fileManager.begin()) {
     while (true) {

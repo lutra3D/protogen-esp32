@@ -8,11 +8,13 @@
 #include "LedBrightnessController.hpp"
 #include "EmotionState.hpp"
 #include "FanController.hpp"
+#include "SystemPowerController.hpp"
 
 class DisplayManager {
 public:
   DisplayManager(uint8_t sdaPin, uint8_t sclPin, EmotionState &emotionState,
-                 FanController &fanController, LedBrightnessController &brightnessController);
+                 FanController &fanController, LedBrightnessController &brightnessController,
+                 SystemPowerController &systemPowerController);
 
   void begin();
   void update();
@@ -22,12 +24,14 @@ private:
     void DrawIconLine(const uint8_t lineOffsetPx, const uint8_t iconSize, const uint8_t textOffsetLeft);
     String formatEarInfo() const;
     String formatFanInfo() const;
+    String formatSystemPowerInfo();
     void DrawIconLine(const uint8_t* icon, uint8_t offsetTop, String text);
     uint8_t sdaPin_;
     uint8_t sclPin_;
     EmotionState &emotionState_;
     FanController &fanController_;
     LedBrightnessController &brightnessController_;
+    SystemPowerController &systemPowerController_;
     Adafruit_SH1106 display_;
 };
 

@@ -6,6 +6,7 @@ WebServerManager::WebServerManager(
     EarController &earController,
     LedBrightnessController &brightnessController,
     TiltController &tiltController,
+    SystemPowerController &systemPowerController,
     FileManager &fileManager,
     CapabilityManager &capabilityManager,
     std::function<void()> onSettingsChanged,
@@ -20,6 +21,7 @@ WebServerManager::WebServerManager(
       fanEndpoint_(fanController, onSettingsChanged),
       earsEndpoint_(brightnessController, onSettingsChanged),
       gyroEndpoint_(tiltController),
+      systemPowerEndpoint_(systemPowerController),
       capabilitiesEndpoint_(capabilityManager),
       notFoundEndpoint_()
 {
@@ -52,6 +54,7 @@ void WebServerManager::registerRoutes()
   fanEndpoint_.registerEndpoint(server_);
   earsEndpoint_.registerEndpoint(server_);
   gyroEndpoint_.registerEndpoint(server_);
+  systemPowerEndpoint_.registerEndpoint(server_);
   capabilitiesEndpoint_.registerEndpoint(server_);
   notFoundEndpoint_.registerEndpoint(server_);
 }
