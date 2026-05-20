@@ -14,6 +14,7 @@
 #include "EmotionState.hpp"
 #include "FanController.hpp"
 #include "TiltController.hpp"
+#include "SystemPowerController.hpp"
 #include "WebEndpoints/Ears/EarsEndpoint.hpp"
 #include "WebEndpoints/Fan/FanEndpoint.hpp"
 #include "WebEndpoints/Emotions/EmotionEndpoint.hpp"
@@ -21,6 +22,7 @@
 #include "WebEndpoints/Files/FileEndpoint.hpp"
 #include "WebEndpoints/Files/FilesEndpoint.hpp"
 #include "WebEndpoints/System/GyroEndpoint.hpp"
+#include "WebEndpoints/System/SystemPowerEndpoint.hpp"
 #include "Capabilities/CapabilityManager.hpp"
 #include "WebEndpoints/Capabilities/CapabilitiesEndpoint.hpp"
 #include "WebEndpoints/System/HeapEndpoint.hpp"
@@ -31,6 +33,7 @@ class WebServerManager
 public:
   WebServerManager(EmotionState &emotionState, FanController &fanController,
                    EarController &earController, LedBrightnessController &brightnessController, TiltController &tiltController,
+                   SystemPowerController &systemPowerController,
                    FileManager &fileManager,
                    CapabilityManager &capabilityManager,
                    std::function<void()> onSettingsChanged, bool allowAllFileChanges);
@@ -51,6 +54,7 @@ private:
   FanEndpoint fanEndpoint_;
   EarsEndpoint earsEndpoint_;
   GyroEndpoint gyroEndpoint_;
+  SystemPowerEndpoint systemPowerEndpoint_;
   CapabilitiesEndpoint capabilitiesEndpoint_;
   NotFoundEndpoint notFoundEndpoint_;
 };
