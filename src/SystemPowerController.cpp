@@ -29,13 +29,21 @@ String SystemPowerController::readPowerInfo() {
   if (!readRegister16(kBusVoltageRegister, rawBusVoltage) || !readRegister16(kShuntVoltageRegister, rawShuntVoltage)) {
     return F("System power read error");
   }
+  
+  // INA219:
+  // Bus voltage register: bits [15:3], LSB = 4 mV
+  // Shunt voltage register: signed 16-bit, LSB = 10 uV
+  // Shunt resistor: 0.02 ohm
 
-  const float voltage = static_cast<float>(rawBusVoltage) * 1.25f / 1000.0f;
+  const float voltage = static_cast<float>(rawBusVoltage >> 3) * 0.004f;
+
   const int16_t signedShuntVoltage = static_cast<int16_t>(rawShuntVoltage);
-  const float shuntMillivolts = static_cast<float>(signedShuntVoltage) * 2.5f / 1000.0f;
-  const float current = (shuntMillivolts / kShuntResistorOhms) / 1000.0f;
+  const float shuntVolts = static_cast<float>(signedShuntVoltage) * 0.00001f;
 
-  return String(voltage, 2) + F("V;") + String(current, 2) + F("A");
+  const float currentAmps = shuntVolts / kShuntResistorOhms;
+  const float currentMilliamps = currentAmps * 1000.0f;
+
+  return String(voltage, 2) + F("V;") + String(currentMilliamps, 2) + F("mA");
 }
 
 bool SystemPowerController::readRegister16(uint8_t reg, uint16_t &value) const {
