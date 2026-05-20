@@ -22,6 +22,7 @@ public:
 
   virtual void drawPixel(int x, int y, Color color) = 0;
   virtual void afterFrameRendered();
+  virtual void beforeFrameRendered();
 
   bool initGif();
 

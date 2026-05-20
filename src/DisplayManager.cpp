@@ -28,22 +28,22 @@ const uint8_t WIFI_ICON_12X12[] PROGMEM = {
   0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-const uint8_t EAR_ICON_12X12[] PROGMEM = {
-  0x00, 0x00, 0x00, 0x00, 0x7c, 0x00, 0x83, 0xc0,
-  0xa2, 0x20, 0x4c, 0x10, 0x24, 0x10, 0x14, 0x10, 
-	0x0c, 0x10, 0x06, 0x20, 0x03, 0xc0, 0x00, 0x00
+const uint8_t BRIGHTNESS_ICON_12X12[] PROGMEM = {
+  0x03, 0x00, 0x04, 0x00, 0xc0, 0x00, 0xe1, 0x00,
+  0x77, 0x00, 0x30, 0x00, 0x30, 0x00, 0x77, 0x00, 
+	0xe0, 0x00, 0xc0, 0x00, 0x06, 0x00, 0x03, 0x00
 };
 } // namespace
 
 DisplayManager::DisplayManager(uint8_t sdaPin, uint8_t sclPin,
                                EmotionState &emotionState,
                                FanController &fanController,
-                               EarController &earController)
+                               LedBrightnessController &brightnessController)
     : sdaPin_(sdaPin),
       sclPin_(sclPin),
       emotionState_(emotionState),
       fanController_(fanController),
-      earController_(earController),
+      brightnessController_(brightnessController),
       display_() {}
 
 void DisplayManager::begin() {
@@ -73,7 +73,7 @@ void DisplayManager::renderStatus() {
   
   display_.setTextSize(1);
   DrawIconLine(FAN_ICON_12X12, 18, formatFanInfo());
-  DrawIconLine(EAR_ICON_12X12, 18+lineHeight, formatEarInfo());
+  DrawIconLine(BRIGHTNESS_ICON_12X12, 18+lineHeight, formatEarInfo());
 
   IPAddress ip = WiFi.softAPIP();
   DrawIconLine(WIFI_ICON_12X12, 18+2*lineHeight, ip.toString());
@@ -92,7 +92,7 @@ void DisplayManager::DrawIconLine(const uint8_t* icon, uint8_t offsetTop, String
 String DisplayManager::formatEarInfo() const {
   String line = F("");
   line += F(" Brightness:");
-  line += String(static_cast<int>(earController_.getBrightnessPercent() + 0.5f));
+  line += String(static_cast<int>(brightnessController_.getBrightnessPercent() + 0.5f));
   line += F("%");
   return line;
 }

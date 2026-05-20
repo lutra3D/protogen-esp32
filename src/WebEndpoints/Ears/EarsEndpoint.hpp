@@ -1,14 +1,14 @@
-#ifndef WEB_ENDPOINTS_DEVICES_EARS_ENDPOINT_HPP
-#define WEB_ENDPOINTS_DEVICES_EARS_ENDPOINT_HPP
+#ifndef WEB_ENDPOINTS_BRIGHTNESS_ENDPOINT_HPP
+#define WEB_ENDPOINTS_BRIGHTNESS_ENDPOINT_HPP
 
 #include <ESPAsyncWebServer.h>
 #include <functional>
 
-#include "EarController.hpp"
+#include "LedBrightnessController.hpp"
 
 class EarsEndpoint {
 public:
-  EarsEndpoint(EarController &earController,
+  EarsEndpoint(LedBrightnessController &brightnessController,
                std::function<void()> onSettingsChanged);
 
   void registerEndpoint(AsyncWebServer &server);
@@ -16,11 +16,9 @@ public:
 private:
   void handleGet(AsyncWebServerRequest *request);
   void handlePut(AsyncWebServerRequest *request);
-  bool updateBrightness(AsyncWebServerRequest *request, Ear &ear,
-                        bool &updated);
 
-  EarController &earController_;
+  LedBrightnessController &brightnessController_;
   std::function<void()> onSettingsChanged_;
 };
 
-#endif // WEB_ENDPOINTS_DEVICES_EARS_ENDPOINT_HPP
+#endif

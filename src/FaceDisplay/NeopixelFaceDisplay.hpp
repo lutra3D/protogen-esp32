@@ -4,11 +4,13 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "GifFaceDisplay.hpp"
+#include "LedBrightnessController.hpp"
 
 class NeopixelFaceDisplay : public GifFaceDisplay
 {
 public:
-  NeopixelFaceDisplay(uint8_t leftPin, uint8_t rightPin, uint16_t panelWidth, uint16_t panelHeight);
+  NeopixelFaceDisplay(uint8_t leftPin, uint8_t rightPin, uint16_t panelWidth, uint16_t panelHeight,
+                      LedBrightnessController &brightnessController);
   ~NeopixelFaceDisplay() override;
 
   bool begin() override;
@@ -17,6 +19,7 @@ public:
 
 protected:
   void afterFrameRendered() override;
+  void beforeFrameRendered() override;
 
 private:
   uint16_t getPixelIndex(uint16_t x, uint16_t y) const;
@@ -31,6 +34,7 @@ private:
   Adafruit_NeoPixel rightPanel_;
 
   bool initialized_;
+  LedBrightnessController &brightnessController_;
 };
 
 #endif // NEOPIXELFACEDISPLAY_HPP

@@ -3,7 +3,6 @@
 
 #include <ArduinoJson.h>
 
-#include "../Graphics/Brightness.hpp"
 #include "../Graphics/Color.hpp"
 #include "../Graphics/Gradient.hpp"
 
@@ -23,10 +22,6 @@ public:
   void setColorMode(ColorMode mode);
   ColorMode getColorMode() const;
 
-  void setBrightness(uint8_t brightness);
-  void setBrightnessPercent(float percent);
-  uint8_t getBrightness() const;
-  float getBrightnessPercent() const;
 
   void serialize(JsonVariant json) const;
   bool deserialize(const JsonObject &object, String &error);
@@ -35,7 +30,6 @@ private:
   Color color_;
   Gradient gradient_;
   ColorMode colorMode_;
-  Brightness brightness_;
 };
 
 #endif

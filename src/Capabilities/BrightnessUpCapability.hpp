@@ -4,18 +4,18 @@
 #include <functional>
 
 #include "Capabilities/Capability.hpp"
-#include "EarController.hpp"
+#include "LedBrightnessController.hpp"
 
 class BrightnessUpCapability : public Capability
 {
 public:
-  BrightnessUpCapability(EarController &earController,
+  BrightnessUpCapability(LedBrightnessController &brightnessController,
                          std::function<void()> onSettingsChanged);
 
   bool handle() override;
 
 private:
-  EarController &earController_;
+  LedBrightnessController &brightnessController_;
   std::function<void()> onSettingsChanged_;
 };
 

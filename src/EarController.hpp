@@ -3,26 +3,20 @@
 
 #include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
-#include <ArduinoJson.h>
 
+#include "LedBrightnessController.hpp"
 #include "Model/Ear.hpp"
+#include "Model/EmotionDefinition.hpp"
 
 class EarController {
 public:
-  EarController(uint16_t ledCount, uint8_t dataPin);
+  EarController(uint16_t ledCount, uint8_t dataPin, LedBrightnessController &brightnessController);
 
   bool begin();
-  void setBrightness(uint8_t brightness);
-  void setBrightnessPercent(float percent);
-  uint8_t getBrightness() const;
-
   void setColor(Color color);
   void setGradient(Gradient gradient);
-
-  float getBrightnessPercent() const;
-
+  void applyEmotionEarColor(const EmotionDefinition *emotion);
   Ear &getEar();
-
   void update();
 
 private:
@@ -30,6 +24,7 @@ private:
   Adafruit_NeoPixel earLeds_;
   Ear ear_;
   CircleDisplay display_;
+  LedBrightnessController &brightnessController_;
 };
 
 #endif // EAR_CONTROLLER_HPP

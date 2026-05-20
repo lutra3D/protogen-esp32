@@ -1,6 +1,7 @@
 #include "NeopixelFaceDisplay.hpp"
 
-NeopixelFaceDisplay::NeopixelFaceDisplay(uint8_t leftPin, uint8_t rightPin, uint16_t panelWidth, uint16_t panelHeight)
+NeopixelFaceDisplay::NeopixelFaceDisplay(uint8_t leftPin, uint8_t rightPin, uint16_t panelWidth, uint16_t panelHeight,
+                                           LedBrightnessController &brightnessController)
     : GifFaceDisplay(),
       leftPin_(leftPin),
       rightPin_(rightPin),
@@ -9,7 +10,8 @@ NeopixelFaceDisplay::NeopixelFaceDisplay(uint8_t leftPin, uint8_t rightPin, uint
       pixelCountPerPanel_(panelWidth * panelHeight),
       leftPanel_(pixelCountPerPanel_, leftPin, NEO_GRB + NEO_KHZ800),
       rightPanel_(pixelCountPerPanel_, rightPin, NEO_GRB + NEO_KHZ800),
-      initialized_(false)
+      initialized_(false),
+      brightnessController_(brightnessController)
 {
 }
 
@@ -45,6 +47,7 @@ bool NeopixelFaceDisplay::displayReady() const
   return initialized_;
 }
 
+
 void NeopixelFaceDisplay::drawPixel(int x, int y, Color color)
 {
   if (!initialized_ || x < 0 || y < 0)
@@ -73,6 +76,18 @@ void NeopixelFaceDisplay::drawPixel(int x, int y, Color color)
   {
     rightPanel_.setPixelColor(getPixelIndex(rightX, panelY), pixelColor);
   }
+}
+
+void NeopixelFaceDisplay::beforeFrameRendered()
+{
+  if (!initialized_)
+  {
+    return;
+  };
+
+  const uint8_t brightness = brightnessController_.getBrightness();
+  leftPanel_.setBrightness(brightness);
+  rightPanel_.setBrightness(brightness);
 }
 
 void NeopixelFaceDisplay::afterFrameRendered()
