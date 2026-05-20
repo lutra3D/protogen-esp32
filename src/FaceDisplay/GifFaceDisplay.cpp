@@ -65,6 +65,10 @@ void GifFaceDisplay::afterFrameRendered()
 {
 }
 
+void GifFaceDisplay::beforeFrameRendered()
+{
+}
+
 void GifFaceDisplay::GIFDrawWrapper(GIFDRAW *pDraw)
 {
   if (instance_ != nullptr)

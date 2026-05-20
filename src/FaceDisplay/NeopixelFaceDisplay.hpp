@@ -19,6 +19,7 @@ public:
 
 protected:
   void afterFrameRendered() override;
+  void beforeFrameRendered() override;
 
 private:
   uint16_t getPixelIndex(uint16_t x, uint16_t y) const;
@@ -33,7 +34,6 @@ private:
   Adafruit_NeoPixel rightPanel_;
 
   bool initialized_;
-  bool brightnessDirty_;
   LedBrightnessController &brightnessController_;
 };
 
