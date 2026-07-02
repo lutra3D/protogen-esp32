@@ -1,9 +1,15 @@
 #include "BLEController.hpp"
 #include "NimBLEDevice.h"
 
-BLEController::CharacteristicCallbacks::CharacteristicCallbacks(EmotionState &emotionState, CapabilityManager &capabilityManager)
-    : emotionState_(emotionState), capabilityManager_(capabilityManager)
+BLEController::CharacteristicCallbacks::CharacteristicCallbacks(EmotionState &emotionState, CapabilityManager &capabilityManager, EarController &earController)
+    : emotionState_(emotionState), capabilityManager_(capabilityManager), earController_(earController)
 {
+}
+
+void BLEController::CharacteristicCallbacks::setEmotionAndApplyEars(const String &emotionPath)
+{
+    emotionState_.setCurrentEmotion(emotionPath);
+    earController_.applyEmotionEarColor(emotionState_.getCurrentEmotionDefinition());
 }
 
 void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo)
@@ -98,7 +104,7 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
                 if (emotionName == emotion.name)
                 {
                     Serial.println("[I] Setting emotion" + emotion.path);
-                    emotionState_.setCurrentEmotion(emotion.path);
+                    setEmotionAndApplyEars(emotion.path);
                     return;
                 }
             }
@@ -110,7 +116,7 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
     { // legacy remote reasons
         auto newEmotion = emotions[characteristicValue.toInt() - 1];
         Serial.println("[I] Setting emotion" + newEmotion.path);
-        emotionState_.setCurrentEmotion(newEmotion.path);
+        setEmotionAndApplyEars(newEmotion.path);
         return;
     }
     
@@ -120,7 +126,7 @@ void BLEController::CharacteristicCallbacks::onWrite(NimBLECharacteristic *pChar
         if (characteristicValue == emotion.name)
         {
             Serial.println("[I] Setting emotion" + emotion.path);
-            emotionState_.setCurrentEmotion(emotion.path);
+            setEmotionAndApplyEars(emotion.path);
         }
     }
 }
@@ -133,8 +139,8 @@ class ServerCallbacks : public NimBLEServerCallbacks
     }
 } serverCallbacks;
 
-BLEController::BLEController(EmotionState &emotionState, CapabilityManager &capabilityManager)
-  :  emotionState_(emotionState), capabilityManager_(capabilityManager)
+BLEController::BLEController(EmotionState &emotionState, CapabilityManager &capabilityManager, EarController &earController)
+  :  emotionState_(emotionState), capabilityManager_(capabilityManager), earController_(earController)
 {
 }
 
@@ -156,7 +162,7 @@ bool BLEController::begin()
                                                          NIMBLE_PROPERTY::INDICATE);
     pCharacteristic->setValue(emotions.size());
 
-    auto chrCallbacks = new CharacteristicCallbacks(emotionState_, capabilityManager_);
+    auto chrCallbacks = new CharacteristicCallbacks(emotionState_, capabilityManager_, earController_);
 
     pCharacteristic->setCallbacks(chrCallbacks);
 
