@@ -46,7 +46,7 @@ WebServerManager webServerManager(emotionState, fanController, earController, le
                                   onSettingsChanged, 
                                   ALLOW_ALL_FILE_CHANGES);
 DisplayManager displayManager(PIN_SDA, PIN_SCL, emotionState, fanController, ledBrightnessController, systemPowerController);
-BLEController bleController(emotionState, capabilityManager); 
+BLEController bleController(emotionState, capabilityManager, earController);
 
 void setup() {
   Serial.begin(115200);
