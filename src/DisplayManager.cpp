@@ -106,7 +106,7 @@ void DisplayManager::DrawIconLine(const uint8_t* icon, uint8_t offsetTop, String
 
 String DisplayManager::formatEarInfo() const {
   String line = F("");
-S  line += String(static_cast<int>(brightnessController_.getBrightnessPercent() + 0.5f));
+  line += String(static_cast<int>(brightnessController_.getBrightnessPercent() + 0.5f));
   line += F("%");
   return line;
 }
